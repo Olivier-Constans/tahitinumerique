@@ -14,7 +14,7 @@ RUN --mount=type=cache,target=/root/.m2/repository mvn --batch-mode -DskipTests 
 
 #---------------------------
 # Etape de lancement
-FROM bitnami/java:21.0.4-9-debian-12-r6
+FROM eclipse-temurin:21-jdk
 
 RUN groupadd -g 1001 nonroot && \
     adduser --uid 1001 --gid 1001 nonroot
