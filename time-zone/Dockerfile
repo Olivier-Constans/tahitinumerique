@@ -26,7 +26,7 @@ WORKDIR /app
 
 COPY --from=builder /app/target/time-zone.jar .
 
-EXPOSE 8080
+EXPOSE 7373
 
 # MaxRAMPercentage : permet à la JVM d'utiliser un pourcentage de la mémoire totale du conteneur
 # ExitOnOutOfMemoryError : permet de stopper le conteneur si une erreur de type OutOfMemoryError est détectée
