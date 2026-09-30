@@ -11,17 +11,8 @@ import java.util.Locale;
 @SpringBootApplication
 public class TimeZoneApplication {
 
-	public static void main(String[] args) {
+	static void main(String[] args) {
 		SpringApplication.run(TimeZoneApplication.class, args);
-	}
-
-	@Bean
-	public ResourceBundleMessageSource messageSourceConfiguration() {
-		ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-		messageSource.setDefaultEncoding("UTF-8");
-		messageSource.setDefaultLocale(Locale.FRENCH);
-		messageSource.setAlwaysUseMessageFormat(true);
-		return messageSource;
 	}
 
 	@Bean
