@@ -101,6 +101,13 @@ class TimezoneControllerTest {
     }
 
     @Test
+    void testUnknownRouteUsesNotFoundMessage() throws Exception {
+        mockMvc.perform(get("/inconnu"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("La ressource demandée n'existe pas."));
+    }
+
+    @Test
     void testUnexpectedException() throws Exception {
         when(service.findById(1L)).thenThrow(new IllegalStateException("boom"));
 

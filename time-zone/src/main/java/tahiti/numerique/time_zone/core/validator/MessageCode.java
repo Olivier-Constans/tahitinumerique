@@ -12,4 +12,5 @@ public final class MessageCode {
     public final static String GENERIC_INTERNAL_ERROR = "generic.internalError";
     public final static String GENERIC_FORM_REFERENCE_NOT_EXIST = "generic.form.reference.not-exist";
     public final static String GENERIC_NOT_FOUND = "generic.notFound";
+    public final static String GENERIC_RESOURCE_NOT_FOUND = "generic.resourceNotFound";
 }

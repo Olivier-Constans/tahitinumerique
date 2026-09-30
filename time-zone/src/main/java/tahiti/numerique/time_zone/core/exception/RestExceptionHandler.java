@@ -5,6 +5,7 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -19,6 +20,7 @@ import java.util.Locale;
 
 import static tahiti.numerique.time_zone.core.validator.MessageCode.GENERIC_BAD_REQUEST;
 import static tahiti.numerique.time_zone.core.validator.MessageCode.GENERIC_INTERNAL_ERROR;
+import static tahiti.numerique.time_zone.core.validator.MessageCode.GENERIC_RESOURCE_NOT_FOUND;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
@@ -37,6 +39,17 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorMessageResponse> handleException(BusinessException ex) {
         ErrorMessageResponse messageDto = new ErrorMessageResponse(ex.generateMessage(messageSource));
+        return new ResponseEntity<>(messageDto, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Propriété inconnue dans les paramètres de tri (ex : {@code ?sort=foo}).
+     */
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<ErrorMessageResponse> handleException(PropertyReferenceException ex) {
+        LOGGER.warn("Requête invalide : {}", ex.getMessage());
+        ErrorMessageResponse messageDto = new ErrorMessageResponse(
+                messageSource.getMessage(GENERIC_BAD_REQUEST, null, Locale.FRENCH));
         return new ResponseEntity<>(messageDto, HttpStatus.BAD_REQUEST);
     }
 
@@ -59,6 +72,9 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         if (statusCode.is5xxServerError()) {
             LOGGER.error("Erreur Spring MVC", ex);
             code = GENERIC_INTERNAL_ERROR;
+        } else if (statusCode.isSameCodeAs(HttpStatus.NOT_FOUND)) {
+            LOGGER.warn("Ressource introuvable : {}", ex.getMessage());
+            code = GENERIC_RESOURCE_NOT_FOUND;
         } else {
             LOGGER.warn("Requête invalide : {}", ex.getMessage());
             code = GENERIC_BAD_REQUEST;
