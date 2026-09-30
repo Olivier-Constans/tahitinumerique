@@ -1,6 +1,6 @@
 #---------------------------
 # Etape de build
-FROM maven:3.9.7 AS builder
+FROM maven:3.9.16-eclipse-temurin-25 AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ RUN --mount=type=cache,target=/root/.m2/repository mvn --batch-mode -DskipTests 
 
 #---------------------------
 # Etape de lancement
-FROM eclipse-temurin:21-jdk
+FROM eclipse-temurin:25-jdk
 
 RUN groupadd -g 1001 nonroot && \
     adduser --uid 1001 --gid 1001 nonroot
