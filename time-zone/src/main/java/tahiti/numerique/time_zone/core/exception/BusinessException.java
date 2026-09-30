@@ -3,12 +3,12 @@ package tahiti.numerique.time_zone.core.exception;
 import lombok.Getter;
 
 @Getter
-public class BusinessException extends RuntimeException  implements MessageException{
+public class BusinessException extends RuntimeException implements MessageException{
 
-    private MessageExceptionInfo messageExceptionInfo;
+    private final MessageExceptionInfo messageExceptionInfo;
 
     public BusinessException(String code, Object[] args) {
-        super();
+        super(code);
         messageExceptionInfo = new MessageExceptionInfo(code, args);
     }
 }

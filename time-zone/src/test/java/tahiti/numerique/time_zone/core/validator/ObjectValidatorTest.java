@@ -10,6 +10,7 @@ import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static tahiti.numerique.time_zone.core.validator.MessageCode.GENERIC_FORM_MAX_LENGTH;
 import static tahiti.numerique.time_zone.core.validator.MessageCode.GENERIC_FORM_REFERENCE_NOT_EXIST;
 import static tahiti.numerique.time_zone.core.validator.MessageCode.GENERIC_FORM_REQUIRED;
 
@@ -68,5 +69,33 @@ public class ObjectValidatorTest {
         );
 
         assertEquals(messageError, exception.generateMessage(messageSource));
+    }
+
+    @Test
+    void testNotBlank() {
+        assertDoesNotThrow(() -> ObjectValidator.notBlank("value", "field"));
+        assertThrows(BusinessException.class, () -> ObjectValidator.notBlank(null, "field"));
+        assertThrows(BusinessException.class, () -> ObjectValidator.notBlank("  ", "field"));
+    }
+
+    @Test
+    void testMaxLength() {
+        var messageError = "messageError";
+        MessageSource messageSource = Mockito.mock(MessageSource.class);
+        when(messageSource.getMessage(GENERIC_FORM_MAX_LENGTH, new Object[]{"field", 3}, Locale.FRENCH)).thenReturn(messageError);
+
+        assertDoesNotThrow(() -> ObjectValidator.maxLength("abc", 3, "field"));
+        assertDoesNotThrow(() -> ObjectValidator.maxLength(null, 3, "field"));
+        BusinessException exception = assertThrows(BusinessException.class, () ->
+                ObjectValidator.maxLength("abcd", 3, "field")
+        );
+
+        assertEquals(messageError, exception.generateMessage(messageSource));
+    }
+
+    @Test
+    void testValid() {
+        assertDoesNotThrow(() -> ObjectValidator.valid(true, "field"));
+        assertThrows(BusinessException.class, () -> ObjectValidator.valid(false, "field"));
     }
 }

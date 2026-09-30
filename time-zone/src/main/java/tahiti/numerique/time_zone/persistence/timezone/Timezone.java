@@ -19,6 +19,8 @@ import tahiti.numerique.time_zone.persistence.audit.Auditable;
 @FieldNameConstants
 public class Timezone implements Auditable {
 
+    public static final int LABEL_MAX_LENGTH = 100;
+
     @Id
     @GeneratedValue
     private Long id;
@@ -26,8 +28,10 @@ public class Timezone implements Auditable {
     @Embedded
     private Audit audit;
 
+    @Column(nullable = false, length = LABEL_MAX_LENGTH)
     private String label;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private OffsetUTC offsetUTC;
 

@@ -3,13 +3,13 @@ package tahiti.numerique.time_zone.metier.audit.controller;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Getter
 @Setter
 public class AuditResponse {
 
-    private LocalDateTime createDate;
+    private Instant createDate;
 
-    private LocalDateTime updateDate;
+    private Instant updateDate;
 }

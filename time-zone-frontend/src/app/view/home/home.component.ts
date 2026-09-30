@@ -89,7 +89,7 @@ export class HomeComponent {
     }
     const form = {
       date: transformToUTCDate(this.form.controls.dateSearch.value!!),
-      timezone: this.form.controls.timezone.value!!
+      timezoneId: this.form.controls.timezone.value!!.id
     }
     this.$result = this._timezoneService.calculateDate(form)
   }

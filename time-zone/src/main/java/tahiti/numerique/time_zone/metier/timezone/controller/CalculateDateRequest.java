@@ -12,6 +12,6 @@ import java.time.LocalDateTime;
 @Setter
 @FieldNameConstants
 public class CalculateDateRequest {
-    private TimezoneResponse timezone;
+    private Long timezoneId;
     private LocalDateTime date;
 }

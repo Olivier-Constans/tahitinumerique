@@ -10,5 +10,5 @@ export interface CaculateDateResponse {
 
 export interface CaculateDateResquest {
   date: Date;
-  timezone: TimezoneResponse;
+  timezoneId: number;
 }

@@ -24,10 +24,12 @@ public class TimezoneService {
     private final TimezoneRepository timezoneRepository;
     private final TimezoneMapper timezoneMapper;
 
+    @Transactional(readOnly = true)
     public Page<Timezone> findAll(Pageable pageable) {
         return timezoneRepository.findAll(pageable);
     }
 
+    @Transactional(readOnly = true)
     public Timezone findById(Long id) {
         return timezoneRepository.findById(id).orElseThrow(() -> new NotFoundException("timezone", id));
     }
@@ -42,11 +44,14 @@ public class TimezoneService {
     }
 
     private Timezone save(Timezone timezone, TimezoneRequest form) {
-        ObjectValidator.required(form.getLabel(), TimezoneRequest.Fields.label);
+        ObjectValidator.notBlank(form.getLabel(), TimezoneRequest.Fields.label);
+        ObjectValidator.maxLength(form.getLabel(), Timezone.LABEL_MAX_LENGTH, TimezoneRequest.Fields.label);
         ObjectValidator.required(form.getOffsetUTC(), TimezoneRequest.Fields.offsetUTC);
-        ObjectValidator.valid(OffsetUTC.getEnumForLabel(form.getOffsetUTC()), TimezoneRequest.Fields.offsetUTC);
+        var offsetUTC = OffsetUTC.getEnumForLabel(form.getOffsetUTC());
+        ObjectValidator.valid(offsetUTC != null, TimezoneRequest.Fields.offsetUTC);
 
         timezoneMapper.populate(timezone, form);
+        timezone.setOffsetUTC(offsetUTC);
         return timezoneRepository.save(timezone);
     }
 
@@ -55,27 +60,24 @@ public class TimezoneService {
         timezoneRepository.delete(timezone);
     }
 
+    @Transactional(readOnly = true)
     public CalculateDate calculateDate(CalculateDateRequest form) {
 
         ObjectValidator.required(form.getDate(), CalculateDateRequest.Fields.date);
-        ObjectValidator.required(form.getTimezone(), CalculateDateRequest.Fields.timezone);
-        ObjectValidator.required(form.getTimezone().getId(), CalculateDateRequest.Fields.timezone);
+        ObjectValidator.required(form.getTimezoneId(), CalculateDateRequest.Fields.timezoneId);
 
         var timezoneForm = ObjectValidator.exist(
-                this.timezoneRepository, form.getTimezone().getId(), CalculateDateRequest.Fields.timezone);
+                this.timezoneRepository, form.getTimezoneId(), CalculateDateRequest.Fields.timezoneId);
 
         var offsetDateTime = OffsetDateTime.of(form.getDate(), timezoneForm.getOffsetUTC().getZoneOffset());
 
         var resultat = new CalculateDate();
-        timezoneRepository.findAll().forEach(timezone -> {
-            if (timezone.getId().equals(timezoneForm.getId())) {
-                return;
-            }
+
+        timezoneRepository.findAllByIdNot(timezoneForm.getId()).forEach(timezone ->
             resultat.getCalculateDateItemList().add(new CalculateDate.CalculateDateItem(
                     timezone,
                     offsetDateTime.withOffsetSameInstant(timezone.getOffsetUTC().getZoneOffset()).toLocalDateTime()
-            ));
-        });
+            )));
         return resultat;
     }
 

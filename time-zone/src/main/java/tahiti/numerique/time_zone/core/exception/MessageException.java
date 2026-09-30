@@ -4,7 +4,7 @@ import org.springframework.context.MessageSource;
 
 import java.util.Locale;
 
-public interface MessageException {
+interface MessageException {
 
     MessageExceptionInfo getMessageExceptionInfo();
 
