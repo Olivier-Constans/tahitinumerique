@@ -6,7 +6,7 @@ import tahiti.numerique.time_zone.metier.timezone.service.CalculateDate;
 @Mapper(componentModel = "spring", uses = {TimezoneMapper.class})
 public interface CalculateDateMapper {
 
-    CalculateDateResponse.CalculateDateItemResponse mapToReponse(CalculateDate.CalculateDateItem calculateDateItem);
+    CalculateDateResponse.CalculateDateItemResponse mapToResponse(CalculateDate.CalculateDateItem calculateDateItem);
 
     CalculateDateResponse mapToResponse(CalculateDate calculateDate);
 }

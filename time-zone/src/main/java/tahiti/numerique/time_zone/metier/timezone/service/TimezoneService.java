@@ -4,17 +4,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tahiti.numerique.time_zone.core.exception.NotFoundException;
 import tahiti.numerique.time_zone.core.validator.ObjectValidator;
 import tahiti.numerique.time_zone.metier.timezone.controller.CalculateDateRequest;
 import tahiti.numerique.time_zone.metier.timezone.controller.TimezoneRequest;
 import tahiti.numerique.time_zone.metier.timezone.mapper.TimezoneMapper;
+import tahiti.numerique.time_zone.persistence.OffsetUTC;
 import tahiti.numerique.time_zone.persistence.timezone.Timezone;
 import tahiti.numerique.time_zone.persistence.timezone.TimezoneRepository;
 
 import java.time.OffsetDateTime;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class TimezoneService {
 
@@ -41,6 +44,7 @@ public class TimezoneService {
     private Timezone save(Timezone timezone, TimezoneRequest form) {
         ObjectValidator.required(form.getLabel(), TimezoneRequest.Fields.label);
         ObjectValidator.required(form.getOffsetUTC(), TimezoneRequest.Fields.offsetUTC);
+        ObjectValidator.valid(OffsetUTC.getEnumForLabel(form.getOffsetUTC()), TimezoneRequest.Fields.offsetUTC);
 
         timezoneMapper.populate(timezone, form);
         return timezoneRepository.save(timezone);
@@ -55,6 +59,7 @@ public class TimezoneService {
 
         ObjectValidator.required(form.getDate(), CalculateDateRequest.Fields.date);
         ObjectValidator.required(form.getTimezone(), CalculateDateRequest.Fields.timezone);
+        ObjectValidator.required(form.getTimezone().getId(), CalculateDateRequest.Fields.timezone);
 
         var timezoneForm = ObjectValidator.exist(
                 this.timezoneRepository, form.getTimezone().getId(), CalculateDateRequest.Fields.timezone);

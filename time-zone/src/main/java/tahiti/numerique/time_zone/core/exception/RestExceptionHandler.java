@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import tahiti.numerique.time_zone.core.controller.ErrorMessageResponse;
 
+import java.util.Locale;
+
+import static tahiti.numerique.time_zone.core.validator.MessageCode.GENERIC_INTERNAL_ERROR;
+
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
@@ -34,7 +38,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorMessageResponse> handleException(Exception ex) {
         LOGGER.error("Une erreur inattendue s'est produite", ex);
-        ErrorMessageResponse messageDto = new ErrorMessageResponse(ex.getMessage());
+        ErrorMessageResponse messageDto = new ErrorMessageResponse(
+                messageSource.getMessage(GENERIC_INTERNAL_ERROR, null, Locale.FRENCH));
         return new ResponseEntity<>(messageDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

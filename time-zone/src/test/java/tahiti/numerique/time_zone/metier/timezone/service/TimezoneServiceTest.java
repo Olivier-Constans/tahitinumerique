@@ -133,6 +133,16 @@ public class TimezoneServiceTest {
     }
 
     @Test
+    void testSaveOffsetInvalid() {
+        TimezoneRequest form = new TimezoneRequest();
+        form.setLabel("Label");
+        form.setOffsetUTC("UTC+99");
+
+        assertThrows(BusinessException.class, () -> timezoneService.create(form));
+        verify(timezoneRepository, never()).save(any(Timezone.class));
+    }
+
+    @Test
     void testDeleteById() {
         var id = 1L;
         Timezone timezone = new Timezone();
@@ -194,6 +204,18 @@ public class TimezoneServiceTest {
 
         CalculateDateRequest form = new CalculateDateRequest();
         form.setDate(LocalDateTime.parse(inputDateS, formatter));
+
+        assertThrows(BusinessException.class, () -> timezoneService.calculateDate(form));
+    }
+
+    @Test
+    void testCalculateDateTimezoneIdMissing() {
+        String inputDateS = "2024-09-07 11:43";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+        CalculateDateRequest form = new CalculateDateRequest();
+        form.setDate(LocalDateTime.parse(inputDateS, formatter));
+        form.setTimezone(new TimezoneResponse());
 
         assertThrows(BusinessException.class, () -> timezoneService.calculateDate(form));
     }
