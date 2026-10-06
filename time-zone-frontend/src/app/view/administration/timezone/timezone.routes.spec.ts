@@ -7,6 +7,7 @@ import {TimezoneService} from "../../../shared/service/timezone.service";
 import {aTimezone} from "../../../../testing/timezone.fixture";
 import {OffsetUTC} from "../../../shared/model/offsetUTC.model";
 import {TimezoneEditComponent} from "./timezone-edit/timezone-edit.component";
+import {HttpErrorResponse} from "@angular/common/http";
 
 describe('Routes timezone (consultation, création, modification)', () => {
   let harness: RouterTestingHarness;
@@ -62,12 +63,21 @@ describe('Routes timezone (consultation, création, modification)', () => {
     });
 
     it('redirige vers la 404 quand la timezone est introuvable', async () => {
-      timezoneService.getTimezoneById.mockReturnValue(throwError(() => new Error('404')));
+      timezoneService.getTimezoneById.mockReturnValue(throwError(() => new HttpErrorResponse({status: 404})));
 
       await harness.navigateByUrl('/admin/timezone/99');
 
       expect(router.url).toBe('/404');
       expect(element().textContent).toContain('Page introuvable');
+    });
+
+    it('annule la navigation sans rediriger vers la 404 pour une autre erreur', async () => {
+      await harness.navigateByUrl('/admin/timezone/new');
+      timezoneService.getTimezoneById.mockReturnValue(throwError(() => new HttpErrorResponse({status: 500})));
+
+      await harness.navigateByUrl('/admin/timezone/99');
+
+      expect(router.url).toBe('/admin/timezone/new');
     });
   });
 

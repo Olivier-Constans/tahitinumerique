@@ -1,6 +1,7 @@
 import {RedirectCommand, ResolveFn, Router, Routes} from "@angular/router";
 import {inject} from "@angular/core";
-import {catchError, of} from "rxjs";
+import {catchError, EMPTY, of} from "rxjs";
+import {HttpErrorResponse} from "@angular/common/http";
 import {TimezoneService} from "../../../shared/service/timezone.service";
 import {TimezoneResponse} from "../../../shared/model/timezone.model";
 
@@ -8,7 +9,11 @@ export const resolveFn: ResolveFn<TimezoneResponse> = (route) => {
   const service = inject(TimezoneService)
   const router = inject(Router)
   return service.getTimezoneById(Number(route.paramMap.get('id'))).pipe(
-    catchError(() => of(new RedirectCommand(router.parseUrl('/404'))))
+    // Seul un 404 mène à la page introuvable ; pour les autres erreurs, déjà signalées par un toast,
+    // la navigation est annulée
+    catchError((error: unknown) => error instanceof HttpErrorResponse && error.status === 404
+      ? of(new RedirectCommand(router.parseUrl('/404')))
+      : EMPTY)
   )
 }
 

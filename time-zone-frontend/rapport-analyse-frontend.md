@@ -9,8 +9,8 @@
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
 | 1. Analyse technique | 0 | 0 | 0 | 1 | 1 |
-| 2. Analyse fonctionnelle | 0 | 0 | 7 | 0 | 7 |
-| **Total** | **0** | **0** | **7** | **1** | **8** |
+| 2. Analyse fonctionnelle | 0 | 0 | 6 | 0 | 6 |
+| **Total** | **0** | **0** | **6** | **1** | **7** |
 
 **Outils** : lint OK (0 erreur) · tests 39/39 passés (8 fichiers) · build OK avec 1 avertissement (budget initial dépassé : 955,68 kB pour 500 kB)
 
@@ -65,14 +65,6 @@ Aucun point ouvert.
 - **Constat** : l'heure saisie et l'heure affichée passent par un `Date` exprimé dans le fuseau du *navigateur*. Si cette heure n'existe pas localement (changement d'heure), JavaScript la décale. Vérifié avec `TZ=Europe/Paris` : 2026-03-29 02:30 saisi devient `2026-03-29T03:30:00.000Z` à l'envoi. De même, un résultat `LocalDateTime` à 02:30 ce jour-là s'affiche 03:30.
 - **Impact** : un calcul faux d'une heure, une heure par an, uniquement pour les utilisateurs dont le navigateur est dans un fuseau à heure d'été. Tahiti n'est pas concerné.
 - **Recommandation** : ne pas passer par l'heure locale. Formater la saisie avec `formatDate(value, "yyyy-MM-dd'T'HH:mm:ss", 'fr')` et envoyer la chaîne obtenue. Afficher le résultat directement depuis la chaîne `LocalDateTime` reçue, ou avec `date:'…':'UTC'` après l'avoir parsée comme UTC.
-
-#### FRONT-20261007-01 · Mineur · Échecs de validation Zod silencieux, y compris après une écriture réussie
-- **Statut** : Ouvert
-- **Découvert le** : 2026-10-07 · **Dernière vérification** : 2026-10-07
-- **Emplacement** : `src/app/shared/service/timezone.service.ts:22,27,32,37,46`, `src/app/shared/interceptor/http-error.interceptor.ts:8-20`, `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.ts:80-85`, `src/app/view/administration/timezone/timezone.routes.ts:10-12`, `src/app/view/home/home.component.ts:68-70`
-- **Constat** : le `parse` Zod est appliqué dans le service, après la chaîne HTTP. Une réponse non conforme lève une `$ZodError` que l'intercepteur ne voit pas (il ne traite que les `HttpErrorResponse` de la requête). Chaque appelant l'absorbe ensuite sans message : le formulaire de fuseau reste affiché sans retour (`catchError(() => EMPTY)`), le resolver redirige vers la page « Page introuvable », et le calcul n'affiche simplement aucun résultat. Aucune trace n'est laissée en console. Les contrats du back sont aujourd'hui conformes (enum `OffsetUTC`, `Instant` et `LocalDateTime` en ISO), le cas se produit donc en cas de dérive de contrat, par exemple un décalage ajouté côté back.
-- **Impact** : sur une création ou une modification, le serveur a bien enregistré la donnée mais l'utilisateur reste sur le formulaire sans explication et risque de soumettre de nouveau, ce qui crée un doublon. Une erreur de contrat est par ailleurs difficile à diagnostiquer.
-- **Recommandation** : traiter l'erreur de validation à un seul endroit, par exemple un opérateur commun dans le service qui journalise la `$ZodError` (`console.error`) et affiche un toast « Réponse inattendue du serveur. » via `MessageService` avant de la propager. Distinguer dans le resolver un 404 réel (`HttpErrorResponse` de statut 404) des autres erreurs.
 
 ### 2.2 Analyse UX/UI
 

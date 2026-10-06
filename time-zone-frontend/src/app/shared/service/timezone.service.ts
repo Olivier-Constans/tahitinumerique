@@ -1,9 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import {HttpClient, HttpParams} from "@angular/common/http";
-import {map, Observable} from "rxjs";
+import {Observable} from "rxjs";
 import {TimezoneRequest, TimezoneResponse} from "../model/timezone.model";
 import {Page, pageOf} from "../model/page.model";
 import {CalculateDateResponse, CalculateDateRequest} from "../model/calculateDate.model";
+import {expecting} from "../interceptor/response-validation.interceptor";
 
 const TimezonePage = pageOf(TimezoneResponse);
 
@@ -18,23 +19,19 @@ export class TimezoneService {
     const params = new HttpParams()
       .set('page', page)
       .set('size', size);
-    return this._http.get<unknown>(`${this.baseUrl}`, { params })
-      .pipe(map((json) => TimezonePage.parse(json)));
+    return this._http.get<Page<TimezoneResponse>>(`${this.baseUrl}`, { params, context: expecting(TimezonePage) });
   }
 
   createTimezone(form: TimezoneRequest): Observable<TimezoneResponse> {
-    return this._http.post<unknown>(`${this.baseUrl}`, form)
-      .pipe(map((json) => TimezoneResponse.parse(json)));
+    return this._http.post<TimezoneResponse>(`${this.baseUrl}`, form, { context: expecting(TimezoneResponse) });
   }
 
   getTimezoneById(id: number): Observable<TimezoneResponse> {
-    return this._http.get<unknown>(`${this.baseUrl}/${id}`)
-      .pipe(map((json) => TimezoneResponse.parse(json)));
+    return this._http.get<TimezoneResponse>(`${this.baseUrl}/${id}`, { context: expecting(TimezoneResponse) });
   }
 
   updateTimezone(id: number, form: TimezoneRequest): Observable<TimezoneResponse> {
-    return this._http.put<unknown>(`${this.baseUrl}/${id}`, form)
-      .pipe(map((json) => TimezoneResponse.parse(json)));
+    return this._http.put<TimezoneResponse>(`${this.baseUrl}/${id}`, form, { context: expecting(TimezoneResponse) });
   }
 
   deleteTimezone(id: number): Observable<void> {
@@ -42,7 +39,6 @@ export class TimezoneService {
   }
 
   calculateDate(form: CalculateDateRequest): Observable<CalculateDateResponse> {
-    return this._http.post<unknown>(`${this.baseUrl}/calculate-date`, form)
-      .pipe(map((json) => CalculateDateResponse.parse(json)));
+    return this._http.post<CalculateDateResponse>(`${this.baseUrl}/calculate-date`, form, { context: expecting(CalculateDateResponse) });
   }
 }
