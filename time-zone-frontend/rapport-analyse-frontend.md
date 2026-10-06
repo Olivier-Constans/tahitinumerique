@@ -6,9 +6,9 @@
 
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
-| 1. Analyse technique | 0 | 1 | 6 | 4 | 11 |
+| 1. Analyse technique | 0 | 1 | 6 | 3 | 10 |
 | 2. Analyse fonctionnelle | 0 | 2 | 7 | 0 | 9 |
-| **Total** | **0** | **3** | **13** | **4** | **20** |
+| **Total** | **0** | **3** | **13** | **3** | **19** |
 
 **Outils** : lint OK (0 erreur) · tests 39/39 passés (8 fichiers) · build OK avec 1 avertissement (budget initial dépassé : 947,94 kB pour 500 kB)
 
@@ -109,14 +109,6 @@
 - **Impact** : faible pour l'instant. Le parcours complet (création puis calcul) n'est vérifié nulle part de bout en bout.
 - **Recommandation** : ajouter un scénario Playwright couvrant la création de deux fuseaux, puis le calcul sur la page d'accueil.
 
-#### FRONT-20261006-11 · Info · README générique d'Angular CLI
-- **Statut** : Ouvert
-- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
-- **Emplacement** : `README.md`
-- **Constat** : le README décrit `ng serve` et `ng generate`, mais ne dit rien du proxy `/api` vers `localhost:7373`, de l'image Docker, de la configuration nginx (`/etc/nginx/extra/*.conf`) ni du rôle de l'application.
-- **Impact** : une prise en main plus lente pour un nouveau développeur ou un relecteur.
-- **Recommandation** : ajouter une section « Démarrage » (back requis sur le port 7373, `npm start`) et une section « Docker » (build, montage de `api_redirection-local.conf`).
-
 ## 2. Analyse fonctionnelle
 
 ### 2.1 Bugs potentiels
@@ -201,7 +193,14 @@
 
 ## Points clos
 
-Aucun point clos.
+#### FRONT-20261006-11 · Info · README générique d'Angular CLI
+- **Statut** : Corrigé le 2026-10-06
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
+- **Emplacement** : `README.md`
+- **Constat** : le README décrit `ng serve` et `ng generate`, mais ne dit rien du proxy `/api` vers `localhost:7373`, de l'image Docker, de la configuration nginx (`/etc/nginx/extra/*.conf`) ni du rôle de l'application.
+- **Impact** : une prise en main plus lente pour un nouveau développeur ou un relecteur.
+- **Recommandation** : ajouter une section « Démarrage » (back requis sur le port 7373, `npm start`) et une section « Docker » (build, montage de `api_redirection-local.conf`).
+- **Correction** : `README.md` réécrit en français. Il décrit le rôle de l'application et la stack, les prérequis (back sur le port 7373), le démarrage avec `npm start` (en prévenant que `ng serve` seul n'active pas le proxy `/api`), les commandes, l'image Docker et la configuration nginx (montage obligatoire de `api_redirection-local.conf` dans `/etc/nginx/extra/`, `docker-compose.yml` à la racine), ainsi que la structure du code. La section Claude Code est conservée, et les sections génériques d'Angular CLI sont supprimées. Aucun code source n'a été modifié. La commande de test documentée a été vérifiée (39/39).
 
 ## Historique des analyses
 
