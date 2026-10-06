@@ -51,7 +51,7 @@ describe('AdministrationComponent', () => {
 
     await render();
 
-    expect(element().textContent).toContain('Pas de timezone configurée');
+    expect(element().textContent).toContain('Aucun fuseau horaire configuré.');
   });
 
   it('propose de réessayer quand le chargement échoue', async () => {
@@ -89,7 +89,7 @@ describe('AdministrationComponent', () => {
 
     expect(timezoneService.deleteTimezone).toHaveBeenCalledWith(1);
     expect(timezoneService.getAllTimezones).toHaveBeenCalledTimes(2);
-    expect(element().textContent).toContain('Pas de timezone configurée');
+    expect(element().textContent).toContain('Aucun fuseau horaire configuré.');
   });
 
   it('revient à la page précédente quand la dernière timezone d\'une page est supprimée', async () => {

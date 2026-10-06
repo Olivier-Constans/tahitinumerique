@@ -1,7 +1,7 @@
 <div>
   <div class="flex align-items-center flex-wrap">
     <div class="flex-grow-1">
-      <h2>Timezone configuration</h2>
+      <h2>Configuration des fuseaux horaires</h2>
     </div>
     <div class="flex-shrink-0">
       <p-button icon="pi pi-plus" [rounded]="true" [routerLink]="[TIMEZONE_PATH, 'new']" />
@@ -16,7 +16,7 @@
       </div>
     } @else if(result(); as page){
       @if (page.totalElements === 0) {
-        <div>Pas de timezone configurée </div>
+        <div>Aucun fuseau horaire configuré.</div>
       } @else {
         @for (result of page.content; track result.id) {
           <div class="surface-200 m-2 p-2 flex align-items-center flex-wrap">

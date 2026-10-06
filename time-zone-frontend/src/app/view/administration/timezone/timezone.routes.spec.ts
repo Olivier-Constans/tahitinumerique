@@ -56,7 +56,7 @@ describe('Routes timezone (consultation, création, modification)', () => {
       expect(timezoneService.getTimezoneById).toHaveBeenCalledWith(5);
       expect(element().querySelector('h2')?.textContent).toBe('Paris');
       expect(element().textContent).toMatch(/Modifié le 02\/01\/2026 à \d{2}:\d{2}/);
-      expect(element().textContent).toContain('Offset: UTC+01');
+      expect(element().textContent).toContain('Décalage UTC : UTC+01');
     });
 
     it('redirige vers la 404 quand la timezone est introuvable', async () => {
@@ -75,7 +75,7 @@ describe('Routes timezone (consultation, création, modification)', () => {
     });
 
     it('affiche un formulaire vide dont la validation est désactivée', () => {
-      expect(element().querySelector('h2')?.textContent).toContain('Création timezone');
+      expect(element().querySelector('h2')?.textContent).toContain('Nouveau fuseau horaire');
       expect(element().querySelector<HTMLButtonElement>('button[type="submit"]')!.disabled).toBe(true);
     });
 
@@ -114,7 +114,7 @@ describe('Routes timezone (consultation, création, modification)', () => {
     });
 
     it('pré-remplit le formulaire avec la timezone', () => {
-      expect(element().querySelector('h2')?.textContent).toContain('Modification de la timezone "Tahiti"');
+      expect(element().querySelector('h2')?.textContent).toContain('Modification du fuseau horaire "Tahiti"');
       expect(element().querySelector<HTMLInputElement>('input#label')!.value).toBe('Tahiti');
       expect(element().querySelector<HTMLButtonElement>('button[type="submit"]')!.disabled).toBe(false);
     });

@@ -7,8 +7,8 @@
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
 | 1. Analyse technique | 0 | 1 | 6 | 3 | 10 |
-| 2. Analyse fonctionnelle | 0 | 2 | 6 | 0 | 8 |
-| **Total** | **0** | **3** | **12** | **3** | **18** |
+| 2. Analyse fonctionnelle | 0 | 2 | 4 | 0 | 6 |
+| **Total** | **0** | **3** | **10** | **3** | **16** |
 
 **Outils** : lint OK (0 erreur) · tests 39/39 passés (8 fichiers) · build OK avec 1 avertissement (budget initial dépassé : 947,94 kB pour 500 kB)
 
@@ -167,23 +167,27 @@
 
 ### 2.4 Wording
 
-#### FRONT-20261006-19 · Mineur · Mélange d'anglais et de français dans l'interface
-- **Statut** : Ouvert
-- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
-- **Emplacement** : `src/index.html:5`, `src/app/shared/component/header/header.component.html:9`, `src/app/view/administration/administration.component.html:4`, `src/app/view/administration/timezone/timezone.component.html:6`
-- **Constat** : « TimeZoneFrontend » (titre de l'onglet), « Timezone project », « Timezone configuration » et « Offset: » côtoient des textes en français.
-- **Impact** : une interface qui paraît inachevée.
-- **Recommandation** : « Fuseaux horaires » pour l'onglet et le header, « Configuration des fuseaux horaires », « Décalage UTC : ».
+Aucun point ouvert.
+
+## Points clos
 
 #### FRONT-20261006-20 · Mineur · Terminologie « timezone » et « fuseau horaire » incohérente
-- **Statut** : Ouvert
+- **Statut** : Corrigé le 2026-10-06
 - **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
 - **Emplacement** : `src/app/view/administration/administration.component.html:19`, `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.html:5,10,15`
 - **Constat** : « Pas de timezone configurée », « Modification de la timezone », « Création timezone » et le label de champ « Label » côtoient « Fuseau horaire » et « Ajouter un fuseau horaire ». Le champ intitulé « Fuseau horaire » sert en réalité à choisir un décalage UTC.
 - **Impact** : le vocabulaire est incohérent, et il y a une ambiguïté entre le fuseau (l'entité) et le décalage (sa propriété).
 - **Recommandation** : utiliser « fuseau horaire » partout. Renommer les champs « Nom » et « Décalage UTC », et le titre en « Nouveau fuseau horaire ».
+- **Correction** : « fuseau horaire » est employé partout. Dans `administration.component.html`, « Aucun fuseau horaire configuré. ». Dans `timezone-edit.component.html`, les titres deviennent « Modification du fuseau horaire "…" » et « Nouveau fuseau horaire », et les champs « Nom » et « Décalage UTC ». Les textes attendus sont mis à jour dans `timezone.routes.spec.ts` et `administration.component.spec.ts`. Hors périmètre (back) : les messages de validation de `messages.properties` citent le nom technique du champ (`label`, `offsetUTC`). Lint OK, tests 39/39.
 
-## Points clos
+#### FRONT-20261006-19 · Mineur · Mélange d'anglais et de français dans l'interface
+- **Statut** : Corrigé le 2026-10-06
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
+- **Emplacement** : `src/index.html:5`, `src/app/shared/component/header/header.component.html:9`, `src/app/view/administration/administration.component.html:4`, `src/app/view/administration/timezone/timezone.component.html:6`
+- **Constat** : « TimeZoneFrontend » (titre de l'onglet), « Timezone project », « Timezone configuration » et « Offset: » côtoient des textes en français.
+- **Impact** : une interface qui paraît inachevée.
+- **Recommandation** : « Fuseaux horaires » pour l'onglet et le header, « Configuration des fuseaux horaires », « Décalage UTC : ».
+- **Correction** : textes traduits en français : titre de l'onglet et `h1` du header « Fuseaux horaires » (`index.html`, `header.component.html`), titre de l'administration « Configuration des fuseaux horaires » (`administration.component.html`) et « Décalage UTC : » sur la consultation (`timezone.component.html`). Les textes attendus sont mis à jour dans `app.component.spec.ts`, `header.component.spec.ts` et `timezone.routes.spec.ts`. Restent hors périmètre : « Label » et l'emploi de « timezone » (FRONT-20261006-20), et `lang="en"` (FRONT-20261006-18). Lint OK, tests 39/39.
 
 #### FRONT-20261006-16 · Mineur · Le pipe `titlecase` modifie les libellés saisis
 - **Statut** : Corrigé le 2026-10-06

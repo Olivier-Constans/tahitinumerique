@@ -17,7 +17,7 @@ describe('HeaderComponent', () => {
   });
 
   it('affiche le titre de l\'application', () => {
-    expect(fixture.nativeElement.querySelector('h1').textContent).toBe('Timezone project');
+    expect(fixture.nativeElement.querySelector('h1').textContent).toBe('Fuseaux horaires');
   });
 
   it('navigue vers l\'administration', async () => {

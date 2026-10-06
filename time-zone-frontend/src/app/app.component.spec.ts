@@ -16,7 +16,7 @@ describe('AppComponent', () => {
     await fixture.whenStable();
 
     const element: HTMLElement = fixture.nativeElement;
-    expect(element.querySelector('app-header h1')?.textContent).toContain('Timezone project');
+    expect(element.querySelector('app-header h1')?.textContent).toContain('Fuseaux horaires');
     expect(element.querySelector('p-toast')).not.toBeNull();
     expect(element.querySelector('router-outlet')).not.toBeNull();
   });
