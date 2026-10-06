@@ -41,7 +41,7 @@
     <h2>Résultats</h2>
     @for (data of page.calculateDateItemList; track data.timezone.id) {
     <div class="p-2">
-      <span class="font-bold">{{data.timezone.label | titlecase}}: </span> {{data.date | date:"dd/MM/yyyy 'à' HH:mm "}}
+      <span class="font-bold">{{data.timezone.label}}: </span> {{data.date | date:"dd/MM/yyyy 'à' HH:mm "}}
     </div>
     }
   }

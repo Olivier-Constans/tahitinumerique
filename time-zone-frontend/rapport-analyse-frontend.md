@@ -7,8 +7,8 @@
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
 | 1. Analyse technique | 0 | 1 | 6 | 3 | 10 |
-| 2. Analyse fonctionnelle | 0 | 2 | 7 | 0 | 9 |
-| **Total** | **0** | **3** | **13** | **3** | **19** |
+| 2. Analyse fonctionnelle | 0 | 2 | 6 | 0 | 8 |
+| **Total** | **0** | **3** | **12** | **3** | **18** |
 
 **Outils** : lint OK (0 erreur) · tests 39/39 passés (8 fichiers) · build OK avec 1 avertissement (budget initial dépassé : 947,94 kB pour 500 kB)
 
@@ -147,14 +147,6 @@
 - **Impact** : pour modifier un fuseau qu'on consulte, il faut revenir à la liste.
 - **Recommandation** : ajouter un bouton « Modifier » (`[routerLink]="['edit']"`) et utiliser `p-breadcrumb`.
 
-#### FRONT-20261006-16 · Mineur · Le pipe `titlecase` modifie les libellés saisis
-- **Statut** : Ouvert
-- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
-- **Emplacement** : `src/app/view/home/home.component.html:44`
-- **Constat** : les résultats affichent `data.timezone.label | titlecase`, alors que le libellé est affiché tel quel partout ailleurs (liste, consultation, select). « la Réunion » devient « La Réunion » et « USA – EST » devient « Usa – Est ».
-- **Impact** : un même fuseau est présenté différemment d'une page à l'autre, et les sigles sont abîmés.
-- **Recommandation** : retirer `titlecase` et afficher le libellé tel que l'administrateur l'a saisi.
-
 ### 2.3 Linter (templates et accessibilité)
 
 #### FRONT-20261006-17 · Majeur · Boutons réduits à une icône sans libellé accessible
@@ -192,6 +184,15 @@
 - **Recommandation** : utiliser « fuseau horaire » partout. Renommer les champs « Nom » et « Décalage UTC », et le titre en « Nouveau fuseau horaire ».
 
 ## Points clos
+
+#### FRONT-20261006-16 · Mineur · Le pipe `titlecase` modifie les libellés saisis
+- **Statut** : Corrigé le 2026-10-06
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
+- **Emplacement** : `src/app/view/home/home.component.html:44`
+- **Constat** : les résultats affichent `data.timezone.label | titlecase`, alors que le libellé est affiché tel quel partout ailleurs (liste, consultation, select). « la Réunion » devient « La Réunion » et « USA – EST » devient « Usa – Est ».
+- **Impact** : un même fuseau est présenté différemment d'une page à l'autre, et les sigles sont abîmés.
+- **Recommandation** : retirer `titlecase` et afficher le libellé tel que l'administrateur l'a saisi.
+- **Correction** : le pipe `titlecase` est retiré des résultats de l'accueil, et le libellé est affiché tel que saisi, comme sur les autres pages (`home.component.html`). L'import `TitleCasePipe` est supprimé de `home.component.ts`. Le test `home.component.spec.ts` attend désormais `tahiti: …` et `paris: …` pour des fuseaux saisis en minuscules : il garantit que le libellé n'est plus transformé. Lint OK, tests 39/39.
 
 #### FRONT-20261006-11 · Info · README générique d'Angular CLI
 - **Statut** : Corrigé le 2026-10-06

@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, signal} from '@angular/core';
-import {DatePipe, TitleCasePipe} from "@angular/common";
+import {DatePipe} from "@angular/common";
 import {DatePicker} from "primeng/datepicker";
 import {FormControl, NonNullableFormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {Select} from "primeng/select";
@@ -29,8 +29,7 @@ export interface HomeForm {
         ReactiveFormsModule,
         Select,
         Button,
-        RouterLink,
-        TitleCasePipe
+        RouterLink
     ],
     templateUrl: './home.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush
