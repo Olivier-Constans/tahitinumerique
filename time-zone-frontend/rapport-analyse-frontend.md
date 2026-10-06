@@ -8,9 +8,9 @@
 
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
-| 1. Analyse technique | 0 | 0 | 3 | 4 | 7 |
+| 1. Analyse technique | 0 | 0 | 3 | 3 | 6 |
 | 2. Analyse fonctionnelle | 0 | 2 | 8 | 0 | 10 |
-| **Total** | **0** | **2** | **11** | **4** | **17** |
+| **Total** | **0** | **2** | **11** | **3** | **16** |
 
 **Outils** : lint OK (0 erreur) · tests 39/39 passés (8 fichiers) · build OK avec 1 avertissement (budget initial dépassé : 955,68 kB pour 500 kB)
 
@@ -20,14 +20,7 @@
 
 ### 1.1 Linter
 
-#### FRONT-20261006-01 · Info · Configuration ESLint sans règles basées sur les types
-- **Statut** : Ouvert
-- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
-- **Emplacement** : `eslint.config.js:11-14`
-- **Constat** : la configuration étend `tseslint.configs.recommended` et `stylistic`, qui n'analysent pas les types. Les assertions non nulles (`!`) passent donc sans alerte (`home.component.ts:124-125`, `timezone-edit.component.ts:72-73`). `ng lint` ne remonte aucune erreur.
-- **Impact** : aucun défaut actuel, mais le linter ne détecterait pas le retour de contournements de typage comme ceux de FRONT-20261006-07 et FRONT-20261006-08 (aujourd'hui clos).
-- **Révisé le** 2026-10-07 : les doubles casts `as unknown as` ont disparu avec l'introduction de Zod (commit `d115c04`). Il reste les assertions non nulles sur les valeurs de formulaire.
-- **Recommandation** : passer à `tseslint.configs.recommendedTypeChecked` (avec `parserOptions.projectService: true`), ou au minimum activer `@typescript-eslint/no-non-null-assertion` en `warn`.
+Aucun point ouvert.
 
 ### 1.2 Structure du code
 

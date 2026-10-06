@@ -2,6 +2,16 @@
 
 > Points corrigés ou ignorés, triés par date de clôture (la plus récente en premier). Les points ouverts sont dans `rapport-analyse-frontend.md`.
 
+#### FRONT-20261006-01 · Info · Configuration ESLint sans règles basées sur les types
+- **Statut** : Corrigé le 2026-10-07
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `eslint.config.js:11-14`
+- **Constat** : la configuration étend `tseslint.configs.recommended` et `stylistic`, qui n'analysent pas les types. Les assertions non nulles (`!`) passent donc sans alerte (`home.component.ts:124-125`, `timezone-edit.component.ts:72-73`). `ng lint` ne remonte aucune erreur.
+- **Impact** : aucun défaut actuel, mais le linter ne détecterait pas le retour de contournements de typage comme ceux de FRONT-20261006-07 et FRONT-20261006-08 (aujourd'hui clos).
+- **Révisé le** 2026-10-07 : les doubles casts `as unknown as` ont disparu avec l'introduction de Zod (commit `d115c04`). Il reste les assertions non nulles sur les valeurs de formulaire.
+- **Recommandation** : passer à `tseslint.configs.recommendedTypeChecked` (avec `parserOptions.projectService: true`), ou au minimum activer `@typescript-eslint/no-non-null-assertion` en `warn`.
+- **Correction** : `eslint.config.js` étend désormais `recommendedTypeChecked` et `stylisticTypeChecked`, avec `parserOptions.project` sur `tsconfig.app.json` et `tsconfig.spec.json` (`projectService` ne voyait que `tsconfig.json`, sans les types vitest, d'où 395 erreurs parasites dans les specs). `unbound-method` est désactivée (faux positifs sur `Validators.required` et les mocks `vi.fn`). `no-non-null-assertion` n'est pas activée : elle relève de `strict` et non du type-checked, et les `!` restants suivent un contrôle `form.invalid`. Corrections exigées par les nouvelles règles : Promise de `router.navigate` explicitement ignorée dans `timezone-edit.component.ts` (`no-misused-promises`), `fixture.nativeElement` et `componentInstance` typés dans 5 specs. Lint propre, 39 tests passent.
+
 #### FRONT-20261006-07 · Majeur · Typage incorrect de `OffsetUTC`
 - **Statut** : Corrigé le 2026-10-07
 - **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07

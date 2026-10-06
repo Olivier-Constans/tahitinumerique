@@ -16,12 +16,16 @@ describe('HeaderComponent', () => {
     await fixture.whenStable();
   });
 
+  function element(): HTMLElement {
+    return fixture.nativeElement as HTMLElement;
+  }
+
   it('affiche le titre de l\'application', () => {
-    expect(fixture.nativeElement.querySelector('h1').textContent).toBe('Fuseaux horaires');
+    expect(element().querySelector('h1')?.textContent).toBe('Fuseaux horaires');
   });
 
   it('navigue vers l\'administration', async () => {
-    fixture.nativeElement.querySelector('p-button button').click();
+    element().querySelector<HTMLButtonElement>('p-button button')!.click();
     await fixture.whenStable();
 
     expect(router.url).toBe('/admin');
@@ -30,7 +34,7 @@ describe('HeaderComponent', () => {
   it('revient à l\'accueil en cliquant sur le logo', async () => {
     await router.navigateByUrl('/admin');
 
-    fixture.nativeElement.querySelector('img').click();
+    element().querySelector('img')!.click();
     await fixture.whenStable();
 
     expect(router.url).toBe('/');

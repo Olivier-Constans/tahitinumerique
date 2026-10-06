@@ -15,7 +15,7 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     await fixture.whenStable();
 
-    const element: HTMLElement = fixture.nativeElement;
+    const element = fixture.nativeElement as HTMLElement;
     expect(element.querySelector('app-header h1')?.textContent).toContain('Fuseaux horaires');
     expect(element.querySelector('p-toast')).not.toBeNull();
     expect(element.querySelector('router-outlet')).not.toBeNull();

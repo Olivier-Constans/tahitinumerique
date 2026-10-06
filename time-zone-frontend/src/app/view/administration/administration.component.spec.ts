@@ -29,7 +29,7 @@ describe('AdministrationComponent', () => {
   }
 
   function element(): HTMLElement {
-    return fixture.nativeElement;
+    return fixture.nativeElement as HTMLElement;
   }
 
   function clickButton(selector: string) {

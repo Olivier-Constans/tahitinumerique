@@ -9,12 +9,21 @@ module.exports = defineConfig([
     files: ["**/*.ts"],
     extends: [
       eslint.configs.recommended,
-      tseslint.configs.recommended,
-      tseslint.configs.stylistic,
+      tseslint.configs.recommendedTypeChecked,
+      tseslint.configs.stylisticTypeChecked,
       angular.configs.tsRecommended,
     ],
+    languageOptions: {
+      parserOptions: {
+        // projectService ne trouverait que tsconfig.json, sans les types vitest des specs
+        project: ["tsconfig.app.json", "tsconfig.spec.json"],
+        tsconfigRootDir: __dirname,
+      },
+    },
     processor: angular.processInlineTemplates,
     rules: {
+      // Faux positifs sur les méthodes statiques (Validators.required) et les mocks vi.fn
+      "@typescript-eslint/unbound-method": "off",
       "@angular-eslint/directive-selector": [
         "error",
         {

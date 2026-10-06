@@ -82,7 +82,9 @@ export class TimezoneEditComponent {
       takeUntilDestroyed(this._destroyRef),
       catchError(() => EMPTY)
     )
-      .subscribe((response) => this._router.navigate(data ? [".."] : ["..", response.id], {relativeTo: this._route}))
+      .subscribe((response) => {
+        void this._router.navigate(data ? [".."] : ["..", response.id], {relativeTo: this._route});
+      })
   }
 
 }

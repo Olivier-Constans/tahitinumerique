@@ -31,7 +31,7 @@ describe('HomeComponent', () => {
   }
 
   function element(): HTMLElement {
-    return fixture.nativeElement;
+    return fixture.nativeElement as HTMLElement;
   }
 
   it('propose de réessayer quand le chargement des timezones échoue', async () => {

@@ -5,6 +5,8 @@ import {of, throwError} from "rxjs";
 import {routes} from "../../../app.routes";
 import {TimezoneService} from "../../../shared/service/timezone.service";
 import {aTimezone} from "../../../../testing/timezone.fixture";
+import {OffsetUTC} from "../../../shared/model/offsetUTC.model";
+import {TimezoneEditComponent} from "./timezone-edit/timezone-edit.component";
 
 describe('Routes timezone (consultation, création, modification)', () => {
   let harness: RouterTestingHarness;
@@ -37,8 +39,9 @@ describe('Routes timezone (consultation, création, modification)', () => {
     input.dispatchEvent(new Event('input'));
   }
 
-  function selectOffset(offset: string) {
-    harness.routeDebugElement!.componentInstance.form.controls.offsetUTC.setValue(offset);
+  function selectOffset(offset: OffsetUTC) {
+    const component = harness.routeDebugElement!.componentInstance as TimezoneEditComponent;
+    component.form.controls.offsetUTC.setValue(offset);
   }
 
   async function submit() {
