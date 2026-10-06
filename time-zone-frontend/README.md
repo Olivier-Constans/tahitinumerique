@@ -114,11 +114,11 @@ export type TimezoneResponse = z.infer<typeof TimezoneResponse>;
 
 ## Claude Code
 
-Le projet fournit trois skills [Claude Code](https://docs.claude.com/en/docs/claude-code) dans `.claude/skills/`. Ils servent à auditer le front et à suivre la correction des points relevés. Ils travaillent tous sur le fichier `rapport-analyse-frontend.md`, à la racine du projet.
+Le projet fournit trois skills [Claude Code](https://docs.claude.com/en/docs/claude-code) dans `.claude/skills/`. Ils servent à auditer le front et à suivre la correction des points relevés. Ils travaillent sur `rapport-analyse-frontend.md` (points ouverts) et `rapport-analyse-frontend-clos.md` (points clos), à la racine du projet. Les conventions communes sont dans `.claude/skills/analyse-frontend/conventions.md`, et le script `.claude/skills/analyse-frontend/scripts/rapport.mjs` modifie un point (statut, clôture, réouverture, synthèse) sans relire tout le rapport.
 
 ### `/analyse-frontend` : analyser le front
 
-Ce skill lance `ng lint`, `ng test` et `ng build`, lit le code et la configuration, puis crée ou met à jour `rapport-analyse-frontend.md`.
+Ce skill lance `ng lint`, `ng test` et `ng build`, lit le code et la configuration, puis crée ou met à jour `rapport-analyse-frontend.md`. Par défaut, l'analyse est incrémentale : seuls les fichiers modifiés depuis le commit noté dans le rapport, et ceux cités par les points ouverts, sont relus. Demander une « analyse complète » pour tout relire.
 
 Le rapport est une **liste de suivi** sur la durée. On le relance après des corrections pour voir ce qui est réglé et ce qui est nouveau.
 
@@ -126,8 +126,9 @@ Le rapport est une **liste de suivi** sur la durée. On le relance après des co
 - une synthèse : nombre de points ouverts par gravité, résultat du lint, des tests et du build ;
 - *1. Analyse technique* : Linter, Structure du code, Homogénéité, Qualité ;
 - *2. Analyse fonctionnelle* : Bugs potentiels, Analyse UX/UI, Linter (templates et accessibilité), Wording ;
-- *Points clos* : points corrigés ou ignorés ;
 - *Historique des analyses* : une ligne par exécution.
+
+Les points corrigés ou ignorés sont déplacés dans `rapport-analyse-frontend-clos.md`, du plus récemment clos au plus ancien.
 
 **Conventions :**
 - **Identifiant** : `FRONT-AAAAMMJJ-NN`. La date est celle de la découverte du point. L'identifiant est définitif : il n'est jamais renuméroté ni réutilisé.
@@ -153,7 +154,7 @@ Ce skill traite un seul point du rapport :
 1. Il relit le point et vérifie dans le code que le constat tient toujours.
 2. **Si le problème est réel**, il propose une correction et attend la validation de l'utilisateur. Il l'applique ensuite et lance le lint et les tests. Le point passe en `Corrigé le …` avec une ligne `Correction`.
 3. **Sinon**, il argumente, preuves à l'appui : faux positif, choix technique assumé ou hors périmètre. Après confirmation, le point passe en `Ignoré le … (motif)` avec une ligne `Justification`. Si le constat n'est que partiellement juste, le point est révisé dans le rapport et reste ouvert.
-4. Il met à jour le rapport : le point est déplacé dans « Points clos » et la synthèse est recalculée.
+4. Il met à jour le rapport : le point est déplacé dans `rapport-analyse-frontend-clos.md` et la synthèse est recalculée.
 
 Aucune modification du code ni du rapport n'est faite sans validation, et rien n'est commité automatiquement.
 
@@ -167,8 +168,8 @@ Aucune modification du code ni du rapport n'est faite sans validation, et rien n
 
 Ce skill met à jour le statut d'un point sans lire ni modifier le code. Il sert quand la décision est déjà prise : un point corrigé à la main, ou un point qu'on choisit d'écarter.
 
-- **Corrigé** : le point passe en `Corrigé le …` avec la mention « déclarée manuellement, sans vérification du code », puis il est déplacé dans « Points clos ». Si le problème est toujours dans le code, la prochaine analyse le rouvrira.
-- **Ignoré** : le skill demande la raison (on peut répondre `N/A`). Le point passe en `Ignoré le …` avec une ligne `Justification`, puis il est déplacé dans « Points clos ». Il ne sera plus re-signalé.
+- **Corrigé** : le point passe en `Corrigé le …` avec la mention « déclarée manuellement, sans vérification du code », puis il est déplacé dans le fichier des points clos. Si le problème est toujours dans le code, la prochaine analyse le rouvrira.
+- **Ignoré** : le skill demande la raison (on peut répondre `N/A`). Le point passe en `Ignoré le …` avec une ligne `Justification`, puis il est déplacé dans le fichier des points clos. Il ne sera plus re-signalé.
 - **Ouvert** : le point est rouvert et replacé dans sa sous-section, avec une ligne `Rouvert le …`. Son historique (`Correction`, `Justification`) est conservé.
 
 La synthèse est recalculée à chaque changement. Ce skill ne se déclenche que sur appel explicite : Claude ne l'utilise jamais de lui-même.

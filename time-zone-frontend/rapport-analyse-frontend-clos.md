@@ -1,0 +1,81 @@
+# Points clos du rapport d'analyse front-end
+
+> Points corrigés ou ignorés, triés par date de clôture (la plus récente en premier). Les points ouverts sont dans `rapport-analyse-frontend.md`.
+
+#### FRONT-20261006-07 · Majeur · Typage incorrect de `OffsetUTC`
+- **Statut** : Corrigé le 2026-10-07
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `src/app/shared/model/offsetUTC.model.ts:2`, `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.ts:46`, `src/testing/timezone.fixture.ts:9`
+- **Constat** : `OffsetUTC` est un enum numérique (valeurs 0 à 40). Pourtant, l'application manipule et envoie ses *noms* (`"UTC+01"`), comme le back qui attend un libellé (`OffsetUTC.getEnumForLabel`). Il faut `isNaN(Number(k))` pour extraire les options, et `as unknown as OffsetUTC` dans les tests.
+- **Impact** : le type annoncé ne correspond pas à la valeur réelle. Une comparaison du type `offsetUTC === OffsetUTC["UTC+01"]` serait toujours fausse, sans erreur de compilation.
+- **Recommandation** :
+  ```ts
+  export const OFFSETS_UTC = ['UTC', 'UTC+01', /* … */ 'UTC-12'] as const;
+  export type OffsetUTC = typeof OFFSETS_UTC[number];
+  ```
+  Ensuite, `optionsOffsetUTC = [...OFFSETS_UTC]`, et les casts disparaissent des tests.
+- **Correction** : résolu par une évolution, sans correction dédiée : le commit `d115c04` (ajout de Zod mini) remplace l'enum numérique par un schéma `z.enum([...])` de libellés et un type dérivé `z.infer` (`offsetUTC.model.ts:4-48`). Les options du select viennent de `OffsetUTC.options` (`timezone-edit.component.ts:46`) et le cast `as unknown as OffsetUTC` a disparu de `timezone.fixture.ts`. La liste correspond aux libellés de l'enum Java `OffsetUTC` du back (41 valeurs), et un test vérifie qu'un décalage inconnu est rejeté (`timezone.service.spec.ts:100-106`).
+
+#### FRONT-20261006-08 · Mineur · Transformations de réponses par mutation et double cast
+- **Statut** : Corrigé le 2026-10-07
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `src/app/shared/model/audit.model.ts:12-16`, `src/app/shared/service/timezone.service.ts:47-55`
+- **Constat** : `auditResponseTransform` et `calculateDate` modifient directement l'objet reçu, et déclarent comme `Date` des champs qui arrivent en `string` (`as unknown as string`).
+- **Impact** : le type est faux jusqu'à la transformation. Un appel qui oublie la transformation compile sans erreur et manipule des chaînes typées `Date`.
+- **Recommandation** : typer la réponse brute (`interface AuditDto { createDate: string; … }`) et renvoyer un nouvel objet : `({...data, audit: {createDate: toDate(data.audit.createDate), …}})`.
+- **Correction** : résolu par une évolution, sans correction dédiée : le commit `d115c04` (ajout de Zod mini) remplace `auditResponseTransform` et la transformation par mutation de `calculateDate` par des schémas Zod (`audit.model.ts`, `calculateDate.model.ts`, `timezone.model.ts`). Les réponses sont reçues en `unknown` puis validées et converties par `parse`, qui renvoie un nouvel objet ; les dates sont transformées par le schéma `isoDate`. Plus aucun `as unknown as` dans `src/`.
+
+#### FRONT-20261006-02 · Mineur · Code mort et fichiers vides
+- **Statut** : Corrigé le 2026-10-06
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
+- **Emplacement** : `src/app/shared/service/date.function.ts:7`, `src/app/app.component.ts:14`, `src/app/app.component.scss`, `src/styles.scss`
+- **Constat** : `toUTCDate` n'est utilisée que dans son test. `AppComponent.title` n'est lu nulle part. `app.component.scss` est vide et `styles.scss` ne contient que le commentaire généré par Angular CLI.
+- **Impact** : du bruit à la lecture, et un test qui maintient une fonction inutilisée.
+- **Recommandation** : supprimer `toUTCDate` et son test, ainsi que `title`. Supprimer `app.component.scss` et retirer `styleUrl` du composant.
+- **Correction** : `toUTCDate` supprimée de `date.function.ts` avec son test dans `date.function.spec.ts` (`toDate` et `transformToUTCDate`, utilisée par `home.component.ts`, sont conservées). Propriété `title` et `styleUrl` retirés de `app.component.ts`, fichier `app.component.scss` supprimé. Commentaire généré retiré de `styles.scss`, conservé vide comme point d'entrée des styles globaux déclaré dans `angular.json`. Lint OK, tests 38/38 (un test supprimé), build OK (avertissement de budget préexistant, suivi par un autre point).
+
+#### FRONT-20261006-05 · Mineur · Fautes de frappe dans les identifiants
+- **Statut** : Corrigé le 2026-10-06
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
+- **Emplacement** : `src/app/shared/model/calculateDate.model.ts:11`, `src/app/shared/service/timezone.service.ts:7,47`, `src/app/view/home/home.component.ts:13,66`
+- **Constat** : `CaculateDateItemResponse`, `CaculateDateResponse`, `CaculateDateResquest`, `AutitableResponse`, `reponse`.
+- **Impact** : les recherches dans le code échouent, et la relecture laisse une impression de négligence.
+- **Recommandation** : renommer en `CalculateDateItemResponse`, `CalculateDateResponse`, `CalculateDateRequest`, `AuditableResponse` et `response` (renommage via l'IDE).
+- **Rouvert le** 2026-10-06 : constat toujours présent dans le code. Le commit `06b3aa9` corrige `Caculate…`, `AutitableResponse` et `reponse`, mais `CaculateDateResquest` est devenu `CalculateDateResquest` : la faute « Resquest » subsiste (5 occurrences). Il reste à renommer en `CalculateDateRequest`, comme la classe du back (`CalculateDateRequest.java`).
+- **Correction** : `CalculateDateResquest` renommé en `CalculateDateRequest`, comme la classe du back, dans `calculateDate.model.ts` (déclaration), `timezone.service.ts` (import et paramètre de `calculateDate`) et `home.component.ts` (import et `Subject`). Les autres fautes avaient été corrigées par le commit `06b3aa9`. Plus aucune occurrence de `Resquest`, `Caculate`, `Autitable` ni `reponse` dans `src/`. Interface de type uniquement, sans effet sur la requête envoyée. Aucun test ajouté, la compilation suffit à vérifier le renommage. Lint OK, tests 39/39.
+
+#### FRONT-20261006-20 · Mineur · Terminologie « timezone » et « fuseau horaire » incohérente
+- **Statut** : Corrigé le 2026-10-06
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
+- **Emplacement** : `src/app/view/administration/administration.component.html:19`, `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.html:5,10,15`
+- **Constat** : « Pas de timezone configurée », « Modification de la timezone », « Création timezone » et le label de champ « Label » côtoient « Fuseau horaire » et « Ajouter un fuseau horaire ». Le champ intitulé « Fuseau horaire » sert en réalité à choisir un décalage UTC.
+- **Impact** : le vocabulaire est incohérent, et il y a une ambiguïté entre le fuseau (l'entité) et le décalage (sa propriété).
+- **Recommandation** : utiliser « fuseau horaire » partout. Renommer les champs « Nom » et « Décalage UTC », et le titre en « Nouveau fuseau horaire ».
+- **Correction** : « fuseau horaire » est employé partout. Dans `administration.component.html`, « Aucun fuseau horaire configuré. ». Dans `timezone-edit.component.html`, les titres deviennent « Modification du fuseau horaire "…" » et « Nouveau fuseau horaire », et les champs « Nom » et « Décalage UTC ». Les textes attendus sont mis à jour dans `timezone.routes.spec.ts` et `administration.component.spec.ts`. Hors périmètre (back) : les messages de validation de `messages.properties` citent le nom technique du champ (`label`, `offsetUTC`). Lint OK, tests 39/39.
+
+#### FRONT-20261006-19 · Mineur · Mélange d'anglais et de français dans l'interface
+- **Statut** : Corrigé le 2026-10-06
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
+- **Emplacement** : `src/index.html:5`, `src/app/shared/component/header/header.component.html:9`, `src/app/view/administration/administration.component.html:4`, `src/app/view/administration/timezone/timezone.component.html:6`
+- **Constat** : « TimeZoneFrontend » (titre de l'onglet), « Timezone project », « Timezone configuration » et « Offset: » côtoient des textes en français.
+- **Impact** : une interface qui paraît inachevée.
+- **Recommandation** : « Fuseaux horaires » pour l'onglet et le header, « Configuration des fuseaux horaires », « Décalage UTC : ».
+- **Correction** : textes traduits en français : titre de l'onglet et `h1` du header « Fuseaux horaires » (`index.html`, `header.component.html`), titre de l'administration « Configuration des fuseaux horaires » (`administration.component.html`) et « Décalage UTC : » sur la consultation (`timezone.component.html`). Les textes attendus sont mis à jour dans `app.component.spec.ts`, `header.component.spec.ts` et `timezone.routes.spec.ts`. Restent hors périmètre : « Label » et l'emploi de « timezone » (FRONT-20261006-20), et `lang="en"` (FRONT-20261006-18). Lint OK, tests 39/39.
+
+#### FRONT-20261006-16 · Mineur · Le pipe `titlecase` modifie les libellés saisis
+- **Statut** : Corrigé le 2026-10-06
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
+- **Emplacement** : `src/app/view/home/home.component.html:44`
+- **Constat** : les résultats affichent `data.timezone.label | titlecase`, alors que le libellé est affiché tel quel partout ailleurs (liste, consultation, select). « la Réunion » devient « La Réunion » et « USA – EST » devient « Usa – Est ».
+- **Impact** : un même fuseau est présenté différemment d'une page à l'autre, et les sigles sont abîmés.
+- **Recommandation** : retirer `titlecase` et afficher le libellé tel que l'administrateur l'a saisi.
+- **Correction** : le pipe `titlecase` est retiré des résultats de l'accueil, et le libellé est affiché tel que saisi, comme sur les autres pages (`home.component.html`). L'import `TitleCasePipe` est supprimé de `home.component.ts`. Le test `home.component.spec.ts` attend désormais `tahiti: …` et `paris: …` pour des fuseaux saisis en minuscules : il garantit que le libellé n'est plus transformé. Lint OK, tests 39/39.
+
+#### FRONT-20261006-11 · Info · README générique d'Angular CLI
+- **Statut** : Corrigé le 2026-10-06
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
+- **Emplacement** : `README.md`
+- **Constat** : le README décrit `ng serve` et `ng generate`, mais ne dit rien du proxy `/api` vers `localhost:7373`, de l'image Docker, de la configuration nginx (`/etc/nginx/extra/*.conf`) ni du rôle de l'application.
+- **Impact** : une prise en main plus lente pour un nouveau développeur ou un relecteur.
+- **Recommandation** : ajouter une section « Démarrage » (back requis sur le port 7373, `npm start`) et une section « Docker » (build, montage de `api_redirection-local.conf`).
+- **Correction** : `README.md` réécrit en français. Il décrit le rôle de l'application et la stack, les prérequis (back sur le port 7373), le démarrage avec `npm start` (en prévenant que `ng serve` seul n'active pas le proxy `/api`), les commandes, l'image Docker et la configuration nginx (montage obligatoire de `api_redirection-local.conf` dans `/etc/nginx/extra/`, `docker-compose.yml` à la racine), ainsi que la structure du code. La section Claude Code est conservée, et les sections génériques d'Angular CLI sont supprimées. Aucun code source n'a été modifié. La commande de test documentée a été vérifiée (39/39).
