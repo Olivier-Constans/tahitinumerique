@@ -43,7 +43,7 @@ export class TimezoneEditComponent {
 
   protected readonly ADMIN_PATH = ADMIN_PATH;
 
-  readonly optionsOffsetUTC = Object.values(OffsetUTC).filter(k => isNaN(Number(k)));
+  readonly optionsOffsetUTC = OffsetUTC.options;
 
   // Alimenté par le resolver de la route via withComponentInputBinding (absent en création)
   readonly data = input<TimezoneResponse>();

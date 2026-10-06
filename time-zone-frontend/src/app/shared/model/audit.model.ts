@@ -1,16 +1,11 @@
+import * as z from "zod/mini";
 import {toDate} from "../service/date.function";
 
-export interface AuditResponse {
-  createDate: Date;
-  updateDate: Date;
-}
+export const isoDate = z.pipe(z.string(), z.transform(toDate));
 
-export interface AuditableResponse {
-  audit: AuditResponse;
-}
+export const AuditResponse = z.object({
+  createDate: isoDate,
+  updateDate: isoDate
+});
 
-export function auditResponseTransform<T extends AuditableResponse>(data: T): T {
-  data.audit.createDate = toDate((data.audit.createDate as unknown) as string);
-  data.audit.updateDate = toDate((data.audit.updateDate as unknown) as string);
-  return data;
-}
+export type AuditResponse = z.infer<typeof AuditResponse>;

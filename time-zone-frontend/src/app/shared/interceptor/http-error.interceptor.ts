@@ -23,6 +23,6 @@ function errorMessage(error: HttpErrorResponse): string {
   if (error.status === 0) {
     return 'Le serveur est injoignable.';
   }
-  const body = error.error as ErrorMessageResponse | null;
-  return body?.message ?? 'Une erreur inattendue s\'est produite.';
+  const body = ErrorMessageResponse.safeParse(error.error);
+  return body.success ? body.data.message : 'Une erreur inattendue s\'est produite.';
 }

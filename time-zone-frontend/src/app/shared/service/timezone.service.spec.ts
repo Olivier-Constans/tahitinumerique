@@ -3,20 +3,20 @@ import {provideHttpClient} from "@angular/common/http";
 import {HttpTestingController, provideHttpClientTesting} from "@angular/common/http/testing";
 import {firstValueFrom} from "rxjs";
 import {TimezoneService} from './timezone.service';
-import {OffsetUTC} from "../model/offsetUTC.model";
+import {$ZodError} from "zod/v4/core";
+import {TimezoneRequest} from "../model/timezone.model";
 
 describe('TimezoneService', () => {
   let service: TimezoneService;
   let httpTesting: HttpTestingController;
 
-  // Nouvel objet à chaque appel : le service modifie la réponse sur place pour convertir les dates
   const timezoneJson = () => ({
     id: 1,
     label: 'Tahiti',
     offsetUTC: 'UTC-10',
     audit: {createDate: '2026-01-01T10:00:00.123456Z', updateDate: '2026-01-02T10:00:00Z'}
   });
-  const request = {label: 'Tahiti', offsetUTC: 'UTC-10' as unknown as OffsetUTC};
+  const request: TimezoneRequest = {label: 'Tahiti', offsetUTC: 'UTC-10'};
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -95,5 +95,13 @@ describe('TimezoneService', () => {
 
     const response = await result;
     expect(response.calculateDateItemList[0].date).toEqual(new Date(2026, 9, 6, 0, 0, 0));
+  });
+
+  it('rejette une réponse dont le décalage UTC est inconnu', async () => {
+    const result = firstValueFrom(service.getTimezoneById(1));
+
+    httpTesting.expectOne('api/timezones/1').flush({...timezoneJson(), offsetUTC: 'UTC+99'});
+
+    await expect(result).rejects.toBeInstanceOf($ZodError);
   });
 });

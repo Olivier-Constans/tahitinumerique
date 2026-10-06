@@ -2,10 +2,10 @@ import { inject, Injectable } from '@angular/core';
 import {HttpClient, HttpParams} from "@angular/common/http";
 import {map, Observable} from "rxjs";
 import {TimezoneRequest, TimezoneResponse} from "../model/timezone.model";
-import {Page} from "../model/page.model";
-import {auditResponseTransform} from "../model/audit.model";
+import {Page, pageOf} from "../model/page.model";
 import {CalculateDateResponse, CalculateDateRequest} from "../model/calculateDate.model";
-import {toDate} from "./date.function";
+
+const TimezonePage = pageOf(TimezoneResponse);
 
 @Injectable({
   providedIn: 'root'
@@ -18,26 +18,23 @@ export class TimezoneService {
     const params = new HttpParams()
       .set('page', page)
       .set('size', size);
-    return this._http.get<Page<TimezoneResponse>>(`${this.baseUrl}`, { params })
-      .pipe(map((page) => {
-        page.content.forEach(auditResponseTransform)
-        return page
-      }));
+    return this._http.get<unknown>(`${this.baseUrl}`, { params })
+      .pipe(map((json) => TimezonePage.parse(json)));
   }
 
   createTimezone(form: TimezoneRequest): Observable<TimezoneResponse> {
-    return this._http.post<TimezoneResponse>(`${this.baseUrl}`, form)
-      .pipe(map(auditResponseTransform));
+    return this._http.post<unknown>(`${this.baseUrl}`, form)
+      .pipe(map((json) => TimezoneResponse.parse(json)));
   }
 
   getTimezoneById(id: number): Observable<TimezoneResponse> {
-    return this._http.get<TimezoneResponse>(`${this.baseUrl}/${id}`)
-      .pipe(map(auditResponseTransform));
+    return this._http.get<unknown>(`${this.baseUrl}/${id}`)
+      .pipe(map((json) => TimezoneResponse.parse(json)));
   }
 
   updateTimezone(id: number, form: TimezoneRequest): Observable<TimezoneResponse> {
-    return this._http.put<TimezoneResponse>(`${this.baseUrl}/${id}`, form)
-      .pipe(map(auditResponseTransform));
+    return this._http.put<unknown>(`${this.baseUrl}/${id}`, form)
+      .pipe(map((json) => TimezoneResponse.parse(json)));
   }
 
   deleteTimezone(id: number): Observable<void> {
@@ -45,12 +42,7 @@ export class TimezoneService {
   }
 
   calculateDate(form: CalculateDateRequest): Observable<CalculateDateResponse> {
-    return this._http.post<CalculateDateResponse>(`${this.baseUrl}/calculate-date`, form).pipe(
-      map((data) => {
-        data.calculateDateItemList.forEach((it) => {
-          it.date = toDate(it.date as unknown as string)
-        })
-        return data
-      }))
+    return this._http.post<unknown>(`${this.baseUrl}/calculate-date`, form)
+      .pipe(map((json) => CalculateDateResponse.parse(json)));
   }
 }

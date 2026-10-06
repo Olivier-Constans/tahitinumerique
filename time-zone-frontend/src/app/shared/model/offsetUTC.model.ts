@@ -1,5 +1,7 @@
+import * as z from "zod/mini";
 
-export enum OffsetUTC {
+// Libellés renvoyés par le backend (champ label de l'enum Java OffsetUTC)
+export const OffsetUTC = z.enum([
   "UTC",
   "UTC+01",
   "UTC+02",
@@ -41,4 +43,6 @@ export enum OffsetUTC {
   "UTC-10",
   "UTC-11",
   "UTC-12"
-}
+]);
+
+export type OffsetUTC = z.infer<typeof OffsetUTC>;

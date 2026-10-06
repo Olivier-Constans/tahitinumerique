@@ -1,12 +1,11 @@
 import {TimezoneResponse} from "../app/shared/model/timezone.model";
-import {OffsetUTC} from "../app/shared/model/offsetUTC.model";
 import {Page} from "../app/shared/model/page.model";
 
 export function aTimezone(overrides: Partial<TimezoneResponse> = {}): TimezoneResponse {
   return {
     id: 1,
     label: 'Tahiti',
-    offsetUTC: 'UTC-10' as unknown as OffsetUTC,
+    offsetUTC: 'UTC-10',
     audit: {
       createDate: new Date('2026-01-01T10:00:00Z'),
       updateDate: new Date('2026-01-02T10:00:00Z')

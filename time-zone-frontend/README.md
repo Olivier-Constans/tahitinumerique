@@ -7,7 +7,7 @@ Application Angular du projet Timezone de Tahiti Numérique. Elle propose deux u
 
 Les données viennent de l'API du back-end Spring Boot (dossier `../time-zone`), exposée sous `/api/timezones`.
 
-**Stack** : Angular 21 (composants standalone, zoneless, signals), PrimeNG 21 (thème Lara), PrimeFlex, Vitest + jsdom, angular-eslint.
+**Stack** : Angular 21 (composants standalone, zoneless, signals), PrimeNG 21 (thème Lara), PrimeFlex, Zod 4 (`zod/mini`), Vitest + jsdom, angular-eslint.
 
 ## Prérequis
 
@@ -72,7 +72,7 @@ src/
 │   ├── shared/
 │   │   ├── component/header/  # barre du haut
 │   │   ├── interceptor/       # toast d'erreur sur toute erreur HTTP
-│   │   ├── model/             # interfaces des requêtes et réponses de l'API
+│   │   ├── model/             # schémas Zod des réponses, interfaces des requêtes
 │   │   └── service/           # TimezoneService (appels HTTP) et utilitaires de date
 │   └── view/
 │       ├── home/              # calcul de date
@@ -82,6 +82,35 @@ src/
 ```
 
 Les pages de consultation et de modification reçoivent le fuseau horaire via un resolver (`timezone.routes.ts`), injecté dans l'input `data` grâce à `withComponentInputBinding`. Si le fuseau n'existe pas, le resolver redirige vers `/404`.
+
+## Modèles et validation des réponses (Zod)
+
+Les réponses de l'API sont validées et converties à l'exécution avec [Zod](https://zod.dev), dans `src/app/shared/model/`.
+
+- Chaque réponse est décrite par un **schéma**. Le type TypeScript du même nom en est déduit (`z.infer`) : le schéma est la seule source de vérité.
+- `TimezoneService` reçoit le JSON sans type (`unknown`) et le passe dans `Schema.parse(json)`. Un JSON non conforme lève une erreur au lieu de circuler avec un type faux.
+- Les conversions se font dans les schémas, sans modifier l'objet reçu. Par exemple, `isoDate` transforme les dates ISO du back en `Date` à l'aide de `toDate`.
+- `OffsetUTC` est une liste fermée de libellés (`"UTC"`, `"UTC+01"`…), identiques à ceux envoyés par le back. Les options du formulaire viennent de `OffsetUTC.options`.
+- Les requêtes (`TimezoneRequest`, `CalculateDateRequest`) restent de simples interfaces, car elles sont envoyées et non reçues.
+
+Exemple :
+
+```ts
+import * as z from "zod/mini";
+
+export const TimezoneResponse = z.object({
+  id: z.number(),
+  label: z.string(),
+  offsetUTC: OffsetUTC,
+  audit: AuditResponse
+});
+export type TimezoneResponse = z.infer<typeof TimezoneResponse>;
+```
+
+**Conventions :**
+- On importe `zod/mini`, toujours avec `import * as z from "zod/mini"`. Avec `import {z}` ou le Zod classique, le bundle initial dépasse le budget de 1 Mo défini dans `angular.json`.
+- Pour transformer une valeur, on enchaîne validation et transformation : `z.pipe(z.string(), z.transform(fn))`.
+- Si une réponse ne respecte pas son schéma, l'erreur (`$ZodError`) remonte à l'appelant. L'intercepteur ne voit que les erreurs HTTP : aucun toast n'est affiché dans ce cas.
 
 ## Claude Code
 

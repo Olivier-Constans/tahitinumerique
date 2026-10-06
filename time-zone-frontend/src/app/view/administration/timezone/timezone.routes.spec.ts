@@ -4,7 +4,6 @@ import {RouterTestingHarness} from "@angular/router/testing";
 import {of, throwError} from "rxjs";
 import {routes} from "../../../app.routes";
 import {TimezoneService} from "../../../shared/service/timezone.service";
-import {OffsetUTC} from "../../../shared/model/offsetUTC.model";
 import {aTimezone} from "../../../../testing/timezone.fixture";
 
 describe('Routes timezone (consultation, création, modification)', () => {
@@ -49,7 +48,7 @@ describe('Routes timezone (consultation, création, modification)', () => {
 
   describe('consultation', () => {
     it('affiche la timezone chargée par le resolver', async () => {
-      timezoneService.getTimezoneById.mockReturnValue(of(aTimezone({id: 5, label: 'Paris', offsetUTC: 'UTC+01' as unknown as OffsetUTC})));
+      timezoneService.getTimezoneById.mockReturnValue(of(aTimezone({id: 5, label: 'Paris', offsetUTC: 'UTC+01'})));
 
       await harness.navigateByUrl('/admin/timezone/5');
 
