@@ -9,8 +9,8 @@
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
 | 1. Analyse technique | 0 | 0 | 3 | 3 | 6 |
-| 2. Analyse fonctionnelle | 0 | 2 | 8 | 0 | 10 |
-| **Total** | **0** | **2** | **11** | **3** | **16** |
+| 2. Analyse fonctionnelle | 0 | 2 | 7 | 0 | 9 |
+| **Total** | **0** | **2** | **10** | **3** | **15** |
 
 **Outils** : lint OK (0 erreur) · tests 39/39 passés (8 fichiers) · build OK avec 1 avertissement (budget initial dépassé : 955,68 kB pour 500 kB)
 
@@ -159,13 +159,7 @@ Aucun point ouvert.
 
 ### 2.4 Wording
 
-#### FRONT-20261006-23 · Mineur · Typographie des libellés : deux-points sans espace et espace final
-- **Statut** : Ouvert
-- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
-- **Emplacement** : `src/app/view/home/home.component.html:44`, `src/app/view/administration/timezone/timezone.component.html:5`
-- **Constat** : les résultats affichent `Tahiti: 06/10/2026 à 10:00`, avec un deux-points collé, à l'anglaise, alors que la page de consultation écrit correctement « Décalage UTC : ». Les formats de date `"dd/MM/yyyy 'à' HH:mm "` se terminent en outre par une espace superflue.
-- **Impact** : typographie française incohérente d'une page à l'autre.
-- **Recommandation** : écrire `{{data.timezone.label}} :` (idéalement avec une espace insécable `&nbsp;`) et retirer l'espace finale des formats de date.
+Aucun point ouvert.
 
 ## Historique des analyses
 

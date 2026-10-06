@@ -2,6 +2,15 @@
 
 > Points corrigés ou ignorés, triés par date de clôture (la plus récente en premier). Les points ouverts sont dans `rapport-analyse-frontend.md`.
 
+#### FRONT-20261006-23 · Mineur · Typographie des libellés : deux-points sans espace et espace final
+- **Statut** : Corrigé le 2026-10-07
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `src/app/view/home/home.component.html:44`, `src/app/view/administration/timezone/timezone.component.html:5`
+- **Constat** : les résultats affichent `Tahiti: 06/10/2026 à 10:00`, avec un deux-points collé, à l'anglaise, alors que la page de consultation écrit correctement « Décalage UTC : ». Les formats de date `"dd/MM/yyyy 'à' HH:mm"` se terminent en outre par une espace superflue.
+- **Impact** : typographie française incohérente d'une page à l'autre.
+- **Recommandation** : écrire `{{data.timezone.label}} :` (idéalement avec une espace insécable `&nbsp;`) et retirer l'espace finale des formats de date.
+- **Correction** : déclarée manuellement par l'utilisateur, sans vérification du code.
+
 #### FRONT-20261006-01 · Info · Configuration ESLint sans règles basées sur les types
 - **Statut** : Corrigé le 2026-10-07
 - **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
