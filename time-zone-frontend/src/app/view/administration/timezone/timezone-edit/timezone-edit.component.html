@@ -1,17 +1,17 @@
 <a [routerLink]="['/', ADMIN_PATH]">> Administration</a>
 
-<div class="flex align-items-center flex-wrap">
-  <div class="flex-grow-1">
+<div class="flex items-center flex-wrap">
+  <div class="grow">
     <h2>@if(data(); as timezone){ Modification du fuseau horaire "{{timezone.label}}" } @else { Nouveau fuseau horaire }</h2>
   </div>
 </div>
 <form (ngSubmit)="onSubmit()" [formGroup]="form">
-  <div class="flex flex-column gap-2 m-2">
+  <div class="flex flex-col gap-2 m-2">
     <label for="label">Nom</label>
     <input pInputText id="label" formControlName="label" type="text"/>
   </div>
 
-  <div class="flex flex-column gap-2 m-2">
+  <div class="flex flex-col gap-2 m-2">
     <label for="offsetUTC">Décalage UTC</label>
     <p-select inputId="offsetUTC" formControlName="offsetUTC" [options]="optionsOffsetUTC" class="w-full" />
   </div>

@@ -1,0 +1,7 @@
+/* PrimeNG s'insère dans le calque « primeng » (voir app.config.ts) : les utilitaires Tailwind passent après lui.
+   Le preflight de Tailwind n'est pas importé, pour ne pas réinitialiser les styles de base. */
+@layer theme, base, primeng, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+@import "tailwindcss-primeui";

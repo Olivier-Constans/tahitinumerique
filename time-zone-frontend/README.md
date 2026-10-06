@@ -7,7 +7,7 @@ Application Angular du projet Timezone de Tahiti Numérique. Elle propose deux u
 
 Les données viennent de l'API du back-end Spring Boot (dossier `../time-zone`), exposée sous `/api/timezones`.
 
-**Stack** : Angular 21 (composants standalone, zoneless, signals), PrimeNG 21 (thème Lara), PrimeFlex, Zod 4 (`zod/mini`), Vitest + jsdom, angular-eslint.
+**Stack** : Angular 21 (composants standalone, zoneless, signals), PrimeNG 21 (thème Lara), Tailwind CSS 4 (avec `tailwindcss-primeui`), Zod 4 (`zod/mini`), Vitest + jsdom, angular-eslint.
 
 ## Prérequis
 
@@ -78,10 +78,24 @@ src/
 │       ├── home/              # calcul de date
 │       ├── administration/    # liste, puis timezone/ (consultation, création, modification)
 │       └── not-found/         # page 404
+├── styles.css                 # styles globaux : Tailwind et ses calques
 └── testing/                   # fixtures partagées par les tests
 ```
 
 Les pages de consultation et de modification reçoivent le fuseau horaire via un resolver (`timezone.routes.ts`), injecté dans l'input `data` grâce à `withComponentInputBinding`. Si le fuseau n'existe pas, le resolver redirige vers `/404`.
+
+## Styles (Tailwind CSS)
+
+La mise en page passe par les classes utilitaires de [Tailwind CSS](https://tailwindcss.com) 4, directement dans les templates (`flex`, `items-center`, `gap-2`, `w-full`…). Le projet ne définit pas de classes CSS à lui.
+
+- `src/styles.css` importe le thème et les utilitaires de Tailwind, ainsi que `tailwindcss-primeui`. Ce plugin donne accès aux couleurs du thème PrimeNG : `bg-surface-200`, `text-primary`…
+- Tailwind est branché sur le build Angular par PostCSS (`.postcssrc.json`). Seules les classes présentes dans les templates sont générées : la feuille de styles reste petite.
+- Le preflight de Tailwind (sa remise à zéro des styles du navigateur) n'est pas importé : il modifierait l'apparence des titres, des marges et des listes.
+- Les styles de PrimeNG sont placés dans le calque CSS `primeng` (option `cssLayer` dans `app.config.ts`), déclaré avant `utilities`. Une classe Tailwind posée sur un composant PrimeNG (`<p-select class="w-full">`) l'emporte donc sur le style du composant, sans `!important`.
+
+**Conventions :**
+- Utiliser les classes Tailwind plutôt que d'écrire du CSS. Si un style ne s'exprime pas avec Tailwind, le placer dans la feuille du composant concerné.
+- Pour les couleurs, utiliser celles du thème PrimeNG (`surface-*`, `primary-*`) plutôt que la palette Tailwind, pour rester cohérent avec les composants.
 
 ## Modèles et validation des réponses (Zod)
 

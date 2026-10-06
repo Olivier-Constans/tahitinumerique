@@ -2,6 +2,16 @@
 
 > Points corrigés ou ignorés, triés par date de clôture (la plus récente en premier). Les points ouverts sont dans `rapport-analyse-frontend.md`.
 
+#### FRONT-20261006-09 · Mineur · Budget du bundle initial dépassé (PrimeFlex chargé en entier)
+- **Statut** : Corrigé le 2026-10-07
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `angular.json:31-35` (styles), `angular.json:41-45` (budgets)
+- **Constat** : `ng build` affiche « bundle initial exceeded maximum budget » : 955,68 kB bruts pour 500 kB autorisés (939,66 kB à l'analyse précédente, l'ajout de Zod pèse environ 16 kB). La feuille `styles` pèse à elle seule 359 kB, car `primeflex.css` est importé en entier (446 kB) alors que l'application n'utilise qu'une vingtaine de classes (`flex`, `gap-2`, `m-2`, `p-2`, `w-full`, `text-center`…). Le transfert compressé reste raisonnable (156 kB).
+- **Impact** : un avertissement permanent au build, qui finira par masquer un vrai dépassement. Le CSS chargé est surtout inutile.
+- **Recommandation** : remplacer PrimeFlex par quelques classes utilitaires maison ou par Tailwind (avec purge, et qui est la recommandation actuelle de PrimeNG). À défaut, ajuster le budget en connaissance de cause.
+- **Correction** : PrimeFlex retiré (dépendance désinstallée, `primeflex.css` enlevé des `styles` d'`angular.json`) ; les 15 classes utilitaires encore utilisées sont reprises à l'identique dans `src/styles.scss`, et `col-12` est remplacé par `w-full p-2` sur le `p-paginator` d'`administration.component.html`. La feuille `styles` passe de 359,40 kB à 13,82 kB, le bundle initial de 979,26 kB à 633,68 kB. Le reste (Angular et PrimeNG) dépassant encore 500 kB, la valeur par défaut d'Angular, le budget `initial` est porté à 750 kB en avertissement (1 MB en erreur, inchangé). Build sans avertissement, lint propre, 43 tests passent.
+- **Complément du 2026-10-07** : les utilitaires maison de `src/styles.scss` sont remplacés par Tailwind v4 (`tailwindcss`, `@tailwindcss/postcss`, `tailwindcss-primeui`, `.postcssrc.json`) dans `src/styles.css`, sans le preflight. PrimeNG est placé dans le calque CSS `primeng` (`app.config.ts`), avant les utilitaires. Les templates utilisent les noms Tailwind (`flex-col`, `items-center`, `grow`, `shrink-0`, `bg-surface-200`, `p-6`, `w-20`). Feuille `styles` : 17,67 kB ; bundle initial : 637,61 kB, sans avertissement. Lint propre, 43 tests passent.
+
 #### FRONT-20261006-17 · Majeur · Boutons réduits à une icône sans libellé accessible
 - **Statut** : Corrigé le 2026-10-07
 - **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07

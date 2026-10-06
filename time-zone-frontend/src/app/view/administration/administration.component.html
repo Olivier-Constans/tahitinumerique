@@ -1,9 +1,9 @@
 <div>
-  <div class="flex align-items-center flex-wrap">
-    <div class="flex-grow-1">
+  <div class="flex items-center flex-wrap">
+    <div class="grow">
       <h2>Configuration des fuseaux horaires</h2>
     </div>
-    <div class="flex-shrink-0">
+    <div class="shrink-0">
       <p-button icon="pi pi-plus" [rounded]="true" [routerLink]="[TIMEZONE_PATH, 'new']"
                 ariaLabel="Ajouter un fuseau horaire" pTooltip="Ajouter un fuseau horaire" tooltipPosition="left" />
     </div>
@@ -20,9 +20,9 @@
         <div>Aucun fuseau horaire configuré.</div>
       } @else {
         @for (result of page.content; track result.id) {
-          <div class="surface-200 m-2 p-2 flex align-items-center flex-wrap">
-              <div class="flex-grow-1">{{result.label}}</div>
-              <div class="flex-shrink-0">
+          <div class="bg-surface-200 m-2 p-2 flex items-center flex-wrap rounded-border">
+              <div class="grow">{{result.label}}</div>
+              <div class="shrink-0 flex gap-2">
                 <p-button icon="pi pi-pencil" [rounded]="true" [routerLink]="[TIMEZONE_PATH, result.id, 'edit']"
                           ariaLabel="Modifier {{result.label}}" pTooltip="Modifier" tooltipPosition="top" />
                 <p-button icon="pi pi-eye" [rounded]="true" severity="secondary" [routerLink]="[TIMEZONE_PATH, result.id]"
@@ -38,7 +38,7 @@
           [first]="first()"
           [rows]="rows()"
           [totalRecords]="page.totalElements"
-          class="col-12"
+          class="w-full p-2"
         />
       }
     }

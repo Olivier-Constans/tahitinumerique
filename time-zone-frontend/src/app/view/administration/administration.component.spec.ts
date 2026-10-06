@@ -51,7 +51,7 @@ describe('AdministrationComponent', () => {
     await render();
 
     expect(timezoneService.getAllTimezones).toHaveBeenCalledWith(0, 10);
-    const labels = [...element().querySelectorAll('.resultat .flex-grow-1')].map(it => it.textContent);
+    const labels = [...element().querySelectorAll('.resultat .grow')].map(it => it.textContent);
     expect(labels).toEqual(['Tahiti', 'Paris']);
   });
 

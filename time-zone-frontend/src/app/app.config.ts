@@ -38,7 +38,11 @@ export const appConfig: ApplicationConfig = {
       theme: {
         preset: LaraBlue,
         options: {
-          darkModeSelector: false
+          darkModeSelector: false,
+          cssLayer: {
+            name: 'primeng',
+            order: 'theme, base, primeng, components, utilities'
+          }
         }
       }
     })

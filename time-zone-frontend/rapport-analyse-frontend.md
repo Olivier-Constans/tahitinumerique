@@ -8,9 +8,9 @@
 
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
-| 1. Analyse technique | 0 | 0 | 2 | 3 | 5 |
+| 1. Analyse technique | 0 | 0 | 1 | 3 | 4 |
 | 2. Analyse fonctionnelle | 0 | 0 | 7 | 0 | 7 |
-| **Total** | **0** | **0** | **9** | **3** | **12** |
+| **Total** | **0** | **0** | **8** | **3** | **11** |
 
 **Outils** : lint OK (0 erreur) · tests 39/39 passés (8 fichiers) · build OK avec 1 avertissement (budget initial dépassé : 955,68 kB pour 500 kB)
 
@@ -51,14 +51,6 @@ Aucun point ouvert.
 - **Recommandation** : dériver le type du schéma, par exemple `export type Page<T> = { content: T[] } & Omit<z.infer<ReturnType<typeof pageOf>>, 'content'>`, ou typer le retour de `pageOf` avec `z.ZodMiniType<Page<z.output<T>>>` pour que le compilateur vérifie la correspondance.
 
 ### 1.4 Qualité
-
-#### FRONT-20261006-09 · Mineur · Budget du bundle initial dépassé (PrimeFlex chargé en entier)
-- **Statut** : Ouvert
-- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
-- **Emplacement** : `angular.json:31-35` (styles), `angular.json:41-45` (budgets)
-- **Constat** : `ng build` affiche « bundle initial exceeded maximum budget » : 955,68 kB bruts pour 500 kB autorisés (939,66 kB à l'analyse précédente, l'ajout de Zod pèse environ 16 kB). La feuille `styles` pèse à elle seule 359 kB, car `primeflex.css` est importé en entier (446 kB) alors que l'application n'utilise qu'une vingtaine de classes (`flex`, `gap-2`, `m-2`, `p-2`, `w-full`, `text-center`…). Le transfert compressé reste raisonnable (156 kB).
-- **Impact** : un avertissement permanent au build, qui finira par masquer un vrai dépassement. Le CSS chargé est surtout inutile.
-- **Recommandation** : remplacer PrimeFlex par quelques classes utilitaires maison ou par Tailwind (avec purge, et qui est la recommandation actuelle de PrimeNG). À défaut, ajuster le budget en connaissance de cause.
 
 #### FRONT-20261006-10 · Info · Couverture de tests incomplète
 - **Statut** : Ouvert
