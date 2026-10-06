@@ -6,12 +6,11 @@ import {DatePipe} from "@angular/common";
 import {ADMIN_PATH} from "../../../app.routes";
 
 @Component({
-  standalone: true,
-  imports: [
-    DatePipe,
-    RouterLink
-  ],
-  templateUrl: './timezone.component.html'
+    imports: [
+        DatePipe,
+        RouterLink
+    ],
+    templateUrl: './timezone.component.html'
 })
 export class TimezoneComponent {
 

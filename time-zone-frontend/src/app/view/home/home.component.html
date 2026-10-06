@@ -8,21 +8,23 @@
     <div class="flex flex-column gap-2 m-2">
       <label>Choisir un fuseau horaire</label>
       <div class="w-full">
-        <p-dropdown styleClass="w-full"
+        <p-select class="w-full"
           formControlName="timezone"
           [options]="timezoneDropdownData.items"
           optionLabel="label"
                     [virtualScroll]="true"
           [virtualScrollOptions]="timezoneDropdownData.options"
-          [virtualScrollItemSize]="43"/>
+          [virtualScrollItemSize]="43"
+          (onShow)="onShowTimezone()"/>
       </div>
     </div>
     <div class="flex flex-column gap-2 m-2">
       <label for="dateSearch">Choisir une date</label>
-      <p-calendar id="dateSearch" styleClass="w-full max-w-max"
+      <p-datepicker inputId="dateSearch" class="w-full max-w-max"
                   formControlName="dateSearch"
                   [showTime]="true"
                   hourFormat="24"
+                  dateFormat="dd/mm/yy"
       />
     </div>
     <div>

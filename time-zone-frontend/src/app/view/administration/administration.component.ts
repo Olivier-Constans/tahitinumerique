@@ -12,14 +12,13 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TIMEZONE_PATH} from "./administration.routes";
 
 @Component({
-  standalone: true,
-  imports: [
-    Button,
-    AsyncPipe,
-    PaginatorModule,
-    RouterLink
-  ],
-  templateUrl: './administration.component.html'
+    imports: [
+        Button,
+        AsyncPipe,
+        PaginatorModule,
+        RouterLink
+    ],
+    templateUrl: './administration.component.html'
 })
 export class AdministrationComponent {
 

@@ -1,13 +1,13 @@
 <p-toolbar>
-  <ng-template pTemplate="start">
+  <ng-template #start>
     <img src="tn-image.webp" class="w-5rem" routerLink="/"/>
   </ng-template>
-  <ng-template pTemplate="center">
+  <ng-template #center>
     <div>
       <h1>Timezone project</h1>
     </div>
   </ng-template>
-  <ng-template pTemplate="end">
+  <ng-template #end>
     <p-button icon="pi pi-cog" [rounded]="true" [text]="true" severity="secondary" [routerLink]="ADMIN_PATH" />
   </ng-template>
 </p-toolbar>

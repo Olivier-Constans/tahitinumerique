@@ -1,8 +1,9 @@
-import {Component, DestroyRef} from '@angular/core';
+import {ChangeDetectorRef, Component, DestroyRef} from '@angular/core';
 import {AsyncPipe, DatePipe, TitleCasePipe} from "@angular/common";
-import {CalendarModule} from "primeng/calendar";
+import {DatePicker} from "primeng/datepicker";
 import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
-import {DropdownModule} from "primeng/dropdown";
+import {Select} from "primeng/select";
+import {Button} from "primeng/button";
 import {TimezoneResponse} from "../../shared/model/timezone.model";
 import {TimezoneService} from "../../shared/service/timezone.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -20,17 +21,17 @@ export interface HomeForm {
 }
 
 @Component({
-  standalone: true,
-  imports: [
-    DatePipe,
-    CalendarModule,
-    ReactiveFormsModule,
-    DropdownModule,
-    AsyncPipe,
-    RouterLink,
-    TitleCasePipe
-  ],
-  templateUrl: './home.component.html'
+    imports: [
+        DatePipe,
+        DatePicker,
+        ReactiveFormsModule,
+        Select,
+        Button,
+        AsyncPipe,
+        RouterLink,
+        TitleCasePipe
+    ],
+    templateUrl: './home.component.html'
 })
 export class HomeComponent {
 
@@ -55,6 +56,7 @@ export class HomeComponent {
     private readonly _formBuilder: NonNullableFormBuilder,
     private readonly _timezoneService: TimezoneService,
     private readonly _destroyRef:	DestroyRef,
+    private readonly _changeDetectorRef: ChangeDetectorRef,
   ) {
     this.form = this._formBuilder.group<HomeForm>({
       dateSearch: this._formBuilder.control(undefined, Validators.required),
@@ -76,11 +78,17 @@ export class HomeComponent {
       return;
     }
 
-    this._timezoneService.getAllTimezones(this.timezoneDropdownData.page++, this.timezoneDropdownData.size)
+    this._timezoneService.getAllTimezones(++this.timezoneDropdownData.page, this.timezoneDropdownData.size)
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe(data => {
           this.timezoneDropdownData.items.push(...data.content);
       });
+  }
+
+  // Le scroller virtuel de PrimeNG ne s'initialise qu'une fois l'overlay visible :
+  // on relance la détection de changements à l'ouverture pour qu'il affiche les options.
+  onShowTimezone() {
+    this._changeDetectorRef.detectChanges();
   }
 
   onSubmit() {

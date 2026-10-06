@@ -12,7 +12,7 @@ import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {Button} from "primeng/button";
 import {OffsetUTC} from "../../../../shared/model/offsetUTC.model";
-import {DropdownModule} from "primeng/dropdown";
+import {Select} from "primeng/select";
 import {InputTextModule} from "primeng/inputtext";
 import {ADMIN_PATH} from "../../../../app.routes";
 
@@ -22,15 +22,14 @@ export interface TimezoneForm {
 }
 
 @Component({
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    Button,
-    DropdownModule,
-    InputTextModule,
-    RouterLink
-  ],
-  templateUrl: './timezone-edit.component.html',
+    imports: [
+        ReactiveFormsModule,
+        Button,
+        Select,
+        InputTextModule,
+        RouterLink
+    ],
+    templateUrl: './timezone-edit.component.html'
 })
 export class TimezoneEditComponent {
 

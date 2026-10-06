@@ -5,14 +5,13 @@ import {ADMIN_PATH} from "../../../app.routes";
 import {Button} from "primeng/button";
 
 @Component({
-  selector: 'app-header',
-  standalone: true,
-  imports: [
-    ToolbarModule,
-    RouterLink,
-    Button
-  ],
-  templateUrl: './header.component.html',
+    selector: 'app-header',
+    imports: [
+        ToolbarModule,
+        RouterLink,
+        Button
+    ],
+    templateUrl: './header.component.html'
 })
 export class HeaderComponent {
 
