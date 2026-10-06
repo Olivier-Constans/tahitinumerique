@@ -1,6 +1,7 @@
 <a [routerLink]="['/', ADMIN_PATH]">> Administration</a>
+@let timezone = data();
 <div>
-  <h2>{{data.label}}</h2>
-  <div>Modifié le {{ data.audit.updateDate | date:"dd/MM/yyyy 'à' HH:mm " }}</div>
-  <div>Offset: {{data.offsetUTC}}</div>
+  <h2>{{timezone.label}}</h2>
+  <div>Modifié le {{ timezone.audit.updateDate | date:"dd/MM/yyyy 'à' HH:mm " }}</div>
+  <div>Offset: {{timezone.offsetUTC}}</div>
 </div>

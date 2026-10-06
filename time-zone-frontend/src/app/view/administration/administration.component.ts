@@ -1,61 +1,50 @@
-import {Component, DestroyRef} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal} from '@angular/core';
 import {Button} from "primeng/button";
 import {TimezoneService} from "../../shared/service/timezone.service";
-import {Observable, take} from "rxjs";
-import {Page} from "../../shared/model/page.model";
+import {switchMap} from "rxjs";
 import {TimezoneResponse} from "../../shared/model/timezone.model";
-import {AsyncPipe} from "@angular/common";
 import {PaginatorModule, PaginatorState} from "primeng/paginator";
-import {ADMIN_PATH} from "../../app.routes";
 import {RouterLink} from "@angular/router";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toObservable, toSignal} from "@angular/core/rxjs-interop";
 import {TIMEZONE_PATH} from "./administration.routes";
 
 @Component({
     imports: [
         Button,
-        AsyncPipe,
         PaginatorModule,
         RouterLink
     ],
-    templateUrl: './administration.component.html'
+    templateUrl: './administration.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdministrationComponent {
 
+  private readonly _timezoneService = inject(TimezoneService);
+  private readonly _destroyRef = inject(DestroyRef);
+
   protected readonly TIMEZONE_PATH = TIMEZONE_PATH;
 
-  $result: Observable<Page<TimezoneResponse>> | undefined
-  page: number;
+  readonly page = signal(0);
+  readonly rows = signal(10);
+  readonly first = computed(() => this.page() * this.rows());
 
-  rows: number;
+  // Incrémenté pour forcer le rechargement de la page courante (ex : après suppression)
+  private readonly _refresh = signal(0);
 
-  constructor(
-    private readonly _timezoneService: TimezoneService,
-    private _destroyRef:	DestroyRef
-  ) {
-    this.page = 0;
-    this.rows = 10;
-    this.runSearch();
-  }
+  private readonly _search = computed(() => ({page: this.page(), rows: this.rows(), refresh: this._refresh()}));
 
-  get first(): number {
-    return this.page * this.rows;
-  }
+  readonly result = toSignal(toObservable(this._search).pipe(
+    switchMap(({page, rows}) => this._timezoneService.getAllTimezones(page, rows))
+  ));
 
   onPageChange($event: PaginatorState) {
-    this.page = $event.page ?? this.page;
-    this.rows = $event.rows ?? this.rows;
-    this.runSearch();
-  }
-
-  runSearch() {
-    this.$result = this._timezoneService.getAllTimezones(this.page, this.rows)
-      .pipe(takeUntilDestroyed(this._destroyRef))
+    this.page.set($event.page ?? this.page());
+    this.rows.set($event.rows ?? this.rows());
   }
 
   delete(data: TimezoneResponse) {
     this._timezoneService.deleteTimezone(data.id)
       .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe(() => { this.runSearch()})
+      .subscribe(() => this._refresh.update(value => value + 1))
   }
 }

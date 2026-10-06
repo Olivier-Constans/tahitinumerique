@@ -1,15 +1,16 @@
-import {ChangeDetectorRef, Component, DestroyRef} from '@angular/core';
-import {AsyncPipe, DatePipe, TitleCasePipe} from "@angular/common";
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, signal} from '@angular/core';
+import {DatePipe, TitleCasePipe} from "@angular/common";
 import {DatePicker} from "primeng/datepicker";
-import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormControl, NonNullableFormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {Select} from "primeng/select";
 import {Button} from "primeng/button";
+import {ScrollerOptions} from "primeng/api";
 import {TimezoneResponse} from "../../shared/model/timezone.model";
 import {TimezoneService} from "../../shared/service/timezone.service";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {finalize, Observable} from "rxjs";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
+import {finalize, Subject, switchMap} from "rxjs";
 import {ScrollerLazyLoadEvent} from "primeng/types/scroller";
-import {CaculateDateResponse} from "../../shared/model/calculateDate.model";
+import {CaculateDateResquest} from "../../shared/model/calculateDate.model";
 import {transformToUTCDate} from "../../shared/service/date.function";
 import {RouterLink} from "@angular/router";
 import {ADMIN_PATH} from "../../app.routes";
@@ -28,72 +29,73 @@ export interface HomeForm {
         ReactiveFormsModule,
         Select,
         Button,
-        AsyncPipe,
         RouterLink,
         TitleCasePipe
     ],
-    templateUrl: './home.component.html'
+    templateUrl: './home.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeComponent {
 
-  date: Date = new Date()
-  form: FormGroup<HomeForm>
+  private readonly _formBuilder = inject(NonNullableFormBuilder);
+  private readonly _timezoneService = inject(TimezoneService);
+  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _changeDetectorRef = inject(ChangeDetectorRef);
 
-  $result?: Observable<CaculateDateResponse>
+  protected readonly ADMIN_PATH = ADMIN_PATH;
+  protected readonly TIMEZONE_PATH = TIMEZONE_PATH;
 
-  timezoneDropdownData = {
-    items: [] as TimezoneResponse[],
-    loaded: false,
-    loading: false,
-    page: 0,
-    size: 10,
-    totalPage: 0,
-    options: {
-      showLoader: false,
-      lazy: true,
-      onLazyLoad: this.onLazyLoadTimezone.bind(this)
-    }
+  readonly form = this._formBuilder.group<HomeForm>({
+    dateSearch: this._formBuilder.control(undefined, Validators.required),
+    timezone: this._formBuilder.control(undefined, Validators.required)
+  })
+
+  readonly timezones = signal<TimezoneResponse[]>([]);
+  readonly timezonesLoaded = signal(false);
+  readonly timezoneScrollerOptions: ScrollerOptions = {
+    showLoader: false,
+    lazy: true,
+    onLazyLoad: (event: ScrollerLazyLoadEvent) => this.onLazyLoadTimezone(event)
   }
 
-  constructor(
-    private readonly _formBuilder: NonNullableFormBuilder,
-    private readonly _timezoneService: TimezoneService,
-    private readonly _destroyRef:	DestroyRef,
-    private readonly _changeDetectorRef: ChangeDetectorRef,
-  ) {
-    this.form = this._formBuilder.group<HomeForm>({
-      dateSearch: this._formBuilder.control(undefined, Validators.required),
-      timezone: this._formBuilder.control(undefined, Validators.required)
-    })
+  private readonly _timezonePageSize = 10;
+  private _timezonePage = 0;
+  private _timezoneTotalPage = 0;
+  private _timezoneLoading = false;
 
-    this._timezoneService.getAllTimezones(this.timezoneDropdownData.page, this.timezoneDropdownData.size)
-      .pipe(takeUntilDestroyed(this._destroyRef))
+  // switchMap annule le calcul précédent si l'utilisateur relance une recherche
+  private readonly _calculateDate = new Subject<CaculateDateResquest>();
+  readonly result = toSignal(this._calculateDate.pipe(
+    switchMap(form => this._timezoneService.calculateDate(form))
+  ));
+
+  constructor() {
+    this._timezoneService.getAllTimezones(this._timezonePage, this._timezonePageSize)
+      .pipe(takeUntilDestroyed())
       .subscribe(data => {
-        this.timezoneDropdownData.items =  data.content;
-        this.timezoneDropdownData.totalPage = data.totalPages;
-        this.timezoneDropdownData.loaded = true;
+        this.timezones.set(data.content);
+        this._timezoneTotalPage = data.totalPages;
+        this.timezonesLoaded.set(true);
       });
   }
 
   onLazyLoadTimezone(event: ScrollerLazyLoadEvent) {
-    const dropdownData = this.timezoneDropdownData
-    const nearEnd = event.last + 5 >= dropdownData.items.length
-    const hasMorePage = dropdownData.page < dropdownData.totalPage - 1
-    if(dropdownData.loading || !nearEnd || !hasMorePage) {
+    const nearEnd = event.last + 5 >= this.timezones().length
+    const hasMorePage = this._timezonePage < this._timezoneTotalPage - 1
+    if(this._timezoneLoading || !nearEnd || !hasMorePage) {
       return;
     }
 
-    dropdownData.loading = true
-    this._timezoneService.getAllTimezones(dropdownData.page + 1, dropdownData.size)
+    this._timezoneLoading = true
+    this._timezoneService.getAllTimezones(this._timezonePage + 1, this._timezonePageSize)
       .pipe(
         takeUntilDestroyed(this._destroyRef),
-        finalize(() => dropdownData.loading = false)
+        finalize(() => this._timezoneLoading = false)
       )
       .subscribe(data => {
-        // Nouvelle référence de tableau pour que le p-select détecte l'ajout des options
-        dropdownData.items = [...dropdownData.items, ...data.content];
-        dropdownData.page = data.number;
-        dropdownData.totalPage = data.totalPages;
+        this.timezones.update(items => [...items, ...data.content]);
+        this._timezonePage = data.number;
+        this._timezoneTotalPage = data.totalPages;
       });
   }
 
@@ -107,13 +109,9 @@ export class HomeComponent {
     if(this.form.invalid) {
       return;
     }
-    const form = {
-      date: transformToUTCDate(this.form.controls.dateSearch.value!!),
-      timezoneId: this.form.controls.timezone.value!!.id
-    }
-    this.$result = this._timezoneService.calculateDate(form)
+    this._calculateDate.next({
+      date: transformToUTCDate(this.form.controls.dateSearch.value!),
+      timezoneId: this.form.controls.timezone.value!.id
+    })
   }
-
-  protected readonly ADMIN_PATH = ADMIN_PATH;
-  protected readonly TIMEZONE_PATH = TIMEZONE_PATH;
 }

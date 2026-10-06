@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {ToolbarModule} from "primeng/toolbar";
 import {RouterLink} from "@angular/router";
 import {ADMIN_PATH} from "../../../app.routes";
@@ -11,7 +11,8 @@ import {Button} from "primeng/button";
         RouterLink,
         Button
     ],
-    templateUrl: './header.component.html'
+    templateUrl: './header.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HeaderComponent {
 

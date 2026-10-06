@@ -1,7 +1,7 @@
-import moment from "moment";
-
 export function toDate(value: string): Date {
-  return moment(value).toDate()
+  // Les Instant Java peuvent avoir jusqu'à 9 décimales : on tronque à la milliseconde,
+  // seule précision garantie par Date.parse sur tous les navigateurs.
+  return new Date(value.replace(/(\.\d{3})\d+/, '$1'))
 }
 
 export function toUTCDate(value: string): Date {

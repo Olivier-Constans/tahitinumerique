@@ -1,7 +1,6 @@
-import {Component, DestroyRef} from '@angular/core';
-import {ActivatedRoute, RouterLink} from "@angular/router";
+import {ChangeDetectionStrategy, Component, input} from '@angular/core';
+import {RouterLink} from "@angular/router";
 import {TimezoneResponse} from "../../../shared/model/timezone.model";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DatePipe} from "@angular/common";
 import {ADMIN_PATH} from "../../../app.routes";
 
@@ -10,24 +9,13 @@ import {ADMIN_PATH} from "../../../app.routes";
         DatePipe,
         RouterLink
     ],
-    templateUrl: './timezone.component.html'
+    templateUrl: './timezone.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TimezoneComponent {
 
-  data: TimezoneResponse;
+  protected readonly ADMIN_PATH = ADMIN_PATH;
 
-  constructor(
-    private readonly _route: ActivatedRoute,
-    private readonly _destroyRef:	DestroyRef
-  ) {
-    this.data = _route.snapshot.data['data'];
-
-    this._route.params
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe(() => {
-      this.data = _route.snapshot.data['data'];
-    })
-  }
-
-    protected readonly ADMIN_PATH = ADMIN_PATH;
+  // Alimenté par le resolver de la route via withComponentInputBinding
+  readonly data = input.required<TimezoneResponse>();
 }

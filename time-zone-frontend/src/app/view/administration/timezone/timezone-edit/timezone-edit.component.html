@@ -2,7 +2,7 @@
 
 <div class="flex align-items-center flex-wrap">
   <div class="flex-grow-1">
-    <h2>@if(data){ Modification de la timezone "{{data.label}}" } @else { Création timezone}</h2>
+    <h2>@if(data(); as timezone){ Modification de la timezone "{{timezone.label}}" } @else { Création timezone}</h2>
   </div>
 </div>
 <form (ngSubmit)="onSubmit()" [formGroup]="form">

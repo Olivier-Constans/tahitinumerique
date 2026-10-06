@@ -9,7 +9,7 @@
   </div>
 
   <div class="resultat">
-    @if($result | async; as page){
+    @if(result(); as page){
       @if (page.totalElements === 0) {
         <div>Pas de timezone configurée </div>
       } @else {
@@ -26,8 +26,8 @@
 
         <p-paginator
           (onPageChange)="onPageChange($event)"
-          [first]="first"
-          [rows]="rows"
+          [first]="first()"
+          [rows]="rows()"
           [totalRecords]="page.totalElements"
           class="col-12"
         />
