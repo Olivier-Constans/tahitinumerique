@@ -8,7 +8,7 @@ import {ScrollerOptions} from "primeng/api";
 import {TimezoneResponse} from "../../shared/model/timezone.model";
 import {TimezoneService} from "../../shared/service/timezone.service";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
-import {finalize, Subject, switchMap} from "rxjs";
+import {catchError, EMPTY, finalize, of, Subject, switchMap} from "rxjs";
 import {ScrollerLazyLoadEvent} from "primeng/types/scroller";
 import {CaculateDateResquest} from "../../shared/model/calculateDate.model";
 import {transformToUTCDate} from "../../shared/service/date.function";
@@ -52,6 +52,7 @@ export class HomeComponent {
 
   readonly timezones = signal<TimezoneResponse[]>([]);
   readonly timezonesLoaded = signal(false);
+  readonly timezonesLoadError = signal(false);
   readonly timezoneScrollerOptions: ScrollerOptions = {
     showLoader: false,
     lazy: true,
@@ -63,19 +64,29 @@ export class HomeComponent {
   private _timezoneTotalPage = 0;
   private _timezoneLoading = false;
 
-  // switchMap annule le calcul précédent si l'utilisateur relance une recherche
   private readonly _calculateDate = new Subject<CaculateDateResquest>();
   readonly result = toSignal(this._calculateDate.pipe(
-    switchMap(form => this._timezoneService.calculateDate(form))
+    switchMap(form => this._timezoneService.calculateDate(form).pipe(
+      catchError(() => of(undefined))
+    ))
   ));
 
   constructor() {
-    this._timezoneService.getAllTimezones(this._timezonePage, this._timezonePageSize)
-      .pipe(takeUntilDestroyed())
-      .subscribe(data => {
-        this.timezones.set(data.content);
-        this._timezoneTotalPage = data.totalPages;
-        this.timezonesLoaded.set(true);
+    this.loadTimezones();
+  }
+
+  loadTimezones() {
+    this.timezonesLoadError.set(false);
+    this._timezoneService.getAllTimezones(0, this._timezonePageSize)
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: data => {
+          this.timezones.set(data.content);
+          this._timezonePage = data.number;
+          this._timezoneTotalPage = data.totalPages;
+          this.timezonesLoaded.set(true);
+        },
+        error: () => this.timezonesLoadError.set(true)
       });
   }
 
@@ -90,6 +101,7 @@ export class HomeComponent {
     this._timezoneService.getAllTimezones(this._timezonePage + 1, this._timezonePageSize)
       .pipe(
         takeUntilDestroyed(this._destroyRef),
+        catchError(() => EMPTY),
         finalize(() => this._timezoneLoading = false)
       )
       .subscribe(data => {

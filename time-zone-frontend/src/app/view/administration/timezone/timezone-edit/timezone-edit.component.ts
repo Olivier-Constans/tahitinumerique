@@ -15,6 +15,7 @@ import {OffsetUTC} from "../../../../shared/model/offsetUTC.model";
 import {Select} from "primeng/select";
 import {InputTextModule} from "primeng/inputtext";
 import {ADMIN_PATH} from "../../../../app.routes";
+import {catchError, EMPTY} from "rxjs";
 
 export interface TimezoneForm {
   label: FormControl<string | undefined>
@@ -76,7 +77,11 @@ export class TimezoneEditComponent {
     const observable = data ?
       this._timezoneService.updateTimezone(data.id, form) : this._timezoneService.createTimezone(form);
 
-    observable.pipe(takeUntilDestroyed(this._destroyRef))
+    // En cas d'erreur on reste sur le formulaire, le toast est affiché par l'intercepteur
+    observable.pipe(
+      takeUntilDestroyed(this._destroyRef),
+      catchError(() => EMPTY)
+    )
       .subscribe((reponse) => this._router.navigate(data ? [".."] : ["..", reponse.id], {relativeTo: this._route}))
   }
 

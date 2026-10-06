@@ -1,4 +1,9 @@
-@if(timezonesLoaded() && timezones().length < 2) {
+@if(timezonesLoadError()) {
+  <div class="text-center">
+    Impossible de charger les fuseaux horaires.
+    <p-button label="Réessayer" [text]="true" (onClick)="loadTimezones()" />
+  </div>
+} @else if(timezonesLoaded() && timezones().length < 2) {
   <div class="text-center">
     Veuillez configurer 2 fuseaux horaires pour utiliser cette fonctionnalité.
     <a [routerLink]="['/', ADMIN_PATH, TIMEZONE_PATH, 'new']"> Ajouter un fuseau horaire</a>

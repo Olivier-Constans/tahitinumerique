@@ -9,7 +9,12 @@
   </div>
 
   <div class="resultat">
-    @if(result(); as page){
+    @if(result() === null) {
+      <div>
+        Impossible de charger les fuseaux horaires.
+        <p-button label="Réessayer" [text]="true" (onClick)="retry()" />
+      </div>
+    } @else if(result(); as page){
       @if (page.totalElements === 0) {
         <div>Pas de timezone configurée </div>
       } @else {

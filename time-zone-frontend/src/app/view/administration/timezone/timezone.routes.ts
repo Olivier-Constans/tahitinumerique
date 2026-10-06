@@ -1,10 +1,15 @@
-import {ActivatedRouteSnapshot, RouterStateSnapshot, Routes} from "@angular/router";
+import {RedirectCommand, ResolveFn, Router, Routes} from "@angular/router";
 import {inject} from "@angular/core";
+import {catchError, of} from "rxjs";
 import {TimezoneService} from "../../../shared/service/timezone.service";
+import {TimezoneResponse} from "../../../shared/model/timezone.model";
 
-export const resolveFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+export const resolveFn: ResolveFn<TimezoneResponse> = (route) => {
   const service = inject(TimezoneService)
-  return service.getTimezoneById(Number(route.paramMap.get('id')))
+  const router = inject(Router)
+  return service.getTimezoneById(Number(route.paramMap.get('id'))).pipe(
+    catchError(() => of(new RedirectCommand(router.parseUrl('/404'))))
+  )
 }
 
 export const routes: Routes = [

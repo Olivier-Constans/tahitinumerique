@@ -2,10 +2,12 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessC
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { routes } from './app.routes';
-import {provideHttpClient, withFetch} from "@angular/common/http";
+import {provideHttpClient, withFetch, withInterceptors} from "@angular/common/http";
 import {providePrimeNG} from "primeng/config";
 import {definePreset} from "@primeuix/themes";
 import Lara from "@primeuix/themes/lara";
+import {MessageService} from "primeng/api";
+import {httpErrorInterceptor} from "./shared/interceptor/http-error.interceptor";
 
 const LaraBlue = definePreset(Lara, {
   semantic: {
@@ -30,7 +32,8 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withFetch()),
+    provideHttpClient(withFetch(), withInterceptors([httpErrorInterceptor])),
+    MessageService,
     providePrimeNG({
       theme: {
         preset: LaraBlue,

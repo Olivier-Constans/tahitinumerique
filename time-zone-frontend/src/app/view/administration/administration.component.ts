@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal} from '@angular/core';
 import {Button} from "primeng/button";
 import {TimezoneService} from "../../shared/service/timezone.service";
-import {switchMap} from "rxjs";
+import {catchError, EMPTY, of, switchMap} from "rxjs";
 import {TimezoneResponse} from "../../shared/model/timezone.model";
 import {PaginatorModule, PaginatorState} from "primeng/paginator";
 import {RouterLink} from "@angular/router";
@@ -33,9 +33,16 @@ export class AdministrationComponent {
 
   private readonly _search = computed(() => ({page: this.page(), rows: this.rows(), refresh: this._refresh()}));
 
+  // null signale un échec de chargement ; l'erreur est absorbée pour ne pas couper le flux de pagination
   readonly result = toSignal(toObservable(this._search).pipe(
-    switchMap(({page, rows}) => this._timezoneService.getAllTimezones(page, rows))
+    switchMap(({page, rows}) => this._timezoneService.getAllTimezones(page, rows).pipe(
+      catchError(() => of(null))
+    ))
   ));
+
+  retry() {
+    this._refresh.update(value => value + 1);
+  }
 
   onPageChange($event: PaginatorState) {
     this.page.set($event.page ?? this.page());
@@ -44,7 +51,10 @@ export class AdministrationComponent {
 
   delete(data: TimezoneResponse) {
     this._timezoneService.deleteTimezone(data.id)
-      .pipe(takeUntilDestroyed(this._destroyRef))
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        catchError(() => EMPTY)
+      )
       .subscribe(() => this._refresh.update(value => value + 1))
   }
 }
