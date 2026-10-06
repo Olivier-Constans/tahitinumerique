@@ -1,9 +1,9 @@
-@if(timezoneDropdownData.items.length < 2) {
+@if(timezoneDropdownData.loaded && timezoneDropdownData.items.length < 2) {
   <div class="text-center">
     Veuillez configurer 2 fuseaux horaires pour utiliser cette fonctionnalité.
     <a [routerLink]="['/', ADMIN_PATH, TIMEZONE_PATH, 'new']"> Ajouter un fuseau horaire</a>
   </div>
-} @else {
+} @else if(timezoneDropdownData.loaded) {
   <form (ngSubmit)="onSubmit()" [formGroup]="form">
     <div class="flex flex-column gap-2 m-2">
       <label>Choisir un fuseau horaire</label>

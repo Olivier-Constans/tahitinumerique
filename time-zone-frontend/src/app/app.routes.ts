@@ -12,6 +12,10 @@ export const routes: Routes = [
     loadChildren: () => import('./view/administration/administration.routes').then(mod => mod.routes)
   },
   {
+    path: '404',
+    loadComponent: () => import('./view/not-found/not-found.component').then(mod => mod.NotFoundComponent)
+  },
+  {
     path: '**',
     redirectTo: '404'
   }

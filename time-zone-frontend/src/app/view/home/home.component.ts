@@ -7,7 +7,8 @@ import {Button} from "primeng/button";
 import {TimezoneResponse} from "../../shared/model/timezone.model";
 import {TimezoneService} from "../../shared/service/timezone.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {Observable} from "rxjs";
+import {finalize, Observable} from "rxjs";
+import {ScrollerLazyLoadEvent} from "primeng/types/scroller";
 import {CaculateDateResponse} from "../../shared/model/calculateDate.model";
 import {transformToUTCDate} from "../../shared/service/date.function";
 import {RouterLink} from "@angular/router";
@@ -42,6 +43,8 @@ export class HomeComponent {
 
   timezoneDropdownData = {
     items: [] as TimezoneResponse[],
+    loaded: false,
+    loading: false,
     page: 0,
     size: 10,
     totalPage: 0,
@@ -68,20 +71,29 @@ export class HomeComponent {
       .subscribe(data => {
         this.timezoneDropdownData.items =  data.content;
         this.timezoneDropdownData.totalPage = data.totalPages;
+        this.timezoneDropdownData.loaded = true;
       });
   }
 
-  onLazyLoadTimezone(event: any) {
-    const needLoadData = event.first + 5 < this.timezoneDropdownData.items.length
-    const endData = !(this.timezoneDropdownData.page < this.timezoneDropdownData.totalPage-1)
-    if(!needLoadData || endData) {
+  onLazyLoadTimezone(event: ScrollerLazyLoadEvent) {
+    const dropdownData = this.timezoneDropdownData
+    const nearEnd = event.last + 5 >= dropdownData.items.length
+    const hasMorePage = dropdownData.page < dropdownData.totalPage - 1
+    if(dropdownData.loading || !nearEnd || !hasMorePage) {
       return;
     }
 
-    this._timezoneService.getAllTimezones(++this.timezoneDropdownData.page, this.timezoneDropdownData.size)
-      .pipe(takeUntilDestroyed(this._destroyRef))
+    dropdownData.loading = true
+    this._timezoneService.getAllTimezones(dropdownData.page + 1, dropdownData.size)
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        finalize(() => dropdownData.loading = false)
+      )
       .subscribe(data => {
-          this.timezoneDropdownData.items.push(...data.content);
+        // Nouvelle référence de tableau pour que le p-select détecte l'ajout des options
+        dropdownData.items = [...dropdownData.items, ...data.content];
+        dropdownData.page = data.number;
+        dropdownData.totalPage = data.totalPages;
       });
   }
 
