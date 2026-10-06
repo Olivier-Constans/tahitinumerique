@@ -1,7 +1,7 @@
-import {AutitableResponse} from "./audit.model";
+import {AuditableResponse} from "./audit.model";
 import {OffsetUTC} from "./offsetUTC.model";
 
-export interface TimezoneResponse extends AutitableResponse {
+export interface TimezoneResponse extends AuditableResponse {
   id: number;
   label: string;
   offsetUTC: OffsetUTC;

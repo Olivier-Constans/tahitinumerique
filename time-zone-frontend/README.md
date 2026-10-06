@@ -85,7 +85,7 @@ Les pages de consultation et de modification reçoivent le fuseau horaire via un
 
 ## Claude Code
 
-Le projet fournit deux skills [Claude Code](https://docs.claude.com/en/docs/claude-code) dans `.claude/skills/`. Ils servent à auditer le front et à suivre la correction des points relevés. Ils travaillent tous les deux sur le fichier `rapport-analyse-frontend.md`, à la racine du projet.
+Le projet fournit trois skills [Claude Code](https://docs.claude.com/en/docs/claude-code) dans `.claude/skills/`. Ils servent à auditer le front et à suivre la correction des points relevés. Ils travaillent tous sur le fichier `rapport-analyse-frontend.md`, à la racine du projet.
 
 ### `/analyse-frontend` : analyser le front
 
@@ -104,7 +104,7 @@ Le rapport est une **liste de suivi** sur la durée. On le relance après des co
 - **Identifiant** : `FRONT-AAAAMMJJ-NN`. La date est celle de la découverte du point. L'identifiant est définitif : il n'est jamais renuméroté ni réutilisé.
 - **Gravité** : Critique, Majeur, Mineur ou Info.
 - **Tri** : dans chaque sous-section, par gravité puis par date de découverte (la plus ancienne en premier).
-- **Statuts** : `Ouvert`, `Corrigé le …` ou `Ignoré le … (faux positif | choix technique | hors périmètre)`.
+- **Statuts** : `Ouvert`, `Corrigé le …` ou `Ignoré le …`, avec si possible un motif (faux positif, choix technique ou hors périmètre).
 
 **Quand on relance l'analyse :**
 - un point toujours présent garde son identifiant ;
@@ -128,8 +128,24 @@ Ce skill traite un seul point du rapport :
 
 Aucune modification du code ni du rapport n'est faite sans validation, et rien n'est commité automatiquement.
 
+### `/manuel-correction-frontend <identifiant> <état>` : changer le statut à la main
+
+```
+/manuel-correction-frontend FRONT-20261006-07 Corrigé
+/manuel-correction-frontend FRONT-20261006-04 Ignoré
+/manuel-correction-frontend FRONT-20261006-07 Ouvert
+```
+
+Ce skill met à jour le statut d'un point sans lire ni modifier le code. Il sert quand la décision est déjà prise : un point corrigé à la main, ou un point qu'on choisit d'écarter.
+
+- **Corrigé** : le point passe en `Corrigé le …` avec la mention « déclarée manuellement, sans vérification du code », puis il est déplacé dans « Points clos ». Si le problème est toujours dans le code, la prochaine analyse le rouvrira.
+- **Ignoré** : le skill demande la raison (on peut répondre `N/A`). Le point passe en `Ignoré le …` avec une ligne `Justification`, puis il est déplacé dans « Points clos ». Il ne sera plus re-signalé.
+- **Ouvert** : le point est rouvert et replacé dans sa sous-section, avec une ligne `Rouvert le …`. Son historique (`Correction`, `Justification`) est conservé.
+
+La synthèse est recalculée à chaque changement. Ce skill ne se déclenche que sur appel explicite : Claude ne l'utilise jamais de lui-même.
+
 ### Workflow conseillé
 
 1. `/analyse-frontend` pour produire ou rafraîchir le rapport.
-2. `/correction-frontend FRONT-…` pour chaque point à traiter, en commençant par les plus graves.
+2. `/correction-frontend FRONT-…` pour chaque point à traiter, en commençant par les plus graves, ou `/manuel-correction-frontend FRONT-… <état>` quand la décision est déjà prise.
 3. `/analyse-frontend` de nouveau pour confirmer les corrections et détecter les régressions.

@@ -1,14 +1,14 @@
 import {TimezoneResponse} from "./timezone.model";
 
-export interface CaculateDateItemResponse {
+export interface CalculateDateItemResponse {
   date: Date;
   timezone: TimezoneResponse;
 }
-export interface CaculateDateResponse {
-  calculateDateItemList: CaculateDateItemResponse[];
+export interface CalculateDateResponse {
+  calculateDateItemList: CalculateDateItemResponse[];
 }
 
-export interface CaculateDateResquest {
+export interface CalculateDateResquest {
   date: Date;
   timezoneId: number;
 }

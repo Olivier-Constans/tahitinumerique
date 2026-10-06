@@ -4,7 +4,7 @@ import {map, Observable} from "rxjs";
 import {TimezoneRequest, TimezoneResponse} from "../model/timezone.model";
 import {Page} from "../model/page.model";
 import {auditResponseTransform} from "../model/audit.model";
-import {CaculateDateResponse, CaculateDateResquest} from "../model/calculateDate.model";
+import {CalculateDateResponse, CalculateDateResquest} from "../model/calculateDate.model";
 import {toDate} from "./date.function";
 
 @Injectable({
@@ -44,8 +44,8 @@ export class TimezoneService {
     return this._http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
-  calculateDate(form: CaculateDateResquest): Observable<CaculateDateResponse> {
-    return this._http.post<CaculateDateResponse>(`${this.baseUrl}/calculate-date`, form).pipe(
+  calculateDate(form: CalculateDateResquest): Observable<CalculateDateResponse> {
+    return this._http.post<CalculateDateResponse>(`${this.baseUrl}/calculate-date`, form).pipe(
       map((data) => {
         data.calculateDateItemList.forEach((it) => {
           it.date = toDate(it.date as unknown as string)

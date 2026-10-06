@@ -81,15 +81,16 @@ Quelques règles :
 - Mettre les références au code entre backticks.
 - Ne mettre aucun emoji, ni dans le rapport ni dans le résumé : la gravité s'écrit en toutes lettres (Critique, Majeur, Mineur, Info).
 
-Statuts possibles : `Ouvert`, `Corrigé le AAAA-MM-JJ`, `Ignoré le AAAA-MM-JJ (faux positif | choix technique | hors périmètre)`. `Ignoré` n'est posé que si l'utilisateur le demande, en général via le skill `correction-frontend` : ne pas décider seul qu'un point est sans intérêt.
+Statuts possibles : `Ouvert`, `Corrigé le AAAA-MM-JJ`, `Ignoré le AAAA-MM-JJ`, suivi si possible du motif `(faux positif | choix technique | hors périmètre)`. `Ignoré` n'est posé que si l'utilisateur le demande, via le skill `correction-frontend` ou `manuel-correction-frontend` : ne pas décider seul qu'un point est sans intérêt.
 
-Le skill `correction-frontend` ajoute parfois à un point une ligne `Correction`, `Justification` ou `Révisé le …`. Ces lignes font partie de l'historique du point et doivent être conservées.
+Les skills `correction-frontend` et `manuel-correction-frontend` ajoutent parfois à un point une ligne `Correction`, `Justification`, `Révisé le …` ou `Rouvert le …`. Ces lignes font partie de l'historique du point et doivent être conservées.
 
 ## Mise à jour d'un rapport existant
 
 Pour chaque point du rapport existant :
 - **Toujours présent** : garder l'identifiant et la date de découverte, mettre à jour `Dernière vérification` et l'emplacement (les numéros de ligne bougent). Ajuster la gravité ou le texte si la situation a changé.
 - **Disparu du code** : passer le statut à `Corrigé le <date du jour>` et déplacer le point dans la section « Points clos ».
+- **Marqué `Corrigé` manuellement mais toujours présent dans le code** : le rouvrir, ajouter une ligne « Rouvert le … : constat toujours présent dans le code », et le signaler dans le résumé.
 - **Statut `Ignoré`** : le laisser tel quel dans « Points clos » et ne pas le re-signaler comme nouveau, même si le code n'a pas changé : c'est une décision validée par l'utilisateur. Le rouvrir seulement si le contexte qui justifiait la décision a disparu, et l'expliquer dans le résumé.
 - **Réapparu après correction** : le rouvrir avec le même identifiant (statut `Ouvert`) et ajouter une ligne « Rouvert le … ».
 

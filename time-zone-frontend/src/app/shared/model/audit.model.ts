@@ -5,11 +5,11 @@ export interface AuditResponse {
   updateDate: Date;
 }
 
-export interface AutitableResponse {
+export interface AuditableResponse {
   audit: AuditResponse;
 }
 
-export function auditResponseTransform<T extends AutitableResponse>(data: T): T {
+export function auditResponseTransform<T extends AuditableResponse>(data: T): T {
   data.audit.createDate = toDate((data.audit.createDate as unknown) as string);
   data.audit.updateDate = toDate((data.audit.updateDate as unknown) as string);
   return data;

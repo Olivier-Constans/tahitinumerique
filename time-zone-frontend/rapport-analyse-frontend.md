@@ -6,9 +6,9 @@
 
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
-| 1. Analyse technique | 0 | 1 | 6 | 3 | 10 |
+| 1. Analyse technique | 0 | 1 | 5 | 3 | 9 |
 | 2. Analyse fonctionnelle | 0 | 2 | 4 | 0 | 6 |
-| **Total** | **0** | **3** | **10** | **3** | **16** |
+| **Total** | **0** | **3** | **9** | **3** | **15** |
 
 **Outils** : lint OK (0 erreur) · tests 39/39 passés (8 fichiers) · build OK avec 1 avertissement (budget initial dépassé : 947,94 kB pour 500 kB)
 
@@ -53,14 +53,6 @@
 - **Recommandation** : ajouter un guard `canMatch` sur `admin` une fois qu'une authentification existe côté back.
 
 ### 1.3 Homogénéité
-
-#### FRONT-20261006-05 · Mineur · Fautes de frappe dans les identifiants
-- **Statut** : Ouvert
-- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
-- **Emplacement** : `src/app/shared/model/calculateDate.model.ts:3,7,11`, `src/app/shared/model/audit.model.ts:8`, `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.ts:85`
-- **Constat** : `CaculateDateItemResponse`, `CaculateDateResponse`, `CaculateDateResquest`, `AutitableResponse`, `reponse`.
-- **Impact** : les recherches dans le code échouent, et la relecture laisse une impression de négligence.
-- **Recommandation** : renommer en `CalculateDateItemResponse`, `CalculateDateResponse`, `CalculateDateRequest`, `AuditableResponse` et `response` (renommage via l'IDE).
 
 #### FRONT-20261006-06 · Mineur · Style de code hétérogène (guillemets, espaces dans les imports, points-virgules)
 - **Statut** : Ouvert
@@ -170,6 +162,15 @@
 Aucun point ouvert.
 
 ## Points clos
+
+#### FRONT-20261006-05 · Mineur · Fautes de frappe dans les identifiants
+- **Statut** : Corrigé le 2026-10-06
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
+- **Emplacement** : `src/app/shared/model/calculateDate.model.ts:3,7,11`, `src/app/shared/model/audit.model.ts:8`, `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.ts:85`
+- **Constat** : `CaculateDateItemResponse`, `CaculateDateResponse`, `CaculateDateResquest`, `AutitableResponse`, `reponse`.
+- **Impact** : les recherches dans le code échouent, et la relecture laisse une impression de négligence.
+- **Recommandation** : renommer en `CalculateDateItemResponse`, `CalculateDateResponse`, `CalculateDateRequest`, `AuditableResponse` et `response` (renommage via l'IDE).
+- **Correction** : déclarée manuellement par l'utilisateur, sans vérification du code.
 
 #### FRONT-20261006-20 · Mineur · Terminologie « timezone » et « fuseau horaire » incohérente
 - **Statut** : Corrigé le 2026-10-06
