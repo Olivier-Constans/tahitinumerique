@@ -10,7 +10,7 @@ import {TimezoneService} from "../../shared/service/timezone.service";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {catchError, EMPTY, finalize, of, Subject, switchMap} from "rxjs";
 import {ScrollerLazyLoadEvent} from "primeng/types/scroller";
-import {CalculateDateResquest} from "../../shared/model/calculateDate.model";
+import {CalculateDateRequest} from "../../shared/model/calculateDate.model";
 import {transformToUTCDate} from "../../shared/service/date.function";
 import {RouterLink} from "@angular/router";
 import {ADMIN_PATH} from "../../app.routes";
@@ -63,7 +63,7 @@ export class HomeComponent {
   private _timezoneTotalPage = 0;
   private _timezoneLoading = false;
 
-  private readonly _calculateDate = new Subject<CalculateDateResquest>();
+  private readonly _calculateDate = new Subject<CalculateDateRequest>();
   readonly result = toSignal(this._calculateDate.pipe(
     switchMap(form => this._timezoneService.calculateDate(form).pipe(
       catchError(() => of(undefined))

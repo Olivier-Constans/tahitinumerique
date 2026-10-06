@@ -7,12 +7,12 @@
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
 | 1. Analyse technique | 0 | 1 | 5 | 3 | 9 |
-| 2. Analyse fonctionnelle | 0 | 2 | 4 | 0 | 6 |
-| **Total** | **0** | **3** | **9** | **3** | **15** |
+| 2. Analyse fonctionnelle | 0 | 2 | 7 | 0 | 9 |
+| **Total** | **0** | **3** | **12** | **3** | **18** |
 
-**Outils** : lint OK (0 erreur) · tests 39/39 passés (8 fichiers) · build OK avec 1 avertissement (budget initial dépassé : 947,94 kB pour 500 kB)
+**Outils** : lint OK (0 erreur) · tests 39/39 passés (8 fichiers) · build OK avec 1 avertissement (budget initial dépassé : 939,66 kB pour 500 kB)
 
-**Depuis la dernière analyse** : première analyse, 20 nouveaux points.
+**Depuis la dernière analyse** : 3 nouveaux, 4 corrigés (FRONT-20261006-11, -16, -19, -20), 1 rouvert (FRONT-20261006-05).
 
 ## 1. Analyse technique
 
@@ -89,7 +89,7 @@
 - **Statut** : Ouvert
 - **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
 - **Emplacement** : `angular.json:31-35` (styles), `angular.json:41-45` (budgets)
-- **Constat** : `ng build` affiche « bundle initial exceeded maximum budget » : 947,94 kB bruts pour 500 kB autorisés. La feuille `styles` pèse à elle seule 359 kB, car `primeflex.css` est importé en entier (446 kB) alors que l'application n'utilise qu'une vingtaine de classes (`flex`, `gap-2`, `m-2`, `p-2`, `w-full`, `text-center`…). Le transfert compressé reste raisonnable (153 kB).
+- **Constat** : `ng build` affiche « bundle initial exceeded maximum budget » : 939,66 kB bruts pour 500 kB autorisés. La feuille `styles` pèse à elle seule 359 kB, car `primeflex.css` est importé en entier (446 kB) alors que l'application n'utilise qu'une vingtaine de classes (`flex`, `gap-2`, `m-2`, `p-2`, `w-full`, `text-center`…). Le transfert compressé reste raisonnable (153 kB).
 - **Impact** : un avertissement permanent au build, qui finira par masquer un vrai dépassement. Le CSS chargé est surtout inutile.
 - **Recommandation** : remplacer PrimeFlex par quelques classes utilitaires maison ou par Tailwind (avec purge, et qui est la recommandation actuelle de PrimeNG). À défaut, ajuster le budget en connaissance de cause.
 
@@ -108,7 +108,7 @@
 #### FRONT-20261006-12 · Mineur · Heures décalées pendant le passage à l'heure d'été du navigateur
 - **Statut** : Ouvert
 - **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
-- **Emplacement** : `src/app/shared/service/date.function.ts:1-5,11-19`, `src/app/view/home/home.component.ts:125`
+- **Emplacement** : `src/app/shared/service/date.function.ts:1-5,11-19`, `src/app/view/home/home.component.ts:124`
 - **Constat** : l'heure saisie et l'heure affichée passent par un `Date` exprimé dans le fuseau du *navigateur*. Si cette heure n'existe pas localement (changement d'heure), JavaScript la décale. Vérifié avec `TZ=Europe/Paris` : 2026-03-29 02:30 saisi devient `2026-03-29T03:30:00.000Z` à l'envoi. De même, un résultat `LocalDateTime` à 02:30 ce jour-là s'affiche 03:30.
 - **Impact** : un calcul faux d'une heure, une heure par an, uniquement pour les utilisateurs dont le navigateur est dans un fuseau à heure d'été. Tahiti n'est pas concerné.
 - **Recommandation** : ne pas passer par l'heure locale. Formater la saisie avec `formatDate(value, "yyyy-MM-dd'T'HH:mm:ss", 'fr')` et envoyer la chaîne obtenue. Afficher le résultat directement depuis la chaîne `LocalDateTime` reçue, ou avec `date:'…':'UTC'` après l'avoir parsée comme UTC.
@@ -139,6 +139,22 @@
 - **Impact** : pour modifier un fuseau qu'on consulte, il faut revenir à la liste.
 - **Recommandation** : ajouter un bouton « Modifier » (`[routerLink]="['edit']"`) et utiliser `p-breadcrumb`.
 
+#### FRONT-20261006-21 · Mineur · Formulaire de fuseau sans contrainte de longueur ni message de validation
+- **Statut** : Ouvert
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
+- **Emplacement** : `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.ts:51-54`, `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.html:9-20`
+- **Constat** : le champ « Nom » n'a que `Validators.required`. Le back refuse un libellé de plus de 100 caractères (`Timezone.LABEL_MAX_LENGTH`, `ObjectValidator.maxLength`), mais le front ne le sait pas : l'utilisateur ne l'apprend qu'au toast d'erreur après l'envoi. Un nom composé uniquement d'espaces passe aussi `required`. Enfin, aucun message n'est affiché sous les champs : le bouton « Enregistrer » est simplement désactivé, sans dire pourquoi.
+- **Impact** : un aller-retour serveur pour une erreur détectable à la saisie, et un bouton grisé sans explication.
+- **Recommandation** : ajouter `Validators.maxLength(100)` et un validateur « non vide après `trim()` », `maxlength="100"` sur l'input, et un `<small class="p-error">` (ou `p-message`) sous chaque champ lorsqu'il est `invalid && touched`.
+
+#### FRONT-20261006-22 · Mineur · Résultats du calcul sans rappel de la saisie et périmés après modification
+- **Statut** : Ouvert
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
+- **Emplacement** : `src/app/view/home/home.component.html:40-47`, `src/app/view/home/home.component.ts:66-71`
+- **Constat** : la section « Résultats » liste les dates obtenues sans rappeler le fuseau et la date de départ. Si l'utilisateur change ensuite le fuseau ou la date sans relancer le calcul, les anciens résultats restent affichés sous le formulaire modifié.
+- **Impact** : des résultats qui ne correspondent plus aux valeurs visibles du formulaire, donc un risque de mauvaise lecture.
+- **Recommandation** : titrer la section avec la saisie (« Le 06/10/2026 à 10:00 à Tahiti correspond à : »), à partir de la requête envoyée, et vider `result` (ou le griser) sur `form.valueChanges`.
+
 ### 2.3 Linter (templates et accessibilité)
 
 #### FRONT-20261006-17 · Majeur · Boutons réduits à une icône sans libellé accessible
@@ -159,18 +175,25 @@
 
 ### 2.4 Wording
 
-Aucun point ouvert.
+#### FRONT-20261006-23 · Mineur · Typographie des libellés : deux-points sans espace et espace final
+- **Statut** : Ouvert
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
+- **Emplacement** : `src/app/view/home/home.component.html:44`, `src/app/view/administration/timezone/timezone.component.html:5`
+- **Constat** : les résultats affichent `Tahiti: 06/10/2026 à 10:00`, avec un deux-points collé, à l'anglaise, alors que la page de consultation écrit correctement « Décalage UTC : ». Les formats de date `"dd/MM/yyyy 'à' HH:mm "` se terminent en outre par une espace superflue.
+- **Impact** : typographie française incohérente d'une page à l'autre.
+- **Recommandation** : écrire `{{data.timezone.label}} :` (idéalement avec une espace insécable `&nbsp;`) et retirer l'espace finale des formats de date.
 
 ## Points clos
 
 #### FRONT-20261006-05 · Mineur · Fautes de frappe dans les identifiants
 - **Statut** : Corrigé le 2026-10-06
 - **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
-- **Emplacement** : `src/app/shared/model/calculateDate.model.ts:3,7,11`, `src/app/shared/model/audit.model.ts:8`, `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.ts:85`
+- **Emplacement** : `src/app/shared/model/calculateDate.model.ts:11`, `src/app/shared/service/timezone.service.ts:7,47`, `src/app/view/home/home.component.ts:13,66`
 - **Constat** : `CaculateDateItemResponse`, `CaculateDateResponse`, `CaculateDateResquest`, `AutitableResponse`, `reponse`.
 - **Impact** : les recherches dans le code échouent, et la relecture laisse une impression de négligence.
 - **Recommandation** : renommer en `CalculateDateItemResponse`, `CalculateDateResponse`, `CalculateDateRequest`, `AuditableResponse` et `response` (renommage via l'IDE).
-- **Correction** : déclarée manuellement par l'utilisateur, sans vérification du code.
+- **Rouvert le** 2026-10-06 : constat toujours présent dans le code. Le commit `06b3aa9` corrige `Caculate…`, `AutitableResponse` et `reponse`, mais `CaculateDateResquest` est devenu `CalculateDateResquest` : la faute « Resquest » subsiste (5 occurrences). Il reste à renommer en `CalculateDateRequest`, comme la classe du back (`CalculateDateRequest.java`).
+- **Correction** : `CalculateDateResquest` renommé en `CalculateDateRequest`, comme la classe du back, dans `calculateDate.model.ts` (déclaration), `timezone.service.ts` (import et paramètre de `calculateDate`) et `home.component.ts` (import et `Subject`). Les autres fautes avaient été corrigées par le commit `06b3aa9`. Plus aucune occurrence de `Resquest`, `Caculate`, `Autitable` ni `reponse` dans `src/`. Interface de type uniquement, sans effet sur la requête envoyée. Aucun test ajouté, la compilation suffit à vérifier le renommage. Lint OK, tests 39/39.
 
 #### FRONT-20261006-20 · Mineur · Terminologie « timezone » et « fuseau horaire » incohérente
 - **Statut** : Corrigé le 2026-10-06
@@ -212,4 +235,5 @@ Aucun point ouvert.
 
 | Date | Nouveaux | Corrigés | Rouverts | Ouverts au total | Lint | Tests |
 |---|---|---|---|---|---|---|
+| 2026-10-06 (2e analyse) | 3 | 4 | 1 | 19 | OK | 39/39 |
 | 2026-10-06 | 20 | 0 | 0 | 20 | OK | 39/39 |

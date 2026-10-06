@@ -8,7 +8,7 @@ export interface CalculateDateResponse {
   calculateDateItemList: CalculateDateItemResponse[];
 }
 
-export interface CalculateDateResquest {
+export interface CalculateDateRequest {
   date: Date;
   timezoneId: number;
 }
