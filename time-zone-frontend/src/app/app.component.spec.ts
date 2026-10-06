@@ -1,29 +1,23 @@
-import { TestBed } from '@angular/core/testing';
-import { AppComponent } from './app.component';
+import {TestBed} from '@angular/core/testing';
+import {provideRouter} from "@angular/router";
+import {MessageService} from "primeng/api";
+import {AppComponent} from './app.component';
 
 describe('AppComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
+  beforeEach(() => {
+    TestBed.configureTestingModule({
       imports: [AppComponent],
-    }).compileComponents();
+      providers: [provideRouter([]), MessageService]
+    });
   });
 
-  it('should create the app', () => {
+  it('affiche le header, la zone de toast et le router-outlet', async () => {
     const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
-  });
+    await fixture.whenStable();
 
-  it(`should have the 'time-zone-frontend' title`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('time-zone-frontend');
-  });
-
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, time-zone-frontend');
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelector('app-header h1')?.textContent).toContain('Timezone project');
+    expect(element.querySelector('p-toast')).not.toBeNull();
+    expect(element.querySelector('router-outlet')).not.toBeNull();
   });
 });
