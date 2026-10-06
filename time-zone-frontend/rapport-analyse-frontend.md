@@ -8,9 +8,9 @@
 
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
-| 1. Analyse technique | 0 | 0 | 0 | 2 | 2 |
+| 1. Analyse technique | 0 | 0 | 0 | 1 | 1 |
 | 2. Analyse fonctionnelle | 0 | 0 | 7 | 0 | 7 |
-| **Total** | **0** | **0** | **7** | **2** | **9** |
+| **Total** | **0** | **0** | **7** | **1** | **8** |
 
 **Outils** : lint OK (0 erreur) · tests 39/39 passés (8 fichiers) · build OK avec 1 avertissement (budget initial dépassé : 955,68 kB pour 500 kB)
 
@@ -52,13 +52,7 @@ Aucun point ouvert.
 
 ### 1.4 Qualité
 
-#### FRONT-20261006-10 · Info · Couverture de tests incomplète
-- **Statut** : Ouvert
-- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
-- **Emplacement** : `src/app/view/not-found/`, `src/app/view/administration/timezone/`
-- **Constat** : 39 tests passent. `TimezoneEditComponent` et `TimezoneComponent` ne sont testés qu'à travers `timezone.routes.spec.ts`, ce qui est un bon choix. `NotFoundComponent` n'a aucun test et il n'y a pas de test e2e.
-- **Impact** : faible pour l'instant. Le parcours complet (création puis calcul) n'est vérifié nulle part de bout en bout.
-- **Recommandation** : ajouter un scénario Playwright couvrant la création de deux fuseaux, puis le calcul sur la page d'accueil.
+Aucun point ouvert.
 
 ## 2. Analyse fonctionnelle
 

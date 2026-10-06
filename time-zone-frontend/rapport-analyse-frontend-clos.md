@@ -2,6 +2,15 @@
 
 > Points corrigés ou ignorés, triés par date de clôture (la plus récente en premier). Les points ouverts sont dans `rapport-analyse-frontend.md`.
 
+#### FRONT-20261006-10 · Info · Couverture de tests incomplète
+- **Statut** : Corrigé le 2026-10-07
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `src/app/view/not-found/`, `src/app/view/administration/timezone/`
+- **Constat** : 39 tests passent. `TimezoneEditComponent` et `TimezoneComponent` ne sont testés qu'à travers `timezone.routes.spec.ts`, ce qui est un bon choix. `NotFoundComponent` n'a aucun test et il n'y a pas de test e2e.
+- **Impact** : faible pour l'instant. Le parcours complet (création puis calcul) n'est vérifié nulle part de bout en bout.
+- **Recommandation** : ajouter un scénario Playwright couvrant la création de deux fuseaux, puis le calcul sur la page d'accueil.
+- **Correction** : ajout de `src/app/view/not-found/not-found.component.spec.ts` (URL inconnue redirigée vers `/404`, lien de retour) et de `src/app/parcours.spec.ts`, test d'intégration du parcours complet (création de deux fuseaux via le formulaire, consultation, puis calcul sur l'accueil) avec les vraies routes, le vrai service et l'intercepteur, seul le back étant simulé par `HttpTestingController`. Pas de Playwright : une e2e réelle exigerait un back démarré en CI. Lint OK, 45 tests OK.
+
 #### FRONT-20261007-02 · Info · Type `Page` déclaré à la main à côté du schéma `pageOf`
 - **Statut** : Corrigé le 2026-10-07
 - **Découvert le** : 2026-10-07 · **Dernière vérification** : 2026-10-07
