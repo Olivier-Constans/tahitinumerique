@@ -9,7 +9,7 @@ services:
     build:
       context: ./time-zone-frontend/
     volumes:
-      - ./time-zone-frontend/nginx/api_redirection-local.conf:/opt/bitnami/nginx/conf/bitnami/api_redirection-local.conf:ro
+      - ./time-zone-frontend/nginx/api_redirection-local.conf:/etc/nginx/extra/api_redirection-local.conf:ro
     depends_on:
       - backend
     ports:
