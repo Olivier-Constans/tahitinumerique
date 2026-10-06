@@ -21,7 +21,7 @@ Le rapport sert de **liste de suivi** sur la durée, pas d'instantané : on le r
 3. **Lire le code** de `src/` : composants, templates, services, modèles, routes, intercepteurs, tests. Lire aussi la configuration (`angular.json`, `tsconfig*.json`, `eslint.config.js`, `Dockerfile`, nginx, proxy). Quand le dépôt du back-end est accessible, vérifier les contrats d'API (types, formats de date, enums) avant de signaler une incohérence.
 4. **Vérifier avant d'affirmer.** Un « bug potentiel » doit s'appuyer sur une lecture précise du code, et si possible sur un test existant ou un essai rapide. Si un test existant prouve que le comportement est correct, ne pas signaler le point. Un faux positif fait perdre confiance dans tout le rapport.
 5. **Rapprocher les constats du rapport existant** (voir « Mise à jour »), puis écrire le fichier.
-6. **Résumer dans la conversation** : nombre de points nouveaux, corrigés et toujours ouverts, et les deux ou trois points les plus graves. Le détail reste dans le fichier.
+6. **Résumer dans la conversation** : nombre de points nouveaux, corrigés et toujours ouverts, et les deux ou trois points les plus graves. Si une évolution du code a fait bouger des points existants (résolus, déplacés, transformés), les citer. Le détail reste dans le fichier.
 
 ## Sections du rapport
 
@@ -89,12 +89,16 @@ Les skills `correction-frontend` et `manuel-correction-frontend` ajoutent parfoi
 
 Pour chaque point du rapport existant :
 - **Toujours présent** : garder l'identifiant et la date de découverte, mettre à jour `Dernière vérification` et l'emplacement (les numéros de ligne bougent). Ajuster la gravité ou le texte si la situation a changé.
-- **Disparu du code** : passer le statut à `Corrigé le <date du jour>` et déplacer le point dans la section « Points clos ».
+- **Disparu du code** : passer le statut à `Corrigé le <date du jour>` et déplacer le point dans la section « Points clos ». Si la disparition vient d'une évolution et non d'une correction dédiée (refonte, suppression du composant, changement de bibliothèque), ajouter la ligne `- **Correction** : résolu par une évolution, sans correction dédiée : <ce qui a changé>`. L'historique git des fichiers concernés (`git log --since=<dernière vérification>`) aide à l'identifier.
+- **Déplacé par une évolution** (fichier renommé ou déplacé, composant refondu, problème identique) : c'est le même point. Garder l'identifiant, mettre à jour l'emplacement et ajouter une ligne « Révisé le … : déplacé de `<ancien emplacement>` vers `<nouvel emplacement>` ».
+- **Partiellement résolu par une évolution** : le point reste `Ouvert`. Réduire l'emplacement et le constat à ce qui subsiste et ajouter une ligne « Révisé le … ».
+- **Étendu par une évolution** (le même problème apparaît à de nouveaux endroits) : ajouter les emplacements au point existant, avec une ligne « Révisé le … », plutôt que de créer un nouveau point.
+- **Transformé par une évolution** (le problème d'origine a disparu, mais un autre problème, de nature différente, est apparu au même endroit) : fermer l'ancien point comme « Disparu du code » en mentionnant « remplacé par FRONT-… », et créer un nouveau point avec la date du jour qui renvoie à l'ancien (« fait suite à FRONT-… »).
 - **Marqué `Corrigé` manuellement mais toujours présent dans le code** : le rouvrir, ajouter une ligne « Rouvert le … : constat toujours présent dans le code », et le signaler dans le résumé.
 - **Statut `Ignoré`** : le laisser tel quel dans « Points clos » et ne pas le re-signaler comme nouveau, même si le code n'a pas changé : c'est une décision validée par l'utilisateur. Le rouvrir seulement si le contexte qui justifiait la décision a disparu, et l'expliquer dans le résumé.
 - **Réapparu après correction** : le rouvrir avec le même identifiant (statut `Ouvert`) et ajouter une ligne « Rouvert le … ».
 
-Pour reconnaître qu'un constat correspond à un point existant, se fier à sa **nature et à sa localisation** (même fichier ou même composant, même problème), pas au texte exact. Un problème déjà connu, simplement reformulé, ne doit pas recevoir un nouvel identifiant.
+Pour reconnaître qu'un constat correspond à un point existant, se fier à sa **nature et à sa localisation** (même fichier ou même composant, même problème), pas au texte exact. Un problème déjà connu, simplement reformulé, ne doit pas recevoir un nouvel identifiant. Après une refonte, la localisation peut avoir changé : c'est alors la nature du problème qui prime. En cas de doute entre « même point déplacé » et « nouveau point », préférer conserver l'identifiant existant et l'expliquer dans la ligne « Révisé le … ».
 
 Les constats sans correspondance sont des **nouveaux points** : leur attribuer un identifiant avec la date du jour.
 
