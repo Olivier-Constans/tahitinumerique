@@ -1,6 +1,6 @@
 # TimeZoneFrontend
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.2.
+This project uses [Angular CLI](https://github.com/angular/angular-cli) version 21.2.25.
 
 ## Development server
 
@@ -17,6 +17,10 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 ## Running unit tests
 
 Run `ng test` to execute the unit tests via [Vitest](https://vitest.dev) (jsdom environment). Use `ng test --watch=false` for a single run.
+
+## Linting
+
+Run `npm run lint` (or `ng lint`) to lint the TypeScript and HTML templates via [angular-eslint](https://github.com/angular-eslint/angular-eslint). Use `ng lint --fix` to automatically fix what can be fixed. Rules are configured in `eslint.config.js`.
 
 ## Running end-to-end tests
 

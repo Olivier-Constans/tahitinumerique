@@ -11,9 +11,9 @@
 } @else if(timezonesLoaded()) {
   <form (ngSubmit)="onSubmit()" [formGroup]="form">
     <div class="flex flex-column gap-2 m-2">
-      <label>Choisir un fuseau horaire</label>
+      <label for="timezone">Choisir un fuseau horaire</label>
       <div class="w-full">
-        <p-select class="w-full"
+        <p-select inputId="timezone" class="w-full"
           formControlName="timezone"
           [options]="timezones()"
           optionLabel="label"
