@@ -36,6 +36,15 @@ describe('AdministrationComponent', () => {
     element().querySelector<HTMLButtonElement>(`${selector} button`)!.click();
   }
 
+  // La boîte de confirmation peut être rendue hors du composant : on la cherche dans tout le document
+  async function clickInConfirmDialog(label: string) {
+    await fixture.whenStable();
+    const button = [...document.querySelectorAll<HTMLButtonElement>('.p-confirmdialog button')]
+      .find(it => it.textContent?.trim() === label);
+    button!.click();
+    await fixture.whenStable();
+  }
+
   it('affiche la liste des timezones de la première page', async () => {
     timezoneService.getAllTimezones.mockReturnValue(of(aPage([aTimezone({id: 1, label: 'Tahiti'}), aTimezone({id: 2, label: 'Paris'})])));
 
@@ -85,7 +94,7 @@ describe('AdministrationComponent', () => {
 
     await render();
     clickButton('p-button[icon="pi pi-trash"]');
-    await fixture.whenStable();
+    await clickInConfirmDialog('Supprimer');
 
     expect(timezoneService.deleteTimezone).toHaveBeenCalledWith(1);
     expect(timezoneService.getAllTimezones).toHaveBeenCalledTimes(2);
@@ -103,9 +112,31 @@ describe('AdministrationComponent', () => {
 
     timezoneService.getAllTimezones.mockReturnValue(of(aPage([], {totalElements: 10, totalPages: 1, number: 1})));
     clickButton('p-button[icon="pi pi-trash"]');
-    await fixture.whenStable();
+    await clickInConfirmDialog('Supprimer');
 
     expect(timezoneService.getAllTimezones).toHaveBeenLastCalledWith(0, 10);
+  });
+
+  it('demande confirmation en rappelant le fuseau à supprimer', async () => {
+    timezoneService.getAllTimezones.mockReturnValue(of(aPage([aTimezone({id: 1, label: 'Tahiti'})])));
+
+    await render();
+    clickButton('p-button[icon="pi pi-trash"]');
+    await fixture.whenStable();
+
+    expect(document.querySelector('.p-confirmdialog')?.textContent).toContain('Supprimer le fuseau « Tahiti » ?');
+    expect(timezoneService.deleteTimezone).not.toHaveBeenCalled();
+  });
+
+  it('ne supprime rien quand la suppression est annulée', async () => {
+    timezoneService.getAllTimezones.mockReturnValue(of(aPage([aTimezone({id: 1, label: 'Tahiti'})])));
+
+    await render();
+    clickButton('p-button[icon="pi pi-trash"]');
+    await clickInConfirmDialog('Annuler');
+
+    expect(timezoneService.deleteTimezone).not.toHaveBeenCalled();
+    expect(timezoneService.getAllTimezones).toHaveBeenCalledTimes(1);
   });
 
   it('ne recharge pas la liste quand la suppression échoue', async () => {
@@ -114,7 +145,7 @@ describe('AdministrationComponent', () => {
 
     await render();
     clickButton('p-button[icon="pi pi-trash"]');
-    await fixture.whenStable();
+    await clickInConfirmDialog('Supprimer');
 
     expect(timezoneService.getAllTimezones).toHaveBeenCalledTimes(1);
   });

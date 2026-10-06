@@ -9,8 +9,8 @@
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
 | 1. Analyse technique | 0 | 0 | 2 | 3 | 5 |
-| 2. Analyse fonctionnelle | 0 | 2 | 7 | 0 | 9 |
-| **Total** | **0** | **2** | **9** | **3** | **14** |
+| 2. Analyse fonctionnelle | 0 | 1 | 7 | 0 | 8 |
+| **Total** | **0** | **1** | **9** | **3** | **13** |
 
 **Outils** : lint OK (0 erreur) · tests 39/39 passés (8 fichiers) · build OK avec 1 avertissement (budget initial dépassé : 955,68 kB pour 500 kB)
 
@@ -89,14 +89,6 @@ Aucun point ouvert.
 - **Recommandation** : traiter l'erreur de validation à un seul endroit, par exemple un opérateur commun dans le service qui journalise la `$ZodError` (`console.error`) et affiche un toast « Réponse inattendue du serveur. » via `MessageService` avant de la propager. Distinguer dans le resolver un 404 réel (`HttpErrorResponse` de statut 404) des autres erreurs.
 
 ### 2.2 Analyse UX/UI
-
-#### FRONT-20261006-13 · Majeur · Suppression d'un fuseau sans confirmation
-- **Statut** : Ouvert
-- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
-- **Emplacement** : `src/app/view/administration/administration.component.html:27`, `src/app/view/administration/administration.component.ts:52`
-- **Constat** : un seul clic sur la corbeille supprime le fuseau immédiatement. Aucune confirmation ni annulation n'est proposée.
-- **Impact** : une suppression accidentelle est irréversible. Le bouton est en plus placé juste à côté de « Voir ».
-- **Recommandation** : utiliser `ConfirmationService` et `<p-confirmDialog />` de PrimeNG (« Supprimer le fuseau "Tahiti" ? »), puis afficher un toast de succès.
 
 #### FRONT-20261006-14 · Mineur · Retours visuels incomplets (chargement, succès)
 - **Statut** : Ouvert

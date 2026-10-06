@@ -2,6 +2,15 @@
 
 > Points corrigés ou ignorés, triés par date de clôture (la plus récente en premier). Les points ouverts sont dans `rapport-analyse-frontend.md`.
 
+#### FRONT-20261006-13 · Majeur · Suppression d'un fuseau sans confirmation
+- **Statut** : Corrigé le 2026-10-07
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `src/app/view/administration/administration.component.html:27`, `src/app/view/administration/administration.component.ts:52`
+- **Constat** : un seul clic sur la corbeille supprime le fuseau immédiatement. Aucune confirmation ni annulation n'est proposée.
+- **Impact** : une suppression accidentelle est irréversible. Le bouton est en plus placé juste à côté de « Voir ».
+- **Recommandation** : utiliser `ConfirmationService` et `<p-confirmDialog />` de PrimeNG (« Supprimer le fuseau "Tahiti" ? »), puis afficher un toast de succès.
+- **Correction** : le clic sur la corbeille ouvre un `p-confirmdialog` (« Supprimer le fuseau « <libellé> » ? Cette action est définitive. », boutons « Supprimer » en danger et « Annuler », focus par défaut sur « Annuler ») via `ConfirmationService` fourni au niveau du composant ; la suppression n'a lieu que dans `accept`. Fichiers : `administration.component.ts`, `administration.component.html`. Tests : les trois tests de suppression valident la boîte, ajout de « demande confirmation en rappelant le fuseau à supprimer » et « ne supprime rien quand la suppression est annulée ». Le toast de succès reste à traiter avec FRONT-20261006-14.
+
 #### FRONT-20261006-03 · Mineur · Utilitaires de date rangés dans `service/` et appelés par un modèle
 - **Statut** : Corrigé le 2026-10-07
 - **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07

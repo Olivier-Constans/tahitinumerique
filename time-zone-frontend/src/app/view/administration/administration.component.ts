@@ -7,13 +7,17 @@ import {PaginatorModule, PaginatorState} from "primeng/paginator";
 import {RouterLink} from "@angular/router";
 import {takeUntilDestroyed, toObservable, toSignal} from "@angular/core/rxjs-interop";
 import {TIMEZONE_PATH} from "./administration.routes";
+import {ConfirmationService} from "primeng/api";
+import {ConfirmDialog} from "primeng/confirmdialog";
 
 @Component({
     imports: [
         Button,
         PaginatorModule,
-        RouterLink
+        RouterLink,
+        ConfirmDialog
     ],
+    providers: [ConfirmationService],
     templateUrl: './administration.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -21,6 +25,7 @@ export class AdministrationComponent {
 
   private readonly _timezoneService = inject(TimezoneService);
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _confirmationService = inject(ConfirmationService);
 
   protected readonly TIMEZONE_PATH = TIMEZONE_PATH;
 
@@ -50,6 +55,20 @@ export class AdministrationComponent {
   }
 
   delete(data: TimezoneResponse) {
+    this._confirmationService.confirm({
+      header: 'Supprimer le fuseau horaire',
+      message: `Supprimer le fuseau « ${data.label} » ? Cette action est définitive.`,
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Supprimer',
+      rejectLabel: 'Annuler',
+      acceptButtonProps: {severity: 'danger'},
+      rejectButtonProps: {severity: 'secondary', outlined: true},
+      defaultFocus: 'reject',
+      accept: () => this._deleteTimezone(data)
+    });
+  }
+
+  private _deleteTimezone(data: TimezoneResponse) {
     this._timezoneService.deleteTimezone(data.id)
       .pipe(
         takeUntilDestroyed(this._destroyRef),
