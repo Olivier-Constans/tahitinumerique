@@ -55,6 +55,15 @@ describe('AdministrationComponent', () => {
     expect(labels).toEqual(['Tahiti', 'Paris']);
   });
 
+  it('donne un libellé accessible aux boutons réduits à une icône', async () => {
+    timezoneService.getAllTimezones.mockReturnValue(of(aPage([aTimezone({id: 1, label: 'Tahiti'})])));
+
+    await render();
+
+    const labels = [...element().querySelectorAll('p-button button')].map(it => it.getAttribute('aria-label'));
+    expect(labels).toEqual(['Ajouter un fuseau horaire', 'Modifier Tahiti', 'Voir Tahiti', 'Supprimer Tahiti']);
+  });
+
   it('indique qu\'aucune timezone n\'est configurée', async () => {
     timezoneService.getAllTimezones.mockReturnValue(of(aPage([])));
 

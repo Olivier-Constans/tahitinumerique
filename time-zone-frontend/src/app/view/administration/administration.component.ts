@@ -9,13 +9,15 @@ import {takeUntilDestroyed, toObservable, toSignal} from "@angular/core/rxjs-int
 import {TIMEZONE_PATH} from "./administration.routes";
 import {ConfirmationService} from "primeng/api";
 import {ConfirmDialog} from "primeng/confirmdialog";
+import {Tooltip} from "primeng/tooltip";
 
 @Component({
     imports: [
         Button,
         PaginatorModule,
         RouterLink,
-        ConfirmDialog
+        ConfirmDialog,
+        Tooltip
     ],
     providers: [ConfirmationService],
     templateUrl: './administration.component.html',

@@ -4,7 +4,8 @@
       <h2>Configuration des fuseaux horaires</h2>
     </div>
     <div class="flex-shrink-0">
-      <p-button icon="pi pi-plus" [rounded]="true" [routerLink]="[TIMEZONE_PATH, 'new']" />
+      <p-button icon="pi pi-plus" [rounded]="true" [routerLink]="[TIMEZONE_PATH, 'new']"
+                ariaLabel="Ajouter un fuseau horaire" pTooltip="Ajouter un fuseau horaire" tooltipPosition="left" />
     </div>
   </div>
 
@@ -22,9 +23,12 @@
           <div class="surface-200 m-2 p-2 flex align-items-center flex-wrap">
               <div class="flex-grow-1">{{result.label}}</div>
               <div class="flex-shrink-0">
-                <p-button icon="pi pi-pencil" [rounded]="true" [routerLink]="[TIMEZONE_PATH, result.id, 'edit']"/>
-                <p-button icon="pi pi-eye" [rounded]="true" severity="secondary" [routerLink]="[TIMEZONE_PATH, result.id]" />
-                <p-button icon="pi pi-trash" [rounded]="true" severity="danger" (onClick)="delete(result)"/>
+                <p-button icon="pi pi-pencil" [rounded]="true" [routerLink]="[TIMEZONE_PATH, result.id, 'edit']"
+                          ariaLabel="Modifier {{result.label}}" pTooltip="Modifier" tooltipPosition="top" />
+                <p-button icon="pi pi-eye" [rounded]="true" severity="secondary" [routerLink]="[TIMEZONE_PATH, result.id]"
+                          ariaLabel="Voir {{result.label}}" pTooltip="Voir" tooltipPosition="top" />
+                <p-button icon="pi pi-trash" [rounded]="true" severity="danger" (onClick)="delete(result)"
+                          ariaLabel="Supprimer {{result.label}}" pTooltip="Supprimer" tooltipPosition="top" />
               </div>
           </div>
         }

@@ -2,6 +2,15 @@
 
 > Points corrigés ou ignorés, triés par date de clôture (la plus récente en premier). Les points ouverts sont dans `rapport-analyse-frontend.md`.
 
+#### FRONT-20261006-17 · Majeur · Boutons réduits à une icône sans libellé accessible
+- **Statut** : Corrigé le 2026-10-07
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `src/app/shared/component/header/header.component.html:13`, `src/app/view/administration/administration.component.html:7,25,26,27`
+- **Constat** : les boutons `pi-cog`, `pi-plus`, `pi-pencil`, `pi-eye` et `pi-trash` n'ont ni `ariaLabel` ni texte. La règle `templateAccessibility` ne contrôle pas les composants PrimeNG, ce qui explique que `ng lint` ne les signale pas.
+- **Impact** : un lecteur d'écran annonce seulement « bouton », ce qui rend l'administration inutilisable sans la vue. L'absence d'infobulle gêne aussi les utilisateurs voyants.
+- **Recommandation** : ajouter par exemple `ariaLabel="Supprimer {{result.label}}"` et `pTooltip`, et faire de même pour « Administration », « Ajouter », « Modifier » et « Voir ».
+- **Correction** : ajout d'un `ariaLabel` et d'un `pTooltip` sur les cinq boutons réduits à une icône (« Administration » dans `header.component.html`, « Ajouter un fuseau horaire », « Modifier/Voir/Supprimer {{result.label}} » dans `administration.component.html`), import de `Tooltip` dans les deux composants ; tests ajoutés dans `header.component.spec.ts` et `administration.component.spec.ts` sur les `aria-label` rendus.
+
 #### FRONT-20261006-13 · Majeur · Suppression d'un fuseau sans confirmation
 - **Statut** : Corrigé le 2026-10-07
 - **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07

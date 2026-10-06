@@ -9,8 +9,8 @@
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
 | 1. Analyse technique | 0 | 0 | 2 | 3 | 5 |
-| 2. Analyse fonctionnelle | 0 | 1 | 7 | 0 | 8 |
-| **Total** | **0** | **1** | **9** | **3** | **13** |
+| 2. Analyse fonctionnelle | 0 | 0 | 7 | 0 | 7 |
+| **Total** | **0** | **0** | **9** | **3** | **12** |
 
 **Outils** : lint OK (0 erreur) · tests 39/39 passés (8 fichiers) · build OK avec 1 avertissement (budget initial dépassé : 955,68 kB pour 500 kB)
 
@@ -123,14 +123,6 @@ Aucun point ouvert.
 - **Recommandation** : titrer la section avec la saisie (« Le 06/10/2026 à 10:00 à Tahiti correspond à : »), à partir de la requête envoyée, et vider `result` (ou le griser) sur `form.valueChanges`.
 
 ### 2.3 Linter (templates et accessibilité)
-
-#### FRONT-20261006-17 · Majeur · Boutons réduits à une icône sans libellé accessible
-- **Statut** : Ouvert
-- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
-- **Emplacement** : `src/app/shared/component/header/header.component.html:13`, `src/app/view/administration/administration.component.html:7,25,26,27`
-- **Constat** : les boutons `pi-cog`, `pi-plus`, `pi-pencil`, `pi-eye` et `pi-trash` n'ont ni `ariaLabel` ni texte. La règle `templateAccessibility` ne contrôle pas les composants PrimeNG, ce qui explique que `ng lint` ne les signale pas.
-- **Impact** : un lecteur d'écran annonce seulement « bouton », ce qui rend l'administration inutilisable sans la vue. L'absence d'infobulle gêne aussi les utilisateurs voyants.
-- **Recommandation** : ajouter par exemple `ariaLabel="Supprimer {{result.label}}"` et `pTooltip`, et faire de même pour « Administration », « Ajouter », « Modifier » et « Voir ».
 
 #### FRONT-20261006-18 · Mineur · Langue du document déclarée en anglais
 - **Statut** : Ouvert

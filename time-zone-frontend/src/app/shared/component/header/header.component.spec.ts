@@ -24,6 +24,10 @@ describe('HeaderComponent', () => {
     expect(element().querySelector('h1')?.textContent).toBe('Fuseaux horaires');
   });
 
+  it('donne un libellé accessible au bouton d\'administration', () => {
+    expect(element().querySelector('p-button button')?.getAttribute('aria-label')).toBe('Administration');
+  });
+
   it('navigue vers l\'administration', async () => {
     element().querySelector<HTMLButtonElement>('p-button button')!.click();
     await fixture.whenStable();
