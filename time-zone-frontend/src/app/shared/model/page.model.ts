@@ -1,13 +1,5 @@
 import * as z from "zod/mini";
 
-export interface Page<T> {
-  content: T[];
-  totalPages: number;
-  totalElements: number;
-  number: number;
-  size: number;
-}
-
 export function pageOf<T extends z.ZodMiniType>(item: T) {
   return z.object({
     content: z.array(item),
@@ -17,3 +9,6 @@ export function pageOf<T extends z.ZodMiniType>(item: T) {
     size: z.number()
   });
 }
+
+// Dérivé du schéma pour qu'un champ ajouté ou renommé dans pageOf se répercute sur le type
+export type Page<T> = Omit<z.infer<ReturnType<typeof pageOf>>, 'content'> & { content: T[] };
