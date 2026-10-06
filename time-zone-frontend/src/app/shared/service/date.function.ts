@@ -4,10 +4,6 @@ export function toDate(value: string): Date {
   return new Date(value.replace(/(\.\d{3})\d+/, '$1'))
 }
 
-export function toUTCDate(value: string): Date {
-  return transformToUTCDate(toDate(value))
-}
-
 export function transformToUTCDate(value: Date): Date {
   return new Date(Date.UTC(
     value.getFullYear(),

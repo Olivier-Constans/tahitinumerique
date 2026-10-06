@@ -6,9 +6,9 @@
 
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
-| 1. Analyse technique | 0 | 1 | 5 | 3 | 9 |
+| 1. Analyse technique | 0 | 1 | 4 | 3 | 8 |
 | 2. Analyse fonctionnelle | 0 | 2 | 7 | 0 | 9 |
-| **Total** | **0** | **3** | **12** | **3** | **18** |
+| **Total** | **0** | **3** | **11** | **3** | **17** |
 
 **Outils** : lint OK (0 erreur) · tests 39/39 passés (8 fichiers) · build OK avec 1 avertissement (budget initial dépassé : 939,66 kB pour 500 kB)
 
@@ -27,14 +27,6 @@
 - **Recommandation** : passer à `tseslint.configs.recommendedTypeChecked` (avec `parserOptions.projectService: true`), ou au minimum activer `@typescript-eslint/no-non-null-assertion` en `warn`.
 
 ### 1.2 Structure du code
-
-#### FRONT-20261006-02 · Mineur · Code mort et fichiers vides
-- **Statut** : Ouvert
-- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
-- **Emplacement** : `src/app/shared/service/date.function.ts:7`, `src/app/app.component.ts:14`, `src/app/app.component.scss`, `src/styles.scss`
-- **Constat** : `toUTCDate` n'est utilisée que dans son test. `AppComponent.title` n'est lu nulle part. `app.component.scss` est vide et `styles.scss` ne contient que le commentaire généré par Angular CLI.
-- **Impact** : du bruit à la lecture, et un test qui maintient une fonction inutilisée.
-- **Recommandation** : supprimer `toUTCDate` et son test, ainsi que `title`. Supprimer `app.component.scss` et retirer `styleUrl` du composant.
 
 #### FRONT-20261006-03 · Mineur · Utilitaires de date rangés dans `service/` et appelés par un modèle
 - **Statut** : Ouvert
@@ -184,6 +176,15 @@
 - **Recommandation** : écrire `{{data.timezone.label}} :` (idéalement avec une espace insécable `&nbsp;`) et retirer l'espace finale des formats de date.
 
 ## Points clos
+
+#### FRONT-20261006-02 · Mineur · Code mort et fichiers vides
+- **Statut** : Corrigé le 2026-10-06
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-06
+- **Emplacement** : `src/app/shared/service/date.function.ts:7`, `src/app/app.component.ts:14`, `src/app/app.component.scss`, `src/styles.scss`
+- **Constat** : `toUTCDate` n'est utilisée que dans son test. `AppComponent.title` n'est lu nulle part. `app.component.scss` est vide et `styles.scss` ne contient que le commentaire généré par Angular CLI.
+- **Impact** : du bruit à la lecture, et un test qui maintient une fonction inutilisée.
+- **Recommandation** : supprimer `toUTCDate` et son test, ainsi que `title`. Supprimer `app.component.scss` et retirer `styleUrl` du composant.
+- **Correction** : `toUTCDate` supprimée de `date.function.ts` avec son test dans `date.function.spec.ts` (`toDate` et `transformToUTCDate`, utilisée par `home.component.ts`, sont conservées). Propriété `title` et `styleUrl` retirés de `app.component.ts`, fichier `app.component.scss` supprimé. Commentaire généré retiré de `styles.scss`, conservé vide comme point d'entrée des styles globaux déclaré dans `angular.json`. Lint OK, tests 38/38 (un test supprimé), build OK (avertissement de budget préexistant, suivi par un autre point).
 
 #### FRONT-20261006-05 · Mineur · Fautes de frappe dans les identifiants
 - **Statut** : Corrigé le 2026-10-06

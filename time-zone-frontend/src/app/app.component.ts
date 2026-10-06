@@ -7,9 +7,6 @@ import {Toast} from "primeng/toast";
     selector: 'app-root',
     imports: [RouterOutlet, HeaderComponent, Toast],
     templateUrl: './app.component.html',
-    styleUrl: './app.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent {
-  title = 'time-zone-frontend';
-}
+export class AppComponent {}

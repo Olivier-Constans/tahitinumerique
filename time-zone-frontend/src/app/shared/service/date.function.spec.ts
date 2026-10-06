@@ -1,4 +1,4 @@
-import {toDate, toUTCDate, transformToUTCDate} from "./date.function";
+import {toDate, transformToUTCDate} from "./date.function";
 
 describe('date.function', () => {
 
@@ -21,12 +21,6 @@ describe('date.function', () => {
       const date = transformToUTCDate(new Date(2026, 9, 6, 10, 15, 30, 500));
 
       expect(date.toISOString()).toBe('2026-10-06T10:15:30.000Z');
-    });
-  });
-
-  describe('toUTCDate', () => {
-    it("parse une date locale puis la convertit en UTC à l'identique", () => {
-      expect(toUTCDate('2026-10-06T10:15:30.987654').toISOString()).toBe('2026-10-06T10:15:30.000Z');
     });
   });
 });
