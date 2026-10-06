@@ -8,6 +8,7 @@ import {definePreset} from "@primeuix/themes";
 import Lara from "@primeuix/themes/lara";
 import {MessageService} from "primeng/api";
 import {httpErrorInterceptor} from "./shared/interceptor/http-error.interceptor";
+import {responseValidationInterceptor} from "./shared/interceptor/response-validation.interceptor";
 
 const LaraBlue = definePreset(Lara, {
   semantic: {
@@ -32,7 +33,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withFetch(), withInterceptors([httpErrorInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([responseValidationInterceptor, httpErrorInterceptor])),
     MessageService,
     providePrimeNG({
       theme: {

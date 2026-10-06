@@ -1,10 +1,12 @@
 import {TestBed} from '@angular/core/testing';
-import {provideHttpClient} from "@angular/common/http";
+import {provideHttpClient, withInterceptors} from "@angular/common/http";
 import {HttpTestingController, provideHttpClientTesting} from "@angular/common/http/testing";
 import {firstValueFrom} from "rxjs";
 import {TimezoneService} from './timezone.service';
 import {$ZodError} from "zod/v4/core";
 import {TimezoneRequest} from "../model/timezone.model";
+import {MessageService} from "primeng/api";
+import {responseValidationInterceptor} from "../interceptor/response-validation.interceptor";
 
 describe('TimezoneService', () => {
   let service: TimezoneService;
@@ -20,7 +22,11 @@ describe('TimezoneService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting()]
+      providers: [
+        provideHttpClient(withInterceptors([responseValidationInterceptor])),
+        provideHttpClientTesting(),
+        MessageService
+      ]
     });
     service = TestBed.inject(TimezoneService);
     httpTesting = TestBed.inject(HttpTestingController);
@@ -98,6 +104,7 @@ describe('TimezoneService', () => {
   });
 
   it('rejette une réponse dont le décalage UTC est inconnu', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const result = firstValueFrom(service.getTimezoneById(1));
 
     httpTesting.expectOne('api/timezones/1').flush({...timezoneJson(), offsetUTC: 'UTC+99'});

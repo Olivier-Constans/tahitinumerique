@@ -6,6 +6,7 @@ import {RouterTestingHarness} from "@angular/router/testing";
 import {MessageService} from "primeng/api";
 import {routes} from "./app.routes";
 import {httpErrorInterceptor} from "./shared/interceptor/http-error.interceptor";
+import {responseValidationInterceptor} from "./shared/interceptor/response-validation.interceptor";
 import {TimezoneEditComponent} from "./view/administration/timezone/timezone-edit/timezone-edit.component";
 import {HomeComponent} from "./view/home/home.component";
 import {OffsetUTC} from "./shared/model/offsetUTC.model";
@@ -24,7 +25,7 @@ describe('Parcours : création de deux fuseaux puis calcul', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter(routes, withComponentInputBinding()),
-        provideHttpClient(withInterceptors([httpErrorInterceptor])),
+        provideHttpClient(withInterceptors([responseValidationInterceptor, httpErrorInterceptor])),
         provideHttpClientTesting(),
         MessageService
       ]
