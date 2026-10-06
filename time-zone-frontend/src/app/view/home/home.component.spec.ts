@@ -81,7 +81,7 @@ describe('HomeComponent', () => {
       timezoneId: 1
     });
     const results = [...element().querySelectorAll('h2 ~ div')].map(it => it.textContent?.replace(/\s+/g, ' ').trim());
-    expect(results).toEqual(['tahiti: 06/10/2026 à 10:00', 'paris: 06/10/2026 à 22:00']);
+    expect(results).toEqual(['tahiti : 06/10/2026 à 10:00', 'paris : 06/10/2026 à 22:00']);
   });
 
   describe('chargement progressif des timezones dans la liste', () => {

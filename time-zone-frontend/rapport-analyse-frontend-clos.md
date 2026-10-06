@@ -2,6 +2,16 @@
 
 > Points corrigés ou ignorés, triés par date de clôture (la plus récente en premier). Les points ouverts sont dans `rapport-analyse-frontend.md`.
 
+#### FRONT-20261006-03 · Mineur · Utilitaires de date rangés dans `service/` et appelés par un modèle
+- **Statut** : Corrigé le 2026-10-07
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `src/app/shared/service/date.function.ts`, `src/app/shared/model/audit.model.ts:2,4`, `src/app/shared/model/calculateDate.model.ts:3`
+- **Constat** : `date.function.ts` contient des fonctions pures, pas un service injectable, mais il est rangé dans `service/`. De plus, `audit.model.ts` importe ce fichier pour son schéma `isoDate` : le modèle dépend de la couche service. Ce schéma générique `isoDate` est en outre déclaré dans `audit.model.ts` et réimporté par `calculateDate.model.ts`, alors qu'il ne concerne pas l'audit.
+- **Impact** : la hiérarchie des dépendances est floue (modèle → service), et un utilitaire est difficile à trouver.
+- **Recommandation** : déplacer `date.function.ts` vers `shared/util/date.util.ts`, et sortir `isoDate` dans un fichier de schémas communs (par exemple `shared/model/common.schema.ts`).
+- **Révisé le** 2026-10-07 : `auditResponseTransform` a disparu avec l'introduction de Zod (commit `d115c04`) ; la conversion passe désormais par le schéma `isoDate`, qui hérite de la même dépendance vers `service/`. Constat et recommandation ajustés.
+- **Correction** : `shared/service/date.function.ts` (et son spec) déplacé vers `shared/util/date.util.ts` ; schéma `isoDate` sorti de `audit.model.ts` vers `shared/model/date.model.ts`, importé par `audit.model.ts` et `calculateDate.model.ts` ; import de `home.component.ts` mis à jour. Aucun changement de comportement, tests existants déplacés. Lint et tests (39) au vert.
+
 #### FRONT-20261006-23 · Mineur · Typographie des libellés : deux-points sans espace et espace final
 - **Statut** : Corrigé le 2026-10-07
 - **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07

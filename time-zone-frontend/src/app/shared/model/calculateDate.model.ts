@@ -1,6 +1,6 @@
 import * as z from "zod/mini";
 import {TimezoneResponse} from "./timezone.model";
-import {isoDate} from "./audit.model";
+import {isoDate} from "./date.model";
 
 export const CalculateDateItemResponse = z.object({
   date: isoDate,

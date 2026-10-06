@@ -8,9 +8,9 @@
 
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
-| 1. Analyse technique | 0 | 0 | 3 | 3 | 6 |
+| 1. Analyse technique | 0 | 0 | 2 | 3 | 5 |
 | 2. Analyse fonctionnelle | 0 | 2 | 7 | 0 | 9 |
-| **Total** | **0** | **2** | **10** | **3** | **15** |
+| **Total** | **0** | **2** | **9** | **3** | **14** |
 
 **Outils** : lint OK (0 erreur) · tests 39/39 passés (8 fichiers) · build OK avec 1 avertissement (budget initial dépassé : 955,68 kB pour 500 kB)
 
@@ -23,15 +23,6 @@
 Aucun point ouvert.
 
 ### 1.2 Structure du code
-
-#### FRONT-20261006-03 · Mineur · Utilitaires de date rangés dans `service/` et appelés par un modèle
-- **Statut** : Ouvert
-- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
-- **Emplacement** : `src/app/shared/service/date.function.ts`, `src/app/shared/model/audit.model.ts:2,4`, `src/app/shared/model/calculateDate.model.ts:3`
-- **Constat** : `date.function.ts` contient des fonctions pures, pas un service injectable, mais il est rangé dans `service/`. De plus, `audit.model.ts` importe ce fichier pour son schéma `isoDate` : le modèle dépend de la couche service. Ce schéma générique `isoDate` est en outre déclaré dans `audit.model.ts` et réimporté par `calculateDate.model.ts`, alors qu'il ne concerne pas l'audit.
-- **Impact** : la hiérarchie des dépendances est floue (modèle → service), et un utilitaire est difficile à trouver.
-- **Recommandation** : déplacer `date.function.ts` vers `shared/util/date.util.ts`, et sortir `isoDate` dans un fichier de schémas communs (par exemple `shared/model/common.schema.ts`).
-- **Révisé le** 2026-10-07 : `auditResponseTransform` a disparu avec l'introduction de Zod (commit `d115c04`) ; la conversion passe désormais par le schéma `isoDate`, qui hérite de la même dépendance vers `service/`. Constat et recommandation ajustés.
 
 #### FRONT-20261006-04 · Info · Administration accessible sans authentification
 - **Statut** : Ouvert

@@ -11,7 +11,7 @@ import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {catchError, EMPTY, finalize, of, Subject, switchMap} from "rxjs";
 import {ScrollerLazyLoadEvent} from "primeng/types/scroller";
 import {CalculateDateRequest} from "../../shared/model/calculateDate.model";
-import {transformToUTCDate} from "../../shared/service/date.function";
+import {transformToUTCDate} from "../../shared/util/date.util";
 import {RouterLink} from "@angular/router";
 import {ADMIN_PATH} from "../../app.routes";
 import {TIMEZONE_PATH} from "../administration/administration.routes";

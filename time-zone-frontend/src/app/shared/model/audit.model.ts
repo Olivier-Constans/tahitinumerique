@@ -1,7 +1,5 @@
 import * as z from "zod/mini";
-import {toDate} from "../service/date.function";
-
-export const isoDate = z.pipe(z.string(), z.transform(toDate));
+import {isoDate} from "./date.model";
 
 export const AuditResponse = z.object({
   createDate: isoDate,

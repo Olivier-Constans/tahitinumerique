@@ -1,6 +1,6 @@
-import {toDate, transformToUTCDate} from "./date.function";
+import {toDate, transformToUTCDate} from "./date.util";
 
-describe('date.function', () => {
+describe('date.util', () => {
 
   describe('toDate', () => {
     it('tronque les décimales au-delà de la milliseconde', () => {
