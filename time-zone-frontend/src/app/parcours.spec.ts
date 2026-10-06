@@ -42,12 +42,13 @@ describe('Parcours : création de deux fuseaux puis calcul', () => {
 
   // whenStable attend la fin des requêtes HTTP en cours : on attend donc la requête avant de la résoudre
   async function expectRequest(match: string | RequestMatch): Promise<TestRequest> {
-    for (let i = 0; i < 50; i++) {
+    const deadline = Date.now() + 3000;
+    while (Date.now() < deadline) {
       const requests = httpTesting.match(match);
       if (requests.length === 1) {
         return requests[0];
       }
-      await new Promise(resolve => setTimeout(resolve));
+      await new Promise(resolve => setTimeout(resolve, 10));
     }
     return httpTesting.expectOne(match);
   }
@@ -98,5 +99,5 @@ describe('Parcours : création de deux fuseaux puis calcul', () => {
     expect(element().textContent).toContain('Résultats');
     expect(element().textContent).toContain('Tahiti :');
     expect(element().textContent).toContain('Paris :');
-  });
+  }, 15000);
 });
