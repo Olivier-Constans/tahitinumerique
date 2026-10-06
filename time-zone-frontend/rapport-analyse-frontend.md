@@ -8,9 +8,9 @@
 
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
-| 1. Analyse technique | 0 | 0 | 1 | 3 | 4 |
+| 1. Analyse technique | 0 | 0 | 0 | 2 | 2 |
 | 2. Analyse fonctionnelle | 0 | 0 | 7 | 0 | 7 |
-| **Total** | **0** | **0** | **8** | **3** | **11** |
+| **Total** | **0** | **0** | **7** | **2** | **9** |
 
 **Outils** : lint OK (0 erreur) · tests 39/39 passés (8 fichiers) · build OK avec 1 avertissement (budget initial dépassé : 955,68 kB pour 500 kB)
 
@@ -35,20 +35,20 @@ Aucun point ouvert.
 ### 1.3 Homogénéité
 
 #### FRONT-20261006-06 · Mineur · Style de code hétérogène (guillemets, espaces dans les imports, points-virgules)
+
 - **Statut** : Ouvert
+
 - **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
+
 - **Emplacement** : par exemple `src/app/app.component.ts:1-4`, `src/app/shared/service/timezone.service.ts:1-6`, `src/app/shared/service/date.function.ts`, `src/app/view/administration/timezone/timezone.routes.ts`
+
 - **Constat** : un même fichier mélange `import { X } from '...'` et `import {X} from "..."`. Les points-virgules manquent dans certains fichiers (`date.function.ts`, `timezone.routes.ts`) et sont présents ailleurs.
+
 - **Impact** : diffs bruyants, et pas de convention claire pour les contributeurs.
+
 - **Recommandation** : ajouter Prettier (avec un `.prettierrc` et `eslint-config-prettier`) ou les règles `@stylistic` correspondantes, puis reformater tout le projet en un seul commit.
 
-#### FRONT-20261007-02 · Info · Type `Page` déclaré à la main à côté du schéma `pageOf`
-- **Statut** : Ouvert
-- **Découvert le** : 2026-10-07 · **Dernière vérification** : 2026-10-07
-- **Emplacement** : `src/app/shared/model/page.model.ts:3-19`, `src/app/shared/service/timezone.service.ts:17`
-- **Constat** : depuis l'introduction de Zod, les types de réponse sont dérivés des schémas (`z.infer`), sauf `Page<T>`, qui reste une interface écrite à la main et dupliquée par la fonction `pageOf`. Rien ne relie les deux : `getAllTimezones` annonce `Page<TimezoneResponse>` et la compilation passe uniquement parce que les deux structures coïncident.
-- **Impact** : aucun défaut actuel, mais un champ ajouté ou renommé dans `pageOf` sans toucher l'interface (ou l'inverse) ne serait pas détecté.
-- **Recommandation** : dériver le type du schéma, par exemple `export type Page<T> = { content: T[] } & Omit<z.infer<ReturnType<typeof pageOf>>, 'content'>`, ou typer le retour de `pageOf` avec `z.ZodMiniType<Page<z.output<T>>>` pour que le compilateur vérifie la correspondance.
+Aucun point ouvert.
 
 ### 1.4 Qualité
 

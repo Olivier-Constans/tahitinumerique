@@ -2,6 +2,15 @@
 
 > Points corrigés ou ignorés, triés par date de clôture (la plus récente en premier). Les points ouverts sont dans `rapport-analyse-frontend.md`.
 
+#### FRONT-20261007-02 · Info · Type `Page` déclaré à la main à côté du schéma `pageOf`
+- **Statut** : Corrigé le 2026-10-07
+- **Découvert le** : 2026-10-07 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `src/app/shared/model/page.model.ts:3-19`, `src/app/shared/service/timezone.service.ts:17`
+- **Constat** : depuis l'introduction de Zod, les types de réponse sont dérivés des schémas (`z.infer`), sauf `Page<T>`, qui reste une interface écrite à la main et dupliquée par la fonction `pageOf`. Rien ne relie les deux : `getAllTimezones` annonce `Page<TimezoneResponse>` et la compilation passe uniquement parce que les deux structures coïncident.
+- **Impact** : aucun défaut actuel, mais un champ ajouté ou renommé dans `pageOf` sans toucher l'interface (ou l'inverse) ne serait pas détecté.
+- **Recommandation** : dériver le type du schéma, par exemple `export type Page<T> = { content: T[] } & Omit<z.infer<ReturnType<typeof pageOf>>, 'content'>`, ou typer le retour de `pageOf` avec `z.ZodMiniType<Page<z.output<T>>>` pour que le compilateur vérifie la correspondance.
+- **Correction** : l'interface `Page<T>` est remplacée par un type dérivé du schéma (`Omit<z.infer<ReturnType<typeof pageOf>>, 'content'> & { content: T[] }`) dans `src/app/shared/model/page.model.ts`. Vérifié qu'un champ ajouté à `pageOf` fait échouer la compilation (`src/testing/timezone.fixture.ts`). Lint et 43 tests OK.
+
 #### FRONT-20261006-09 · Mineur · Budget du bundle initial dépassé (PrimeFlex chargé en entier)
 - **Statut** : Corrigé le 2026-10-07
 - **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
