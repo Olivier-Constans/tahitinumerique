@@ -9,8 +9,8 @@
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
 | 1. Analyse technique | 0 | 0 | 0 | 1 | 1 |
-| 2. Analyse fonctionnelle | 0 | 0 | 3 | 0 | 3 |
-| **Total** | **0** | **0** | **3** | **1** | **4** |
+| 2. Analyse fonctionnelle | 0 | 0 | 2 | 0 | 2 |
+| **Total** | **0** | **0** | **2** | **1** | **3** |
 
 **Outils** : lint OK (0 erreur) · tests 39/39 passés (8 fichiers) · build OK avec 1 avertissement (budget initial dépassé : 955,68 kB pour 500 kB)
 
@@ -78,13 +78,7 @@ Aucun point ouvert.
 
 ### 2.3 Linter (templates et accessibilité)
 
-#### FRONT-20261006-18 · Mineur · Langue du document déclarée en anglais
-- **Statut** : Ouvert
-- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
-- **Emplacement** : `src/index.html:2`
-- **Constat** : `<html lang="en">` alors que l'interface est principalement en français.
-- **Impact** : les lecteurs d'écran prononcent le texte avec une phonétique anglaise, et la traduction automatique du navigateur se déclenche à tort.
-- **Recommandation** : `<html lang="fr">`, et enregistrer la locale `fr` (`registerLocaleData(localeFr)` et `LOCALE_ID`) pour les pipes de date.
+Aucun point ouvert.
 
 ### 2.4 Wording
 
