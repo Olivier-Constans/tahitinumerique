@@ -2,6 +2,15 @@
 
 > Points corrigés ou ignorés, triés par date de clôture (la plus récente en premier). Les points ouverts sont dans `rapport-analyse-frontend.md`.
 
+#### FRONT-20261007-09 · Mineur · Dépendance `@angular/platform-browser-dynamic` inutilisée
+- **Statut** : Corrigé le 2026-10-07
+- **Découvert le** : 2026-10-07 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `package.json:22`
+- **Constat** : aucun fichier de `src/` n'importe `@angular/platform-browser-dynamic`, et aucune autre dépendance ne la requiert (`npm ls` ne la montre qu'en dépendance directe). L'application démarre avec `bootstrapApplication` (`@angular/platform-browser`) et se compile en AOT avec `@angular/build:application`.
+- **Impact** : dépendance à maintenir et à mettre à jour sans usage. Elle n'alourdit pas le bundle, puisqu'elle n'est jamais importée.
+- **Recommandation** : `npm uninstall @angular/platform-browser-dynamic`, puis vérifier `npm run build` et `npx ng test --watch=false`.
+- **Correction** : déclarée manuellement par l'utilisateur, sans vérification du code.
+
 #### FRONT-20261007-04 · Majeur · Image Docker construite sans Tailwind
 - **Statut** : Corrigé le 2026-10-07
 - **Découvert le** : 2026-10-07 · **Dernière vérification** : 2026-10-07

@@ -8,9 +8,9 @@
 
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
-| 1. Analyse technique | 0 | 0 | 1 | 3 | 4 |
+| 1. Analyse technique | 0 | 0 | 0 | 3 | 3 |
 | 2. Analyse fonctionnelle | 0 | 0 | 5 | 0 | 5 |
-| **Total** | **0** | **0** | **6** | **3** | **9** |
+| **Total** | **0** | **0** | **5** | **3** | **8** |
 
 **Outils** : lint OK · tests 66/66 passés (13 fichiers) · build OK sans avertissement (bundle initial 648,24 kB pour un budget de 750 kB) · Prettier OK
 
@@ -23,14 +23,6 @@
 Aucun point ouvert.
 
 ### 1.2 Structure du code
-
-#### FRONT-20261007-09 · Mineur · Dépendance `@angular/platform-browser-dynamic` inutilisée
-- **Statut** : Ouvert
-- **Découvert le** : 2026-10-07 · **Dernière vérification** : 2026-10-07
-- **Emplacement** : `package.json:22`
-- **Constat** : aucun fichier de `src/` n'importe `@angular/platform-browser-dynamic`, et aucune autre dépendance ne la requiert (`npm ls` ne la montre qu'en dépendance directe). L'application démarre avec `bootstrapApplication` (`@angular/platform-browser`) et se compile en AOT avec `@angular/build:application`.
-- **Impact** : dépendance à maintenir et à mettre à jour sans usage. Elle n'alourdit pas le bundle, puisqu'elle n'est jamais importée.
-- **Recommandation** : `npm uninstall @angular/platform-browser-dynamic`, puis vérifier `npm run build` et `npx ng test --watch=false`.
 
 #### FRONT-20261006-04 · Info · Administration accessible sans authentification
 - **Statut** : Ouvert
