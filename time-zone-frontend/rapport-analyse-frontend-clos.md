@@ -2,6 +2,15 @@
 
 > Points corrigés ou ignorés, triés par date de clôture (la plus récente en premier). Les points ouverts sont dans `rapport-analyse-frontend.md`.
 
+#### FRONT-20261006-21 · Mineur · Formulaire de fuseau sans contrainte de longueur ni message de validation
+- **Statut** : Corrigé le 2026-10-07
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.ts:51-54`, `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.html:9-20`
+- **Constat** : le champ « Nom » n'a que `Validators.required`. Le back refuse un libellé de plus de 100 caractères (`Timezone.LABEL_MAX_LENGTH`, `ObjectValidator.maxLength`), mais le front ne le sait pas : l'utilisateur ne l'apprend qu'au toast d'erreur après l'envoi. Un nom composé uniquement d'espaces passe aussi `required`. Enfin, aucun message n'est affiché sous les champs : le bouton « Enregistrer » est simplement désactivé, sans dire pourquoi.
+- **Impact** : un aller-retour serveur pour une erreur détectable à la saisie, et un bouton grisé sans explication.
+- **Recommandation** : ajouter `Validators.maxLength(100)` et un validateur « non vide après `trim()` », `maxlength="100"` sur l'input, et un `<small class="p-error">` (ou `p-message`) sous chaque champ lorsqu'il est `invalid && touched`.
+- **Correction** : nouveau validateur `notBlank` (`src/app/shared/validator/not-blank.validator.ts`, testé) et `Validators.maxLength(LABEL_MAX_LENGTH)` (100, comme `Timezone.LABEL_MAX_LENGTH` côté back) sur le nom, `maxlength` sur l'input, libellé envoyé après `trim()`. Sous chaque champ `invalid && touched`, un `p-message` explique l'erreur (nom obligatoire ou trop long, décalage obligatoire), avec `[invalid]`, `aria-invalid` et `aria-describedby` sur le nom. Tests ajoutés dans `timezone.routes.spec.ts`. Lint, build et 59 tests OK.
+
 #### FRONT-20261006-14 · Mineur · Retours visuels incomplets (chargement, succès)
 - **Statut** : Corrigé le 2026-10-07
 - **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
