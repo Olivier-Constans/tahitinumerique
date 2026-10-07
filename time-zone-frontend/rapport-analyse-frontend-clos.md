@@ -2,6 +2,15 @@
 
 > Points corrigés ou ignorés, triés par date de clôture (la plus récente en premier). Les points ouverts sont dans `rapport-analyse-frontend.md`.
 
+#### FRONT-20261006-14 · Mineur · Retours visuels incomplets (chargement, succès)
+- **Statut** : Corrigé le 2026-10-07
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `src/app/view/home/home.component.html:11`, `src/app/view/administration/administration.component.html:12`, `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.html:20`
+- **Constat** : rien ne s'affiche pendant le chargement initial de la page d'accueil et de l'administration. Les boutons « Calculer » et « Enregistrer » n'ont pas d'état `loading` et restent cliquables pendant la requête. Seules les erreurs donnent lieu à un toast : la création, la modification et la suppression réussies ne sont pas confirmées.
+- **Impact** : sur un réseau lent, l'écran reste vide et l'utilisateur peut soumettre plusieurs fois.
+- **Recommandation** : afficher des `p-skeleton` ou un `p-progressSpinner` pendant le chargement, ajouter `[loading]` sur les boutons de soumission et un `messageService.add({severity: 'success', …})` après chaque écriture.
+- **Correction** : `p-progressSpinner` (avec `ariaLabel`) pendant le chargement initial de l'accueil et de l'administration ; `[loading]` sur « Calculer » (signal `calculating`) et « Enregistrer » (signal `saving`), avec garde dans `onSubmit` contre une double soumission ; toast de succès après création, modification (`timezone-edit.component.ts`) et suppression (`administration.component.ts`). Tests ajoutés ou adaptés dans `home.component.spec.ts`, `administration.component.spec.ts` et `timezone.routes.spec.ts`. Lint, build et 51 tests OK.
+
 #### FRONT-20261007-01 · Mineur · Échecs de validation Zod silencieux, y compris après une écriture réussie
 - **Statut** : Corrigé le 2026-10-07
 - **Découvert le** : 2026-10-07 · **Dernière vérification** : 2026-10-07

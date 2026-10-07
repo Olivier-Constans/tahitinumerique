@@ -10,7 +10,11 @@
   </div>
 
   <div class="resultat">
-    @if(result() === null) {
+    @if(result() === undefined) {
+      <div class="flex justify-center">
+        <p-progressSpinner ariaLabel="Chargement des fuseaux horaires" />
+      </div>
+    } @else if(result() === null) {
       <div>
         Impossible de charger les fuseaux horaires.
         <p-button label="Réessayer" [text]="true" (onClick)="retry()" />

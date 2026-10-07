@@ -1,9 +1,10 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {provideRouter} from "@angular/router";
-import {of, throwError} from "rxjs";
+import {of, Subject, throwError} from "rxjs";
 import {AdministrationComponent} from './administration.component';
 import {TimezoneService} from "../../shared/service/timezone.service";
 import {aPage, aTimezone} from "../../../testing/timezone.fixture";
+import {MessageService} from "primeng/api";
 
 describe('AdministrationComponent', () => {
   let fixture: ComponentFixture<AdministrationComponent>;
@@ -18,9 +19,11 @@ describe('AdministrationComponent', () => {
       imports: [AdministrationComponent],
       providers: [
         provideRouter([]),
-        {provide: TimezoneService, useValue: timezoneService}
+        {provide: TimezoneService, useValue: timezoneService},
+        MessageService
       ]
     });
+    vi.spyOn(TestBed.inject(MessageService), 'add');
   });
 
   async function render() {
@@ -62,6 +65,14 @@ describe('AdministrationComponent', () => {
 
     const labels = [...element().querySelectorAll('p-button button')].map(it => it.getAttribute('aria-label'));
     expect(labels).toEqual(['Ajouter un fuseau horaire', 'Modifier Tahiti', 'Voir Tahiti', 'Supprimer Tahiti']);
+  });
+
+  it('affiche un indicateur pendant le chargement', async () => {
+    timezoneService.getAllTimezones.mockReturnValue(new Subject());
+
+    await render();
+
+    expect(element().querySelector('p-progressSpinner')?.getAttribute('aria-label')).toBe('Chargement des fuseaux horaires');
   });
 
   it('indique qu\'aucune timezone n\'est configurée', async () => {
@@ -106,6 +117,10 @@ describe('AdministrationComponent', () => {
     await clickInConfirmDialog('Supprimer');
 
     expect(timezoneService.deleteTimezone).toHaveBeenCalledWith(1);
+    expect(TestBed.inject(MessageService).add).toHaveBeenCalledWith(expect.objectContaining({
+      severity: 'success',
+      detail: 'Fuseau horaire « Tahiti » supprimé.'
+    }));
     expect(timezoneService.getAllTimezones).toHaveBeenCalledTimes(2);
     expect(element().textContent).toContain('Aucun fuseau horaire configuré.');
   });
@@ -157,5 +172,6 @@ describe('AdministrationComponent', () => {
     await clickInConfirmDialog('Supprimer');
 
     expect(timezoneService.getAllTimezones).toHaveBeenCalledTimes(1);
+    expect(TestBed.inject(MessageService).add).not.toHaveBeenCalled();
   });
 });

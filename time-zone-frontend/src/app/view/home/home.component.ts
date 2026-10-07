@@ -13,6 +13,7 @@ import {ScrollerLazyLoadEvent} from "primeng/types/scroller";
 import {CalculateDateRequest} from "../../shared/model/calculateDate.model";
 import {transformToUTCDate} from "../../shared/util/date.util";
 import {RouterLink} from "@angular/router";
+import {ProgressSpinner} from "primeng/progressspinner";
 import {ADMIN_PATH} from "../../app.routes";
 import {TIMEZONE_PATH} from "../administration/administration.routes";
 
@@ -29,7 +30,8 @@ export interface HomeForm {
         ReactiveFormsModule,
         Select,
         Button,
-        RouterLink
+        RouterLink,
+        ProgressSpinner
     ],
     templateUrl: './home.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -63,11 +65,17 @@ export class HomeComponent {
   private _timezoneTotalPage = 0;
   private _timezoneLoading = false;
 
+  readonly calculating = signal(false);
   private readonly _calculateDate = new Subject<CalculateDateRequest>();
   readonly result = toSignal(this._calculateDate.pipe(
-    switchMap(form => this._timezoneService.calculateDate(form).pipe(
-      catchError(() => of(undefined))
-    ))
+    // switchMap désabonne la requête précédente (et exécute son finalize) avant d'appeler cette fonction
+    switchMap(form => {
+      this.calculating.set(true);
+      return this._timezoneService.calculateDate(form).pipe(
+        catchError(() => of(undefined)),
+        finalize(() => this.calculating.set(false))
+      );
+    })
   ));
 
   constructor() {
@@ -117,7 +125,7 @@ export class HomeComponent {
   }
 
   onSubmit() {
-    if(this.form.invalid) {
+    if(this.form.invalid || this.calculating()) {
       return;
     }
     this._calculateDate.next({

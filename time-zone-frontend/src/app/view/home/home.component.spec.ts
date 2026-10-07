@@ -1,6 +1,6 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {provideRouter} from "@angular/router";
-import {of, throwError} from "rxjs";
+import {of, Subject, throwError} from "rxjs";
 import {HomeComponent} from './home.component';
 import {TimezoneService} from "../../shared/service/timezone.service";
 import {aPage, aTimezone} from "../../../testing/timezone.fixture";
@@ -82,6 +82,36 @@ describe('HomeComponent', () => {
     });
     const results = [...element().querySelectorAll('h2 ~ div')].map(it => it.textContent?.replace(/\s+/g, ' ').trim());
     expect(results).toEqual(['tahiti : 06/10/2026 à 10:00', 'paris : 06/10/2026 à 22:00']);
+  });
+
+  it('affiche un indicateur pendant le chargement des timezones', async () => {
+    timezoneService.getAllTimezones.mockReturnValue(new Subject());
+
+    await render();
+
+    expect(element().querySelector('p-progressSpinner')?.getAttribute('aria-label')).toBe('Chargement des fuseaux horaires');
+    expect(element().querySelector('form')).toBeNull();
+  });
+
+  it('désactive le bouton Calculer pendant le calcul', async () => {
+    timezoneService.getAllTimezones.mockReturnValue(of(aPage([tahiti, paris])));
+    const pending = new Subject<never>();
+    timezoneService.calculateDate.mockReturnValue(pending);
+
+    await render();
+    fixture.componentInstance.form.setValue({timezone: tahiti, dateSearch: new Date(2026, 9, 6, 10, 0, 0)});
+    await fixture.whenStable();
+    const submit = element().querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    submit.click();
+    await fixture.whenStable();
+
+    expect(submit.disabled).toBe(true);
+    fixture.componentInstance.onSubmit();
+    expect(timezoneService.calculateDate).toHaveBeenCalledTimes(1);
+
+    pending.complete();
+    await fixture.whenStable();
+    expect(submit.disabled).toBe(false);
   });
 
   describe('chargement progressif des timezones dans la liste', () => {

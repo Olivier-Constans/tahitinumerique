@@ -1,13 +1,14 @@
 import {TestBed} from '@angular/core/testing';
 import {provideRouter, Router, withComponentInputBinding} from "@angular/router";
 import {RouterTestingHarness} from "@angular/router/testing";
-import {of, throwError} from "rxjs";
+import {of, Subject, throwError} from "rxjs";
 import {routes} from "../../../app.routes";
 import {TimezoneService} from "../../../shared/service/timezone.service";
 import {aTimezone} from "../../../../testing/timezone.fixture";
 import {OffsetUTC} from "../../../shared/model/offsetUTC.model";
 import {TimezoneEditComponent} from "./timezone-edit/timezone-edit.component";
 import {HttpErrorResponse} from "@angular/common/http";
+import {MessageService} from "primeng/api";
 
 describe('Routes timezone (consultation, création, modification)', () => {
   let harness: RouterTestingHarness;
@@ -23,9 +24,11 @@ describe('Routes timezone (consultation, création, modification)', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter(routes, withComponentInputBinding()),
-        {provide: TimezoneService, useValue: timezoneService}
+        {provide: TimezoneService, useValue: timezoneService},
+        MessageService
       ]
     });
+    vi.spyOn(TestBed.inject(MessageService), 'add');
     router = TestBed.inject(Router);
     harness = await RouterTestingHarness.create();
   });
@@ -102,7 +105,25 @@ describe('Routes timezone (consultation, création, modification)', () => {
       await submit();
 
       expect(timezoneService.createTimezone).toHaveBeenCalledWith({label: 'Tokyo', offsetUTC: 'UTC+09'});
+      expect(TestBed.inject(MessageService).add).toHaveBeenCalledWith(expect.objectContaining({
+        severity: 'success',
+        detail: 'Fuseau horaire « Tokyo » créé.'
+      }));
       expect(router.url).toBe('/admin/timezone/7');
+    });
+
+    it('désactive le bouton pendant l\'enregistrement', async () => {
+      const pending = new Subject<ReturnType<typeof aTimezone>>();
+      timezoneService.createTimezone.mockReturnValue(pending);
+
+      fillLabel('Tokyo');
+      selectOffset('UTC+09');
+      await harness.fixture.whenStable();
+      await submit();
+
+      expect(element().querySelector<HTMLButtonElement>('button[type="submit"]')!.disabled).toBe(true);
+      await submit();
+      expect(timezoneService.createTimezone).toHaveBeenCalledTimes(1);
     });
 
     it('reste sur le formulaire en cas d\'erreur', async () => {
@@ -138,6 +159,10 @@ describe('Routes timezone (consultation, création, modification)', () => {
       await submit();
 
       expect(timezoneService.updateTimezone).toHaveBeenCalledWith(5, {label: 'Papeete', offsetUTC: timezone.offsetUTC});
+      expect(TestBed.inject(MessageService).add).toHaveBeenCalledWith(expect.objectContaining({
+        severity: 'success',
+        detail: 'Fuseau horaire « Papeete » modifié.'
+      }));
       expect(router.url).toBe('/admin/timezone/5');
     });
 
