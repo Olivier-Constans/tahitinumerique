@@ -7,9 +7,10 @@ import {PaginatorModule, PaginatorState} from "primeng/paginator";
 import {RouterLink} from "@angular/router";
 import {takeUntilDestroyed, toObservable, toSignal} from "@angular/core/rxjs-interop";
 import {TIMEZONE_PATH} from "./administration.routes";
-import {ConfirmationService} from "primeng/api";
+import {ConfirmationService, MessageService} from "primeng/api";
 import {ConfirmDialog} from "primeng/confirmdialog";
 import {Tooltip} from "primeng/tooltip";
+import {ProgressSpinner} from "primeng/progressspinner";
 
 @Component({
     imports: [
@@ -17,7 +18,8 @@ import {Tooltip} from "primeng/tooltip";
         PaginatorModule,
         RouterLink,
         ConfirmDialog,
-        Tooltip
+        Tooltip,
+        ProgressSpinner
     ],
     providers: [ConfirmationService],
     templateUrl: './administration.component.html',
@@ -28,6 +30,7 @@ export class AdministrationComponent {
   private readonly _timezoneService = inject(TimezoneService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _confirmationService = inject(ConfirmationService);
+  private readonly _messageService = inject(MessageService);
 
   protected readonly TIMEZONE_PATH = TIMEZONE_PATH;
 
@@ -76,6 +79,9 @@ export class AdministrationComponent {
         takeUntilDestroyed(this._destroyRef),
         catchError(() => EMPTY)
       )
-      .subscribe(() => this._refresh.update(value => value + 1))
+      .subscribe(() => {
+        this._messageService.add({severity: 'success', summary: 'Succès', detail: `Fuseau horaire « ${data.label} » supprimé.`});
+        this._refresh.update(value => value + 1);
+      })
   }
 }

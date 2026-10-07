@@ -9,8 +9,8 @@
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
 | 1. Analyse technique | 0 | 0 | 0 | 1 | 1 |
-| 2. Analyse fonctionnelle | 0 | 0 | 6 | 0 | 6 |
-| **Total** | **0** | **0** | **6** | **1** | **7** |
+| 2. Analyse fonctionnelle | 0 | 0 | 5 | 0 | 5 |
+| **Total** | **0** | **0** | **5** | **1** | **6** |
 
 **Outils** : lint OK (0 erreur) · tests 39/39 passés (8 fichiers) · build OK avec 1 avertissement (budget initial dépassé : 955,68 kB pour 500 kB)
 
@@ -67,14 +67,6 @@ Aucun point ouvert.
 - **Recommandation** : ne pas passer par l'heure locale. Formater la saisie avec `formatDate(value, "yyyy-MM-dd'T'HH:mm:ss", 'fr')` et envoyer la chaîne obtenue. Afficher le résultat directement depuis la chaîne `LocalDateTime` reçue, ou avec `date:'…':'UTC'` après l'avoir parsée comme UTC.
 
 ### 2.2 Analyse UX/UI
-
-#### FRONT-20261006-14 · Mineur · Retours visuels incomplets (chargement, succès)
-- **Statut** : Ouvert
-- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
-- **Emplacement** : `src/app/view/home/home.component.html:11`, `src/app/view/administration/administration.component.html:12`, `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.html:20`
-- **Constat** : rien ne s'affiche pendant le chargement initial de la page d'accueil et de l'administration. Les boutons « Calculer » et « Enregistrer » n'ont pas d'état `loading` et restent cliquables pendant la requête. Seules les erreurs donnent lieu à un toast : la création, la modification et la suppression réussies ne sont pas confirmées.
-- **Impact** : sur un réseau lent, l'écran reste vide et l'utilisateur peut soumettre plusieurs fois.
-- **Recommandation** : afficher des `p-skeleton` ou un `p-progressSpinner` pendant le chargement, ajouter `[loading]` sur les boutons de soumission et un `messageService.add({severity: 'success', …})` après chaque écriture.
 
 #### FRONT-20261006-15 · Mineur · Navigation incomplète dans l'administration
 - **Statut** : Ouvert

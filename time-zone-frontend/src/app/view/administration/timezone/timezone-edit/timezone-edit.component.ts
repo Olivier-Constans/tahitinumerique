@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal} from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -15,7 +15,8 @@ import {OffsetUTC} from "../../../../shared/model/offsetUTC.model";
 import {Select} from "primeng/select";
 import {InputTextModule} from "primeng/inputtext";
 import {ADMIN_PATH} from "../../../../app.routes";
-import {catchError, EMPTY} from "rxjs";
+import {catchError, EMPTY, finalize} from "rxjs";
+import {MessageService} from "primeng/api";
 
 export interface TimezoneForm {
   label: FormControl<string | undefined>
@@ -40,6 +41,7 @@ export class TimezoneEditComponent {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
+  private readonly _messageService = inject(MessageService);
 
   protected readonly ADMIN_PATH = ADMIN_PATH;
 
@@ -47,6 +49,8 @@ export class TimezoneEditComponent {
 
   // Alimenté par le resolver de la route via withComponentInputBinding (absent en création)
   readonly data = input<TimezoneResponse>();
+
+  readonly saving = signal(false);
 
   readonly form: FormGroup<TimezoneForm> = this._formBuilder.group({
     label: this._formBuilder.control<string | undefined>(undefined, Validators.required),
@@ -64,7 +68,7 @@ export class TimezoneEditComponent {
   }
 
   onSubmit(){
-    if(this.form.invalid) {
+    if(this.form.invalid || this.saving()) {
       return;
     }
 
@@ -78,11 +82,18 @@ export class TimezoneEditComponent {
       this._timezoneService.updateTimezone(data.id, form) : this._timezoneService.createTimezone(form);
 
     // En cas d'erreur on reste sur le formulaire, le toast est affiché par l'intercepteur
+    this.saving.set(true);
     observable.pipe(
       takeUntilDestroyed(this._destroyRef),
-      catchError(() => EMPTY)
+      catchError(() => EMPTY),
+      finalize(() => this.saving.set(false))
     )
       .subscribe((response) => {
+        this._messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: `Fuseau horaire « ${response.label} » ${data ? 'modifié' : 'créé'}.`
+        });
         void this._router.navigate(data ? [".."] : ["..", response.id], {relativeTo: this._route});
       })
   }

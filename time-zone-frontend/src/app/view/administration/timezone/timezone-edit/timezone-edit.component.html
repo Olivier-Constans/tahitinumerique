@@ -17,6 +17,6 @@
   </div>
 
   <div>
-    <p-button [disabled]="form.invalid"  label="Enregistrer" ariaLabel="Enregistrer" type="submit" />
+    <p-button [disabled]="form.invalid" [loading]="saving()" label="Enregistrer" ariaLabel="Enregistrer" type="submit" />
   </div>
 </form>

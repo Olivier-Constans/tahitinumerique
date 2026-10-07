@@ -33,7 +33,7 @@
       />
     </div>
     <div>
-      <p-button [disabled]="form.invalid"  label="Calculer" ariaLabel="Calculer" type="submit" />
+      <p-button [disabled]="form.invalid" [loading]="calculating()" label="Calculer" ariaLabel="Calculer" type="submit" />
     </div>
   </form>
 
@@ -45,4 +45,8 @@
     </div>
     }
   }
+} @else {
+  <div class="flex justify-center">
+    <p-progressSpinner ariaLabel="Chargement des fuseaux horaires" />
+  </div>
 }
