@@ -7,7 +7,7 @@ Application Angular du projet Timezone de Tahiti Numérique. Elle propose deux u
 
 Les données viennent de l'API du back-end Spring Boot (dossier `../time-zone`), exposée sous `/api/timezones`.
 
-**Stack** : Angular 21 (composants standalone, zoneless, signals), PrimeNG 21 (thème Lara), Tailwind CSS 4 (avec `tailwindcss-primeui`), Zod 4 (`zod/mini`), Vitest + jsdom, angular-eslint.
+**Stack** : Angular 21 (composants standalone, zoneless, signals), PrimeNG 21 (thème Lara), Tailwind CSS 4 (avec `tailwindcss-primeui`), Zod 4 (`zod/mini`), Vitest + jsdom, angular-eslint, Prettier.
 
 ## Prérequis
 
@@ -34,6 +34,7 @@ L'application est servie sur http://localhost:4200 et se recharge à chaque modi
 | `npm start` | Serveur de développement avec proxy vers le back |
 | `npm test -- --watch=false` | Tests unitaires (Vitest, jsdom) en une passe. Sans l'option, les tests tournent en mode watch |
 | `npm run lint` | ESLint sur le TypeScript et les templates (règles dans `eslint.config.js`). `npx ng lint --fix` corrige ce qui peut l'être |
+| `npm run format` | Formate `src/` avec Prettier (règles dans `.prettierrc`). `npm run format:check` vérifie sans modifier |
 | `npm run build` | Build de production dans `dist/browser/` |
 
 ## Docker

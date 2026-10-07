@@ -1,15 +1,20 @@
-import {TestBed} from '@angular/core/testing';
-import {provideHttpClient, withInterceptors} from "@angular/common/http";
-import {HttpTestingController, provideHttpClientTesting, RequestMatch, TestRequest} from "@angular/common/http/testing";
-import {provideRouter, Router, withComponentInputBinding} from "@angular/router";
-import {RouterTestingHarness} from "@angular/router/testing";
-import {MessageService} from "primeng/api";
-import {routes} from "./app.routes";
-import {httpErrorInterceptor} from "./shared/interceptor/http-error.interceptor";
-import {responseValidationInterceptor} from "./shared/interceptor/response-validation.interceptor";
-import {TimezoneEditComponent} from "./view/administration/timezone/timezone-edit/timezone-edit.component";
-import {HomeComponent} from "./view/home/home.component";
-import {OffsetUTC} from "./shared/model/offsetUTC.model";
+import { TestBed } from '@angular/core/testing';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+  RequestMatch,
+  TestRequest,
+} from '@angular/common/http/testing';
+import { provideRouter, Router, withComponentInputBinding } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
+import { MessageService } from 'primeng/api';
+import { routes } from './app.routes';
+import { httpErrorInterceptor } from './shared/interceptor/http-error.interceptor';
+import { responseValidationInterceptor } from './shared/interceptor/response-validation.interceptor';
+import { TimezoneEditComponent } from './view/administration/timezone/timezone-edit/timezone-edit.component';
+import { HomeComponent } from './view/home/home.component';
+import { OffsetUTC } from './shared/model/offsetUTC.model';
 
 // Parcours complet à travers les vraies routes, le vrai service et l'intercepteur : seul le back est simulé
 describe('Parcours : création de deux fuseaux puis calcul', () => {
@@ -17,9 +22,9 @@ describe('Parcours : création de deux fuseaux puis calcul', () => {
   let router: Router;
   let httpTesting: HttpTestingController;
 
-  const audit = {createDate: '2026-10-06T08:00:00Z', updateDate: '2026-10-06T08:00:00Z'};
-  const tahiti = {id: 1, label: 'Tahiti', offsetUTC: 'UTC-10', audit};
-  const paris = {id: 2, label: 'Paris', offsetUTC: 'UTC+02', audit};
+  const audit = { createDate: '2026-10-06T08:00:00Z', updateDate: '2026-10-06T08:00:00Z' };
+  const tahiti = { id: 1, label: 'Tahiti', offsetUTC: 'UTC-10', audit };
+  const paris = { id: 2, label: 'Paris', offsetUTC: 'UTC+02', audit };
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
@@ -27,8 +32,8 @@ describe('Parcours : création de deux fuseaux puis calcul', () => {
         provideRouter(routes, withComponentInputBinding()),
         provideHttpClient(withInterceptors([responseValidationInterceptor, httpErrorInterceptor])),
         provideHttpClientTesting(),
-        MessageService
-      ]
+        MessageService,
+      ],
     });
     router = TestBed.inject(Router);
     httpTesting = TestBed.inject(HttpTestingController);
@@ -49,12 +54,12 @@ describe('Parcours : création de deux fuseaux puis calcul', () => {
       if (requests.length === 1) {
         return requests[0];
       }
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
     }
     return httpTesting.expectOne(match);
   }
 
-  async function createTimezone(timezone: {id: number, label: string, offsetUTC: string}) {
+  async function createTimezone(timezone: { id: number; label: string; offsetUTC: string }) {
     await harness.navigateByUrl('/admin/timezone/new');
     const input = element().querySelector<HTMLInputElement>('input#label')!;
     input.value = timezone.label;
@@ -64,12 +69,12 @@ describe('Parcours : création de deux fuseaux puis calcul', () => {
     await harness.fixture.whenStable();
     element().querySelector<HTMLButtonElement>('button[type="submit"]')!.click();
 
-    const post = await expectRequest({method: 'POST', url: 'api/timezones'});
-    expect(post.request.body).toEqual({label: timezone.label, offsetUTC: timezone.offsetUTC});
-    post.flush({...timezone, audit});
+    const post = await expectRequest({ method: 'POST', url: 'api/timezones' });
+    expect(post.request.body).toEqual({ label: timezone.label, offsetUTC: timezone.offsetUTC });
+    post.flush({ ...timezone, audit });
 
     // Redirection vers la consultation, chargée par le resolver
-    (await expectRequest(`api/timezones/${timezone.id}`)).flush({...timezone, audit});
+    (await expectRequest(`api/timezones/${timezone.id}`)).flush({ ...timezone, audit });
     await harness.fixture.whenStable();
     expect(router.url).toBe(`/admin/timezone/${timezone.id}`);
     expect(element().querySelector('h2')?.textContent).toBe(timezone.label);
@@ -80,21 +85,31 @@ describe('Parcours : création de deux fuseaux puis calcul', () => {
     await createTimezone(paris);
 
     void router.navigateByUrl('/');
-    (await expectRequest({method: 'GET', url: 'api/timezones?page=0&size=10'}))
-      .flush({content: [tahiti, paris], totalPages: 1, totalElements: 2, number: 0, size: 10});
+    (await expectRequest({ method: 'GET', url: 'api/timezones?page=0&size=10' })).flush({
+      content: [tahiti, paris],
+      totalPages: 1,
+      totalElements: 2,
+      number: 0,
+      size: 10,
+    });
     await harness.fixture.whenStable();
 
     const home = harness.routeDebugElement!.componentInstance as HomeComponent;
-    home.form.setValue({timezone: home.timezones()[0], dateSearch: new Date(2026, 9, 6, 10, 0)});
+    home.form.setValue({ timezone: home.timezones()[0], dateSearch: new Date(2026, 9, 6, 10, 0) });
     await harness.fixture.whenStable();
     element().querySelector<HTMLButtonElement>('button[type="submit"]')!.click();
 
-    const calculate = await expectRequest({method: 'POST', url: 'api/timezones/calculate-date'});
-    expect(calculate.request.body).toEqual({date: new Date('2026-10-06T10:00:00Z'), timezoneId: 1});
-    calculate.flush({calculateDateItemList: [
-      {date: '2026-10-06T20:00:00Z', timezone: tahiti},
-      {date: '2026-10-07T08:00:00Z', timezone: paris}
-    ]});
+    const calculate = await expectRequest({ method: 'POST', url: 'api/timezones/calculate-date' });
+    expect(calculate.request.body).toEqual({
+      date: new Date('2026-10-06T10:00:00Z'),
+      timezoneId: 1,
+    });
+    calculate.flush({
+      calculateDateItemList: [
+        { date: '2026-10-06T20:00:00Z', timezone: tahiti },
+        { date: '2026-10-07T08:00:00Z', timezone: paris },
+      ],
+    });
     await harness.fixture.whenStable();
 
     expect(element().textContent).toContain('Résultats');

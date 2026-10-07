@@ -1,28 +1,25 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {provideRouter} from "@angular/router";
-import {of, Subject, throwError} from "rxjs";
-import {HomeComponent} from './home.component';
-import {TimezoneService} from "../../shared/service/timezone.service";
-import {aPage, aTimezone} from "../../../testing/timezone.fixture";
-import {CalculateDateResponse} from "../../shared/model/calculateDate.model";
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { of, Subject, throwError } from 'rxjs';
+import { HomeComponent } from './home.component';
+import { TimezoneService } from '../../shared/service/timezone.service';
+import { aPage, aTimezone } from '../../../testing/timezone.fixture';
+import { CalculateDateResponse } from '../../shared/model/calculateDate.model';
 
 describe('HomeComponent', () => {
   let fixture: ComponentFixture<HomeComponent>;
-  const tahiti = aTimezone({id: 1, label: 'tahiti'});
-  const paris = aTimezone({id: 2, label: 'paris'});
+  const tahiti = aTimezone({ id: 1, label: 'tahiti' });
+  const paris = aTimezone({ id: 2, label: 'paris' });
   const timezoneService = {
     getAllTimezones: vi.fn<TimezoneService['getAllTimezones']>(),
-    calculateDate: vi.fn<TimezoneService['calculateDate']>()
+    calculateDate: vi.fn<TimezoneService['calculateDate']>(),
   };
 
   beforeEach(() => {
     vi.resetAllMocks();
     TestBed.configureTestingModule({
       imports: [HomeComponent],
-      providers: [
-        provideRouter([]),
-        {provide: TimezoneService, useValue: timezoneService}
-      ]
+      providers: [provideRouter([]), { provide: TimezoneService, useValue: timezoneService }],
     });
   });
 
@@ -60,18 +57,23 @@ describe('HomeComponent', () => {
 
   it('calcule la date dans chaque timezone et affiche les résultats', async () => {
     timezoneService.getAllTimezones.mockReturnValue(of(aPage([tahiti, paris])));
-    timezoneService.calculateDate.mockReturnValue(of({
-      calculateDateItemList: [
-        {timezone: tahiti, date: new Date(2026, 9, 6, 10, 0)},
-        {timezone: paris, date: new Date(2026, 9, 6, 22, 0)}
-      ]
-    }));
+    timezoneService.calculateDate.mockReturnValue(
+      of({
+        calculateDateItemList: [
+          { timezone: tahiti, date: new Date(2026, 9, 6, 10, 0) },
+          { timezone: paris, date: new Date(2026, 9, 6, 22, 0) },
+        ],
+      }),
+    );
 
     await render();
     const submit = element().querySelector<HTMLButtonElement>('button[type="submit"]')!;
     expect(submit.disabled).toBe(true);
 
-    fixture.componentInstance.form.setValue({timezone: tahiti, dateSearch: new Date(2026, 9, 6, 10, 0, 0)});
+    fixture.componentInstance.form.setValue({
+      timezone: tahiti,
+      dateSearch: new Date(2026, 9, 6, 10, 0, 0),
+    });
     await fixture.whenStable();
     submit.click();
     await fixture.whenStable();
@@ -79,21 +81,30 @@ describe('HomeComponent', () => {
     // L'heure saisie est transmise telle quelle, sans décalage lié au fuseau du navigateur
     expect(timezoneService.calculateDate).toHaveBeenCalledWith({
       date: new Date('2026-10-06T10:00:00.000Z'),
-      timezoneId: 1
+      timezoneId: 1,
     });
-    const results = [...element().querySelectorAll('h2 ~ div')].map(it => it.textContent?.replace(/\s+/g, ' ').trim());
+    const results = [...element().querySelectorAll('h2 ~ div')].map((it) =>
+      it.textContent?.replace(/\s+/g, ' ').trim(),
+    );
     expect(results).toEqual(['tahiti : 06/10/2026 à 10:00', 'paris : 06/10/2026 à 22:00']);
-    expect(element().querySelector('h2 + p')?.textContent).toBe('Le 06/10/2026 à 10:00 à tahiti correspond à :');
+    expect(element().querySelector('h2 + p')?.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+      'Le 06/10/2026 à 10:00 à tahiti correspond à :',
+    );
   });
 
   it('efface les résultats dès que la saisie est modifiée', async () => {
     timezoneService.getAllTimezones.mockReturnValue(of(aPage([tahiti, paris])));
-    timezoneService.calculateDate.mockReturnValue(of({
-      calculateDateItemList: [{timezone: tahiti, date: new Date(2026, 9, 6, 10, 0)}]
-    }));
+    timezoneService.calculateDate.mockReturnValue(
+      of({
+        calculateDateItemList: [{ timezone: tahiti, date: new Date(2026, 9, 6, 10, 0) }],
+      }),
+    );
 
     await render();
-    fixture.componentInstance.form.setValue({timezone: tahiti, dateSearch: new Date(2026, 9, 6, 10, 0, 0)});
+    fixture.componentInstance.form.setValue({
+      timezone: tahiti,
+      dateSearch: new Date(2026, 9, 6, 10, 0, 0),
+    });
     fixture.componentInstance.onSubmit();
     await fixture.whenStable();
     expect(element().textContent).toContain('Résultats');
@@ -104,16 +115,21 @@ describe('HomeComponent', () => {
     expect(element().textContent).not.toContain('Résultats');
   });
 
-  it('ignore la réponse d\'un calcul lancé avant une modification de la saisie', async () => {
+  it("ignore la réponse d'un calcul lancé avant une modification de la saisie", async () => {
     timezoneService.getAllTimezones.mockReturnValue(of(aPage([tahiti, paris])));
     const pending = new Subject<CalculateDateResponse>();
     timezoneService.calculateDate.mockReturnValue(pending);
 
     await render();
-    fixture.componentInstance.form.setValue({timezone: tahiti, dateSearch: new Date(2026, 9, 6, 10, 0, 0)});
+    fixture.componentInstance.form.setValue({
+      timezone: tahiti,
+      dateSearch: new Date(2026, 9, 6, 10, 0, 0),
+    });
     fixture.componentInstance.onSubmit();
     fixture.componentInstance.form.controls.timezone.setValue(paris);
-    pending.next({calculateDateItemList: [{timezone: tahiti, date: new Date(2026, 9, 6, 10, 0)}]});
+    pending.next({
+      calculateDateItemList: [{ timezone: tahiti, date: new Date(2026, 9, 6, 10, 0) }],
+    });
     await fixture.whenStable();
 
     expect(pending.observed).toBe(false);
@@ -126,7 +142,9 @@ describe('HomeComponent', () => {
 
     await render();
 
-    expect(element().querySelector('p-progressSpinner')?.getAttribute('aria-label')).toBe('Chargement des fuseaux horaires');
+    expect(element().querySelector('p-progressSpinner')?.getAttribute('aria-label')).toBe(
+      'Chargement des fuseaux horaires',
+    );
     expect(element().querySelector('form')).toBeNull();
   });
 
@@ -136,7 +154,10 @@ describe('HomeComponent', () => {
     timezoneService.calculateDate.mockReturnValue(pending);
 
     await render();
-    fixture.componentInstance.form.setValue({timezone: tahiti, dateSearch: new Date(2026, 9, 6, 10, 0, 0)});
+    fixture.componentInstance.form.setValue({
+      timezone: tahiti,
+      dateSearch: new Date(2026, 9, 6, 10, 0, 0),
+    });
     await fixture.whenStable();
     const submit = element().querySelector<HTMLButtonElement>('button[type="submit"]')!;
     submit.click();
@@ -152,24 +173,30 @@ describe('HomeComponent', () => {
   });
 
   describe('chargement progressif des timezones dans la liste', () => {
-    const firstPage = Array.from({length: 10}, (_, i) => aTimezone({id: i, label: `tz ${i}`}));
+    const firstPage = Array.from({ length: 10 }, (_, i) => aTimezone({ id: i, label: `tz ${i}` }));
 
-    it('charge la page suivante à l\'approche de la fin de la liste', async () => {
-      timezoneService.getAllTimezones.mockReturnValueOnce(of(aPage(firstPage, {totalElements: 12, totalPages: 2})));
-      timezoneService.getAllTimezones.mockReturnValueOnce(of(aPage([tahiti, paris], {totalElements: 12, totalPages: 2, number: 1})));
+    it("charge la page suivante à l'approche de la fin de la liste", async () => {
+      timezoneService.getAllTimezones.mockReturnValueOnce(
+        of(aPage(firstPage, { totalElements: 12, totalPages: 2 })),
+      );
+      timezoneService.getAllTimezones.mockReturnValueOnce(
+        of(aPage([tahiti, paris], { totalElements: 12, totalPages: 2, number: 1 })),
+      );
       await render();
 
-      fixture.componentInstance.onLazyLoadTimezone({first: 0, last: 6});
+      fixture.componentInstance.onLazyLoadTimezone({ first: 0, last: 6 });
 
       expect(timezoneService.getAllTimezones).toHaveBeenLastCalledWith(1, 10);
       expect(fixture.componentInstance.timezones()).toEqual([...firstPage, tahiti, paris]);
     });
 
-    it('ne charge rien tant que la fin de la liste n\'est pas proche', async () => {
-      timezoneService.getAllTimezones.mockReturnValue(of(aPage(firstPage, {totalElements: 12, totalPages: 2})));
+    it("ne charge rien tant que la fin de la liste n'est pas proche", async () => {
+      timezoneService.getAllTimezones.mockReturnValue(
+        of(aPage(firstPage, { totalElements: 12, totalPages: 2 })),
+      );
       await render();
 
-      fixture.componentInstance.onLazyLoadTimezone({first: 0, last: 4});
+      fixture.componentInstance.onLazyLoadTimezone({ first: 0, last: 4 });
 
       expect(timezoneService.getAllTimezones).toHaveBeenCalledTimes(1);
     });
@@ -178,7 +205,7 @@ describe('HomeComponent', () => {
       timezoneService.getAllTimezones.mockReturnValue(of(aPage(firstPage)));
       await render();
 
-      fixture.componentInstance.onLazyLoadTimezone({first: 0, last: 9});
+      fixture.componentInstance.onLazyLoadTimezone({ first: 0, last: 9 });
 
       expect(timezoneService.getAllTimezones).toHaveBeenCalledTimes(1);
     });

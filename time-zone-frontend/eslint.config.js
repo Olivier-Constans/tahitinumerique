@@ -3,6 +3,7 @@ const eslint = require("@eslint/js");
 const { defineConfig } = require("eslint/config");
 const tseslint = require("typescript-eslint");
 const angular = require("angular-eslint");
+const prettier = require("eslint-config-prettier/flat");
 
 module.exports = defineConfig([
   {
@@ -49,5 +50,7 @@ module.exports = defineConfig([
       angular.configs.templateAccessibility,
     ],
     rules: {},
-  }
+  },
+  // Désactive les règles de mise en forme qui entreraient en conflit avec Prettier
+  prettier,
 ]);

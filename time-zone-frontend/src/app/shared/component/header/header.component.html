@@ -1,7 +1,7 @@
 <p-toolbar>
   <ng-template #start>
     <a routerLink="/" class="flex">
-      <img src="tn-image.webp" alt="Retour à l'accueil" class="w-20"/>
+      <img src="tn-image.webp" alt="Retour à l'accueil" class="w-20" />
     </a>
   </ng-template>
   <ng-template #center>
@@ -10,7 +10,15 @@
     </div>
   </ng-template>
   <ng-template #end>
-    <p-button icon="pi pi-cog" [rounded]="true" [text]="true" severity="secondary" [routerLink]="ADMIN_PATH"
-              ariaLabel="Administration" pTooltip="Administration" tooltipPosition="left" />
+    <p-button
+      icon="pi pi-cog"
+      [rounded]="true"
+      [text]="true"
+      severity="secondary"
+      [routerLink]="ADMIN_PATH"
+      ariaLabel="Administration"
+      pTooltip="Administration"
+      tooltipPosition="left"
+    />
   </ng-template>
 </p-toolbar>

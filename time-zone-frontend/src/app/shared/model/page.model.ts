@@ -1,4 +1,4 @@
-import * as z from "zod/mini";
+import * as z from 'zod/mini';
 
 export function pageOf<T extends z.ZodMiniType>(item: T) {
   return z.object({
@@ -6,7 +6,7 @@ export function pageOf<T extends z.ZodMiniType>(item: T) {
     totalPages: z.number(),
     totalElements: z.number(),
     number: z.number(),
-    size: z.number()
+    size: z.number(),
   });
 }
 

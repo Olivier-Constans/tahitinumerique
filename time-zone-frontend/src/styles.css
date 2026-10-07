@@ -2,6 +2,6 @@
    Le preflight de Tailwind n'est pas importé, pour ne pas réinitialiser les styles de base. */
 @layer theme, base, primeng, components, utilities;
 
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/utilities.css" layer(utilities);
-@import "tailwindcss-primeui";
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import 'tailwindcss-primeui';

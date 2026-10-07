@@ -1,5 +1,5 @@
-import {TimezoneResponse} from "../app/shared/model/timezone.model";
-import {Page} from "../app/shared/model/page.model";
+import { TimezoneResponse } from '../app/shared/model/timezone.model';
+import { Page } from '../app/shared/model/page.model';
 
 export function aTimezone(overrides: Partial<TimezoneResponse> = {}): TimezoneResponse {
   return {
@@ -8,9 +8,9 @@ export function aTimezone(overrides: Partial<TimezoneResponse> = {}): TimezoneRe
     offsetUTC: 'UTC-10',
     audit: {
       createDate: new Date('2026-01-01T10:00:00Z'),
-      updateDate: new Date('2026-01-02T10:00:00Z')
+      updateDate: new Date('2026-01-02T10:00:00Z'),
     },
-    ...overrides
+    ...overrides,
   };
 }
 
@@ -21,6 +21,6 @@ export function aPage<T>(content: T[], overrides: Partial<Page<T>> = {}): Page<T
     totalPages: 1,
     number: 0,
     size: 10,
-    ...overrides
+    ...overrides,
   };
 }

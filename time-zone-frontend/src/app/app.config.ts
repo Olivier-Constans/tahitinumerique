@@ -1,16 +1,21 @@
-import { ApplicationConfig, LOCALE_ID, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
+import {
+  ApplicationConfig,
+  LOCALE_ID,
+  provideBrowserGlobalErrorListeners,
+  provideZonelessChangeDetection,
+} from '@angular/core';
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { routes } from './app.routes';
-import {provideHttpClient, withFetch, withInterceptors} from "@angular/common/http";
-import {providePrimeNG} from "primeng/config";
-import {definePreset} from "@primeuix/themes";
-import Lara from "@primeuix/themes/lara";
-import {MessageService} from "primeng/api";
-import {httpErrorInterceptor} from "./shared/interceptor/http-error.interceptor";
-import {responseValidationInterceptor} from "./shared/interceptor/response-validation.interceptor";
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { providePrimeNG } from 'primeng/config';
+import { definePreset } from '@primeuix/themes';
+import Lara from '@primeuix/themes/lara';
+import { MessageService } from 'primeng/api';
+import { httpErrorInterceptor } from './shared/interceptor/http-error.interceptor';
+import { responseValidationInterceptor } from './shared/interceptor/response-validation.interceptor';
 
 registerLocaleData(localeFr);
 
@@ -27,9 +32,9 @@ const LaraBlue = definePreset(Lara, {
       700: '{blue.700}',
       800: '{blue.800}',
       900: '{blue.900}',
-      950: '{blue.950}'
-    }
-  }
+      950: '{blue.950}',
+    },
+  },
 });
 
 export const appConfig: ApplicationConfig = {
@@ -39,7 +44,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withFetch(), withInterceptors([responseValidationInterceptor, httpErrorInterceptor])),
     MessageService,
-    {provide: LOCALE_ID, useValue: 'fr'},
+    { provide: LOCALE_ID, useValue: 'fr' },
     providePrimeNG({
       theme: {
         preset: LaraBlue,
@@ -47,10 +52,10 @@ export const appConfig: ApplicationConfig = {
           darkModeSelector: false,
           cssLayer: {
             name: 'primeng',
-            order: 'theme, base, primeng, components, utilities'
-          }
-        }
-      }
-    })
-  ]
+            order: 'theme, base, primeng, components, utilities',
+          },
+        },
+      },
+    }),
+  ],
 };
