@@ -1,10 +1,10 @@
 import { inject, Injectable } from '@angular/core';
-import {HttpClient, HttpParams} from "@angular/common/http";
-import {Observable} from "rxjs";
-import {TimezoneRequest, TimezoneResponse} from "../model/timezone.model";
-import {Page, pageOf} from "../model/page.model";
-import {CalculateDateResponse, CalculateDateRequest} from "../model/calculateDate.model";
-import {expecting} from "../interceptor/response-validation.interceptor";
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { TimezoneRequest, TimezoneResponse } from '../model/timezone.model';
+import { Page, pageOf } from '../model/page.model';
+import { CalculateDateResponse, CalculateDateRequest } from '../model/calculateDate.model';
+import { expecting } from '../interceptor/response-validation.interceptor';
 
 const TimezonePage = pageOf(TimezoneResponse);
 

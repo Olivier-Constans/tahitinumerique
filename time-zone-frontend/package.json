@@ -7,7 +7,9 @@
     "build": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "format": "prettier --write src",
+    "format:check": "prettier --check src"
   },
   "private": true,
   "dependencies": {
@@ -34,8 +36,10 @@
     "@tailwindcss/postcss": "^4.3.3",
     "angular-eslint": "21.4.0",
     "eslint": "^10.3.0",
+    "eslint-config-prettier": "^10.1.8",
     "jsdom": "^27.4.0",
     "postcss": "^8.5.29",
+    "prettier": "^3.9.9",
     "tailwindcss": "^4.3.3",
     "tailwindcss-primeui": "^0.6.1",
     "typescript": "~5.9.3",

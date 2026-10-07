@@ -1,49 +1,64 @@
-@if(timezonesLoadError()) {
+@if (timezonesLoadError()) {
   <div class="text-center">
     Impossible de charger les fuseaux horaires.
     <p-button label="Réessayer" [text]="true" (onClick)="loadTimezones()" />
   </div>
-} @else if(timezonesLoaded() && timezones().length < 2) {
+} @else if (timezonesLoaded() && timezones().length < 2) {
   <div class="text-center">
     Veuillez configurer 2 fuseaux horaires pour utiliser cette fonctionnalité.
     <a [routerLink]="['/', ADMIN_PATH, TIMEZONE_PATH, 'new']"> Ajouter un fuseau horaire</a>
   </div>
-} @else if(timezonesLoaded()) {
+} @else if (timezonesLoaded()) {
   <form (ngSubmit)="onSubmit()" [formGroup]="form">
     <div class="flex flex-col gap-2 m-2">
       <label for="timezone">Choisir un fuseau horaire</label>
       <div class="w-full">
-        <p-select inputId="timezone" class="w-full"
+        <p-select
+          inputId="timezone"
+          class="w-full"
           formControlName="timezone"
           [options]="timezones()"
           optionLabel="label"
           [virtualScroll]="true"
           [virtualScrollOptions]="timezoneScrollerOptions"
           [virtualScrollItemSize]="43"
-          (onShow)="onShowTimezone()"/>
+          (onShow)="onShowTimezone()"
+        />
       </div>
     </div>
     <div class="flex flex-col gap-2 m-2">
       <label for="dateSearch">Choisir une date</label>
-      <p-datepicker inputId="dateSearch" class="w-full max-w-max"
-                  formControlName="dateSearch"
-                  [showTime]="true"
-                  hourFormat="24"
-                  dateFormat="dd/mm/yy"
+      <p-datepicker
+        inputId="dateSearch"
+        class="w-full max-w-max"
+        formControlName="dateSearch"
+        [showTime]="true"
+        hourFormat="24"
+        dateFormat="dd/mm/yy"
       />
     </div>
     <div>
-      <p-button [disabled]="form.invalid" [loading]="calculating()" label="Calculer" ariaLabel="Calculer" type="submit" />
+      <p-button
+        [disabled]="form.invalid"
+        [loading]="calculating()"
+        label="Calculer"
+        ariaLabel="Calculer"
+        type="submit"
+      />
     </div>
   </form>
 
-  @if(result(); as result){
+  @if (result(); as result) {
     <h2>Résultats</h2>
-    <p>Le {{result.search.date | date:"dd/MM/yyyy 'à' HH:mm"}} à {{result.search.timezone.label}} correspond à :</p>
+    <p>
+      Le {{ result.search.date | date: "dd/MM/yyyy 'à' HH:mm" }} à
+      {{ result.search.timezone.label }} correspond à :
+    </p>
     @for (data of result.response.calculateDateItemList; track data.timezone.id) {
-    <div class="p-2">
-      <span class="font-bold">{{data.timezone.label}} : </span> {{data.date | date:"dd/MM/yyyy 'à' HH:mm"}}
-    </div>
+      <div class="p-2">
+        <span class="font-bold">{{ data.timezone.label }} : </span>
+        {{ data.date | date: "dd/MM/yyyy 'à' HH:mm" }}
+      </div>
     }
   }
 } @else {

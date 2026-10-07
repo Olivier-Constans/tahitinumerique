@@ -4,36 +4,62 @@
       <h2>Configuration des fuseaux horaires</h2>
     </div>
     <div class="shrink-0">
-      <p-button icon="pi pi-plus" [rounded]="true" [routerLink]="[TIMEZONE_PATH, 'new']"
-                ariaLabel="Ajouter un fuseau horaire" pTooltip="Ajouter un fuseau horaire" tooltipPosition="left" />
+      <p-button
+        icon="pi pi-plus"
+        [rounded]="true"
+        [routerLink]="[TIMEZONE_PATH, 'new']"
+        ariaLabel="Ajouter un fuseau horaire"
+        pTooltip="Ajouter un fuseau horaire"
+        tooltipPosition="left"
+      />
     </div>
   </div>
 
   <div class="resultat">
-    @if(result() === undefined) {
+    @if (result() === undefined) {
       <div class="flex justify-center">
         <p-progressSpinner ariaLabel="Chargement des fuseaux horaires" />
       </div>
-    } @else if(result() === null) {
+    } @else if (result() === null) {
       <div>
         Impossible de charger les fuseaux horaires.
         <p-button label="Réessayer" [text]="true" (onClick)="retry()" />
       </div>
-    } @else if(result(); as page){
+    } @else if (result(); as page) {
       @if (page.totalElements === 0) {
         <div>Aucun fuseau horaire configuré.</div>
       } @else {
         @for (result of page.content; track result.id) {
           <div class="bg-surface-200 m-2 p-2 flex items-center flex-wrap rounded-border">
-              <div class="grow">{{result.label}}</div>
-              <div class="shrink-0 flex gap-2">
-                <p-button icon="pi pi-pencil" [rounded]="true" [routerLink]="[TIMEZONE_PATH, result.id, 'edit']"
-                          ariaLabel="Modifier {{result.label}}" pTooltip="Modifier" tooltipPosition="top" />
-                <p-button icon="pi pi-eye" [rounded]="true" severity="secondary" [routerLink]="[TIMEZONE_PATH, result.id]"
-                          ariaLabel="Voir {{result.label}}" pTooltip="Voir" tooltipPosition="top" />
-                <p-button icon="pi pi-trash" [rounded]="true" severity="danger" (onClick)="delete(result)"
-                          ariaLabel="Supprimer {{result.label}}" pTooltip="Supprimer" tooltipPosition="top" />
-              </div>
+            <div class="grow">{{ result.label }}</div>
+            <div class="shrink-0 flex gap-2">
+              <p-button
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [routerLink]="[TIMEZONE_PATH, result.id, 'edit']"
+                ariaLabel="Modifier {{ result.label }}"
+                pTooltip="Modifier"
+                tooltipPosition="top"
+              />
+              <p-button
+                icon="pi pi-eye"
+                [rounded]="true"
+                severity="secondary"
+                [routerLink]="[TIMEZONE_PATH, result.id]"
+                ariaLabel="Voir {{ result.label }}"
+                pTooltip="Voir"
+                tooltipPosition="top"
+              />
+              <p-button
+                icon="pi pi-trash"
+                [rounded]="true"
+                severity="danger"
+                (onClick)="delete(result)"
+                ariaLabel="Supprimer {{ result.label }}"
+                pTooltip="Supprimer"
+                tooltipPosition="top"
+              />
+            </div>
           </div>
         }
 

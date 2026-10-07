@@ -1,7 +1,7 @@
-import * as z from "zod/mini";
+import * as z from 'zod/mini';
 
 export const ErrorMessageResponse = z.object({
-  message: z.string()
+  message: z.string(),
 });
 
 export type ErrorMessageResponse = z.infer<typeof ErrorMessageResponse>;
