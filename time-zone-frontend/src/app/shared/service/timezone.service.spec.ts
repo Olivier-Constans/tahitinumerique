@@ -25,8 +25,8 @@ describe('TimezoneService', () => {
       providers: [
         provideHttpClient(withInterceptors([responseValidationInterceptor])),
         provideHttpClientTesting(),
-        MessageService
-      ]
+        MessageService,
+      ],
     });
     service = TestBed.inject(TimezoneService);
     httpTesting = TestBed.inject(HttpTestingController);
@@ -112,19 +112,5 @@ describe('TimezoneService', () => {
     httpTesting.expectOne('api/timezones/1').flush({ ...timezoneJson(), offsetUTC: 'UTC+99' });
 
     await expect(result).rejects.toBeInstanceOf($ZodError);
-    expect(consoleError).toHaveBeenCalledWith('Réponse non conforme au contrat', expect.any($ZodError));
-    expect(messageService.add).toHaveBeenCalledWith(expect.objectContaining({
-      severity: 'error',
-      detail: 'Réponse inattendue du serveur.'
-    }));
-  });
-
-  it('n\'affiche aucun message pour une réponse conforme', async () => {
-    const result = firstValueFrom(service.getTimezoneById(1));
-
-    httpTesting.expectOne('api/timezones/1').flush(timezoneJson());
-
-    await result;
-    expect(messageService.add).not.toHaveBeenCalled();
   });
 });

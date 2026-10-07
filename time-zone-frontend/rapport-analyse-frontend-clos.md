@@ -2,6 +2,52 @@
 
 > Points corrigés ou ignorés, triés par date de clôture (la plus récente en premier). Les points ouverts sont dans `rapport-analyse-frontend.md`.
 
+#### FRONT-20261007-04 · Majeur · Image Docker construite sans Tailwind
+- **Statut** : Corrigé le 2026-10-07
+- **Découvert le** : 2026-10-07 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `Dockerfile:11-13`
+- **Constat** : le Dockerfile copie `angular.json`, `tsconfig*.json`, `src/` et `public/`, mais pas `.postcssrc.json`, qui déclare le plugin `@tailwindcss/postcss`. Sans lui, `@import 'tailwindcss/utilities.css'` n'est pas traité. Vérifié en reproduisant le contexte de build Docker : la feuille générée contient la directive brute `@tailwind utilities` et aucune classe utilitaire (`.flex`, `gap-2`, `w-full`, `text-center`, `bg-surface-200`), alors que le build local les contient.
+- **Impact** : en production, toute la mise en page fondée sur Tailwind disparaît (formulaires, liste d'administration, alignements).
+- **Recommandation** : ajouter `.postcssrc.json` à la ligne `COPY angular.json tsconfig.json tsconfig.app.json ./`, puis vérifier l'image construite (par exemple `grep -c '\.flex{' dist/browser/styles-*.css` dans l'étape de build).
+- **Correction** : `.postcssrc.json` ajouté à la copie de configuration du `Dockerfile`, suivi d'un garde-fou `RUN grep -q '\.flex{' dist/browser/styles-*.css` qui fait échouer le build si Tailwind n'est pas traité. Vérifié par `docker build` : la feuille servie par nginx contient `.flex`, `.gap-2`, `.w-full`, `.text-center` et `.bg-surface-200`, sans directive `@tailwind` brute. Un build sans `.postcssrc.json` échoue bien sur le garde-fou.
+
+#### FRONT-20261006-06 · Mineur · Style de code hétérogène (guillemets, espaces dans les imports, points-virgules)
+- **Statut** : Corrigé le 2026-10-07
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `src/app/app.config.ts:45`, `src/app/shared/interceptor/response-validation.interceptor.ts`, `src/app/shared/interceptor/response-validation.interceptor.spec.ts`, `src/app/shared/service/timezone.service.ts`, `src/app/shared/service/timezone.service.spec.ts:96-128`
+- **Constat** : ces cinq fichiers ne respectent pas la mise en forme Prettier (`npm run format:check` les signale) : `import {X} from "..."`, virgules finales manquantes, lignes de plus de 100 caractères.
+- **Impact** : diffs bruyants au prochain passage de Prettier, et la convention n'est pas garantie tant que rien ne la vérifie.
+- **Recommandation** : lancer `npm run format`, puis faire échouer la CI (ou un hook de pré-commit) sur `npm run format:check`.
+- **Révisé le 2026-10-07** : partiellement résolu par le commit `127d108` (Prettier, `.prettierrc`, `eslint-config-prettier`, scripts `format` et `format:check`, reformatage du projet). Le point est réduit aux cinq fichiers restés hors format, probablement réintroduits par la fusion avec le commit `018337d`.
+- **Correction** : `prettier --write` appliqué aux fichiers restés hors format (`app.config.ts`, `response-validation.interceptor.ts` et sa spec, `timezone.service.ts`, `timezone.service.spec.ts`). `npm run format:check` passe sur tout `src/`. La vérification en CI ou en pré-commit recommandée n'est pas en place : aucune CI n'existe dans le dépôt.
+
+#### FRONT-20261007-05 · Mineur · Espion `console.error` typé `any` dans la spec de l'intercepteur de validation
+- **Statut** : Corrigé le 2026-10-07
+- **Découvert le** : 2026-10-07 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `src/app/shared/interceptor/response-validation.interceptor.spec.ts:15,37`
+- **Constat** : `let consoleError: ReturnType<typeof vi.spyOn>` se résout en `any` (surcharges génériques de `vi.spyOn`). `npm run lint` échoue sur `consoleError.mockRestore()` (`no-unsafe-call`, `no-unsafe-member-access`). Les deux autres erreurs du lint (`timezone.service.spec.ts:116,128`) relèvent de FRONT-20261007-03.
+- **Impact** : le lint est rouge, ce qui masque toute nouvelle erreur et bloquerait une CI.
+- **Recommandation** : typer l'espion précisément, par exemple `let consoleError: MockInstance<typeof console.error>;` (`import type { MockInstance } from 'vitest'`), ou se contenter de `vi.restoreAllMocks()` dans `afterEach`.
+- **Correction** : espion typé `MockInstance<typeof console.error>` (`import type { MockInstance } from "vitest"`) dans `response-validation.interceptor.spec.ts`. `npm run lint` passe, 66 tests sur 66 passent.
+
+#### FRONT-20261007-06 · Mineur · Message d'erreur du décalage UTC non relié au champ
+- **Statut** : Corrigé le 2026-10-07
+- **Découvert le** : 2026-10-07 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.html:44-55`
+- **Constat** : le champ Nom porte `aria-invalid` et `aria-describedby="label-error"` vers son message. Le `p-select` du décalage UTC n'a ni l'un ni l'autre, et son `p-message` n'a pas d'identifiant.
+- **Impact** : un lecteur d'écran n'annonce pas l'erreur « Le décalage UTC est obligatoire. » en revenant sur le champ, et les deux champs du même formulaire se comportent différemment.
+- **Recommandation** : donner `id="offsetUTC-error"` au message. Le `p-select` de PrimeNG 21 n'expose que `ariaLabel` et `ariaLabelledBy` : poser `aria-invalid` et `aria-describedby` sur son élément focalisable (`#offsetUTC`) depuis le composant, ou utiliser `ariaLabelledBy="offsetUTC-label offsetUTC-error"` avec un `id` sur le `label`.
+- **Correction** : dans `timezone-edit.component.html`, le `p-select` du décalage UTC reçoit via le pass-through PrimeNG (`[pt]`, clé `label`, qui vise l'élément `role="combobox"` d'identifiant `offsetUTC`) les attributs `aria-invalid` et `aria-describedby="offsetUTC-error"` quand le champ est en erreur, et le `p-message` reçoit `id="offsetUTC-error"`, comme pour le champ Nom. Test ajouté dans `timezone.routes.spec.ts` (aucun attribut avant erreur, message relié et `aria-invalid` après sortie du champ vide). Tests : 66/66. Lint : seules restent les 2 erreurs de FRONT-20261007-05.
+
+#### FRONT-20261007-03 · Majeur · Suite de tests en échec de compilation
+- **Statut** : Corrigé le 2026-10-07
+- **Découvert le** : 2026-10-07 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `src/app/shared/service/timezone.service.spec.ts:107-129`
+- **Constat** : les tests « rejette une réponse dont le décalage UTC est inconnu » et « n'affiche aucun message pour une réponse conforme » utilisent `consoleError` et `messageService`, jamais déclarés dans ce fichier (ils existent dans `response-validation.interceptor.spec.ts`). `npx ng test` s'arrête sur `TS2304: Cannot find name 'consoleError'` et `TS2552: Cannot find name 'messageService'` : aucun test ne s'exécute. Même déclarées, l'assertion `toHaveBeenCalledWith('Réponse non conforme au contrat', expect.any($ZodError))` échouerait, l'intercepteur journalisant quatre arguments (méthode et URL comprises). Ces lignes ont été ajoutées par le commit `127d108` (Prettier), vraisemblablement lors d'une fusion avec la correction de FRONT-20261007-01.
+- **Impact** : plus aucune régression n'est détectée tant que la compilation des tests échoue.
+- **Recommandation** : retirer ces assertions du test du service, qui ne doit vérifier que le rejet par `$ZodError`. Le toast et la trace sont déjà couverts dans `response-validation.interceptor.spec.ts`. Le second test peut être supprimé pour la même raison.
+- **Correction** : dans `src/app/shared/service/timezone.service.spec.ts`, retrait des assertions sur `consoleError` et `messageService` (variables non déclarées) du test « rejette une réponse dont le décalage UTC est inconnu », qui ne vérifie plus que le rejet par `$ZodError`, et suppression du test « n'affiche aucun message pour une réponse conforme ». Le toast et la trace restent couverts par `response-validation.interceptor.spec.ts`. Fichier reformaté avec Prettier. Tests : 65/65 (13 fichiers). Lint : les 2 erreurs restantes relèvent de FRONT-20261007-05.
+
 #### FRONT-20261006-18 · Mineur · Langue du document déclarée en anglais
 - **Statut** : Corrigé le 2026-10-07
 - **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
@@ -45,16 +91,8 @@
 - **Constat** : le `parse` Zod est appliqué dans le service, après la chaîne HTTP. Une réponse non conforme lève une `$ZodError` que l'intercepteur ne voit pas (il ne traite que les `HttpErrorResponse` de la requête). Chaque appelant l'absorbe ensuite sans message : le formulaire de fuseau reste affiché sans retour (`catchError(() => EMPTY)`), le resolver redirige vers la page « Page introuvable », et le calcul n'affiche simplement aucun résultat. Aucune trace n'est laissée en console. Les contrats du back sont aujourd'hui conformes (enum `OffsetUTC`, `Instant` et `LocalDateTime` en ISO), le cas se produit donc en cas de dérive de contrat, par exemple un décalage ajouté côté back.
 - **Impact** : sur une création ou une modification, le serveur a bien enregistré la donnée mais l'utilisateur reste sur le formulaire sans explication et risque de soumettre de nouveau, ce qui crée un doublon. Une erreur de contrat est par ailleurs difficile à diagnostiquer.
 - **Recommandation** : traiter l'erreur de validation à un seul endroit, par exemple un opérateur commun dans le service qui journalise la `$ZodError` (`console.error`) et affiche un toast « Réponse inattendue du serveur. » via `MessageService` avant de la propager. Distinguer dans le resolver un 404 réel (`HttpErrorResponse` de statut 404) des autres erreurs.
-- **Correction** : `TimezoneService` valide désormais les réponses avec un opérateur commun `_parse` qui, en cas d'échec, journalise la `$ZodError` (`console.error`), affiche le toast « Réponse inattendue du serveur. » puis propage l'erreur. Le resolver de `timezone.routes.ts` ne redirige vers `/404` que sur un `HttpErrorResponse` 404 et annule la navigation pour les autres erreurs. Tests ajoutés dans `timezone.service.spec.ts` (toast et trace, absence de message sur une réponse conforme) et `timezone.routes.spec.ts` (erreur 500 sans redirection). Lint OK, 47 tests OK.
-
-#### FRONT-20261007-01 · Mineur · Échecs de validation Zod silencieux, y compris après une écriture réussie
-- **Statut** : Corrigé le 2026-10-07
-- **Découvert le** : 2026-10-07 · **Dernière vérification** : 2026-10-07
-- **Emplacement** : `src/app/shared/service/timezone.service.ts:22,27,32,37,46`, `src/app/shared/interceptor/http-error.interceptor.ts:8-20`, `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.ts:80-85`, `src/app/view/administration/timezone/timezone.routes.ts:10-12`, `src/app/view/home/home.component.ts:68-70`
-- **Constat** : le `parse` Zod est appliqué dans le service, après la chaîne HTTP. Une réponse non conforme lève une `$ZodError` que l'intercepteur ne voit pas (il ne traite que les `HttpErrorResponse` de la requête). Chaque appelant l'absorbe ensuite sans message : le formulaire de fuseau reste affiché sans retour (`catchError(() => EMPTY)`), le resolver redirige vers la page « Page introuvable », et le calcul n'affiche simplement aucun résultat. Aucune trace n'est laissée en console. Les contrats du back sont aujourd'hui conformes (enum `OffsetUTC`, `Instant` et `LocalDateTime` en ISO), le cas se produit donc en cas de dérive de contrat, par exemple un décalage ajouté côté back.
-- **Impact** : sur une création ou une modification, le serveur a bien enregistré la donnée mais l'utilisateur reste sur le formulaire sans explication et risque de soumettre de nouveau, ce qui crée un doublon. Une erreur de contrat est par ailleurs difficile à diagnostiquer.
-- **Recommandation** : traiter l'erreur de validation à un seul endroit, par exemple un opérateur commun dans le service qui journalise la `$ZodError` (`console.error`) et affiche un toast « Réponse inattendue du serveur. » via `MessageService` avant de la propager. Distinguer dans le resolver un 404 réel (`HttpErrorResponse` de statut 404) des autres erreurs.
 - **Correction** : la validation des réponses est sortie du service et confiée à un intercepteur dédié, `src/app/shared/interceptor/response-validation.interceptor.ts`. Chaque appel déclare son contrat via `HttpContext` (`{context: expecting(TimezoneResponse)}`) ; l'intercepteur valide le corps, le remplace par la sortie du schéma (dates converties) et, en cas d'échec, journalise la `$ZodError` avec la méthode et l'URL (`console.error`), affiche le toast « Réponse inattendue du serveur. » puis propage l'erreur. `TimezoneService` ne fait plus que décrire ses endpoints, et un futur service d'API n'a rien à dupliquer. L'intercepteur est placé avant `httpErrorInterceptor` (`app.config.ts`) pour éviter un double toast. Le resolver de `timezone.routes.ts` ne redirige vers `/404` que sur un `HttpErrorResponse` 404 et annule la navigation pour les autres erreurs. Tests ajoutés dans `response-validation.interceptor.spec.ts` (conversion, toast unique et trace, absence de schéma, réponse en erreur) et `timezone.routes.spec.ts` (erreur 500 sans redirection). Lint OK, 50 tests OK.
+- **Révisé le 2026-10-07** : une première correction validait les réponses dans `TimezoneService` (opérateur commun `_parse`) ; elle a été remplacée par l'intercepteur décrit ci-dessus. Les deux entrées du point, en double dans ce fichier, ont été fusionnées.
 
 #### FRONT-20261006-10 · Info · Couverture de tests incomplète
 - **Statut** : Corrigé le 2026-10-07

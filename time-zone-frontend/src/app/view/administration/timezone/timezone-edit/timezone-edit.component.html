@@ -47,9 +47,15 @@
       [options]="optionsOffsetUTC"
       class="w-full"
       [invalid]="offsetUTCInError"
+      [pt]="{
+        label: {
+          'aria-invalid': offsetUTCInError,
+          'aria-describedby': offsetUTCInError ? 'offsetUTC-error' : null,
+        },
+      }"
     />
     @if (offsetUTCInError) {
-      <p-message severity="error" size="small" variant="simple"
+      <p-message id="offsetUTC-error" severity="error" size="small" variant="simple"
         >Le décalage UTC est obligatoire.</p-message
       >
     }

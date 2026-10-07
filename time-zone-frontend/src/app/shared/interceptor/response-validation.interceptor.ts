@@ -1,8 +1,13 @@
-import {HttpContext, HttpContextToken, HttpInterceptorFn, HttpResponse} from "@angular/common/http";
-import {inject} from "@angular/core";
-import {MessageService} from "primeng/api";
-import {map} from "rxjs";
-import * as z from "zod/mini";
+import {
+  HttpContext,
+  HttpContextToken,
+  HttpInterceptorFn,
+  HttpResponse,
+} from '@angular/common/http';
+import { inject } from '@angular/core';
+import { MessageService } from 'primeng/api';
+import { map } from 'rxjs';
+import * as z from 'zod/mini';
 
 const RESPONSE_SCHEMA = new HttpContextToken<z.ZodMiniType | null>(() => null);
 
@@ -21,21 +26,26 @@ export const responseValidationInterceptor: HttpInterceptorFn = (req, next) => {
   }
   const messageService = inject(MessageService);
   return next(req).pipe(
-    map(event => {
+    map((event) => {
       if (!(event instanceof HttpResponse)) {
         return event;
       }
       const result = schema.safeParse(event.body);
       if (!result.success) {
-        console.error('Réponse non conforme au contrat', req.method, req.urlWithParams, result.error);
+        console.error(
+          'Réponse non conforme au contrat',
+          req.method,
+          req.urlWithParams,
+          result.error,
+        );
         messageService.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: 'Réponse inattendue du serveur.'
+          detail: 'Réponse inattendue du serveur.',
         });
         throw result.error;
       }
-      return event.clone({body: result.data});
-    })
+      return event.clone({ body: result.data });
+    }),
   );
 };

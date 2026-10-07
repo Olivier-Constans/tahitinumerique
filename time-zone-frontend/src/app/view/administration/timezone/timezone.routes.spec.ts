@@ -120,6 +120,21 @@ describe('Routes timezone (consultation, création, modification)', () => {
       );
     });
 
+    it('signale un décalage UTC manquant et relie le message au champ', async () => {
+      const combobox = element().querySelector<HTMLElement>('#offsetUTC')!;
+      expect(combobox.getAttribute('aria-describedby')).toBeNull();
+      expect(combobox.getAttribute('aria-invalid')).not.toBe('true');
+
+      combobox.dispatchEvent(new Event('blur'));
+      await harness.fixture.whenStable();
+
+      expect(element().querySelector('#offsetUTC-error')?.textContent?.trim()).toBe(
+        'Le décalage UTC est obligatoire.',
+      );
+      expect(combobox.getAttribute('aria-describedby')).toBe('offsetUTC-error');
+      expect(combobox.getAttribute('aria-invalid')).toBe('true');
+    });
+
     it('limite le nom à 100 caractères', async () => {
       const input = element().querySelector<HTMLInputElement>('input#label')!;
       expect(input.getAttribute('maxlength')).toBe('100');

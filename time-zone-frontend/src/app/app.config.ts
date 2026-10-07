@@ -42,7 +42,10 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withFetch(), withInterceptors([responseValidationInterceptor, httpErrorInterceptor])),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([responseValidationInterceptor, httpErrorInterceptor]),
+    ),
     MessageService,
     { provide: LOCALE_ID, useValue: 'fr' },
     providePrimeNG({
