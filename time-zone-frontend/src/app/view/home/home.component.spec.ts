@@ -4,6 +4,7 @@ import {of, Subject, throwError} from "rxjs";
 import {HomeComponent} from './home.component';
 import {TimezoneService} from "../../shared/service/timezone.service";
 import {aPage, aTimezone} from "../../../testing/timezone.fixture";
+import {CalculateDateResponse} from "../../shared/model/calculateDate.model";
 
 describe('HomeComponent', () => {
   let fixture: ComponentFixture<HomeComponent>;
@@ -82,6 +83,42 @@ describe('HomeComponent', () => {
     });
     const results = [...element().querySelectorAll('h2 ~ div')].map(it => it.textContent?.replace(/\s+/g, ' ').trim());
     expect(results).toEqual(['tahiti : 06/10/2026 à 10:00', 'paris : 06/10/2026 à 22:00']);
+    expect(element().querySelector('h2 + p')?.textContent).toBe('Le 06/10/2026 à 10:00 à tahiti correspond à :');
+  });
+
+  it('efface les résultats dès que la saisie est modifiée', async () => {
+    timezoneService.getAllTimezones.mockReturnValue(of(aPage([tahiti, paris])));
+    timezoneService.calculateDate.mockReturnValue(of({
+      calculateDateItemList: [{timezone: tahiti, date: new Date(2026, 9, 6, 10, 0)}]
+    }));
+
+    await render();
+    fixture.componentInstance.form.setValue({timezone: tahiti, dateSearch: new Date(2026, 9, 6, 10, 0, 0)});
+    fixture.componentInstance.onSubmit();
+    await fixture.whenStable();
+    expect(element().textContent).toContain('Résultats');
+
+    fixture.componentInstance.form.controls.timezone.setValue(paris);
+    await fixture.whenStable();
+
+    expect(element().textContent).not.toContain('Résultats');
+  });
+
+  it('ignore la réponse d\'un calcul lancé avant une modification de la saisie', async () => {
+    timezoneService.getAllTimezones.mockReturnValue(of(aPage([tahiti, paris])));
+    const pending = new Subject<CalculateDateResponse>();
+    timezoneService.calculateDate.mockReturnValue(pending);
+
+    await render();
+    fixture.componentInstance.form.setValue({timezone: tahiti, dateSearch: new Date(2026, 9, 6, 10, 0, 0)});
+    fixture.componentInstance.onSubmit();
+    fixture.componentInstance.form.controls.timezone.setValue(paris);
+    pending.next({calculateDateItemList: [{timezone: tahiti, date: new Date(2026, 9, 6, 10, 0)}]});
+    await fixture.whenStable();
+
+    expect(pending.observed).toBe(false);
+    expect(fixture.componentInstance.calculating()).toBe(false);
+    expect(element().textContent).not.toContain('Résultats');
   });
 
   it('affiche un indicateur pendant le chargement des timezones', async () => {

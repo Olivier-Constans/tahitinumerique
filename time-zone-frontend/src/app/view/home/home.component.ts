@@ -8,9 +8,9 @@ import {ScrollerOptions} from "primeng/api";
 import {TimezoneResponse} from "../../shared/model/timezone.model";
 import {TimezoneService} from "../../shared/service/timezone.service";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
-import {catchError, EMPTY, finalize, of, Subject, switchMap} from "rxjs";
+import {catchError, EMPTY, finalize, map, merge, of, Subject, switchMap} from "rxjs";
 import {ScrollerLazyLoadEvent} from "primeng/types/scroller";
-import {CalculateDateRequest} from "../../shared/model/calculateDate.model";
+import {CalculateDateResponse} from "../../shared/model/calculateDate.model";
 import {transformToUTCDate} from "../../shared/util/date.util";
 import {RouterLink} from "@angular/router";
 import {ProgressSpinner} from "primeng/progressspinner";
@@ -21,6 +21,17 @@ import {TIMEZONE_PATH} from "../administration/administration.routes";
 export interface HomeForm {
   dateSearch: FormControl<Date | undefined>,
   timezone: FormControl<TimezoneResponse | undefined>
+}
+
+// Saisie ayant servi au calcul, rappelée au-dessus des résultats
+export interface CalculateDateSearch {
+  date: Date;
+  timezone: TimezoneResponse;
+}
+
+export interface CalculateDateResult {
+  search: CalculateDateSearch;
+  response: CalculateDateResponse;
 }
 
 @Component({
@@ -66,12 +77,24 @@ export class HomeComponent {
   private _timezoneLoading = false;
 
   readonly calculating = signal(false);
-  private readonly _calculateDate = new Subject<CalculateDateRequest>();
-  readonly result = toSignal(this._calculateDate.pipe(
+  private readonly _calculateDate = new Subject<CalculateDateSearch>();
+  // Toute modification du formulaire efface les résultats (et annule un calcul en cours) :
+  // ceux affichés correspondent toujours à la saisie visible
+  readonly result = toSignal(merge(
+    this._calculateDate,
+    this.form.valueChanges.pipe(map(() => null))
+  ).pipe(
     // switchMap désabonne la requête précédente (et exécute son finalize) avant d'appeler cette fonction
-    switchMap(form => {
+    switchMap(search => {
+      if (!search) {
+        return of(undefined);
+      }
       this.calculating.set(true);
-      return this._timezoneService.calculateDate(form).pipe(
+      return this._timezoneService.calculateDate({
+        date: transformToUTCDate(search.date),
+        timezoneId: search.timezone.id
+      }).pipe(
+        map((response): CalculateDateResult => ({search, response})),
         catchError(() => of(undefined)),
         finalize(() => this.calculating.set(false))
       );
@@ -129,8 +152,8 @@ export class HomeComponent {
       return;
     }
     this._calculateDate.next({
-      date: transformToUTCDate(this.form.controls.dateSearch.value!),
-      timezoneId: this.form.controls.timezone.value!.id
+      date: this.form.controls.dateSearch.value!,
+      timezone: this.form.controls.timezone.value!
     })
   }
 }
