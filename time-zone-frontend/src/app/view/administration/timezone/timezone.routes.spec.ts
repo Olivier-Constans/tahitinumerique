@@ -92,6 +92,42 @@ describe('Routes timezone (consultation, création, modification)', () => {
     it('affiche un formulaire vide dont la validation est désactivée', () => {
       expect(element().querySelector('h2')?.textContent).toContain('Nouveau fuseau horaire');
       expect(element().querySelector<HTMLButtonElement>('button[type="submit"]')!.disabled).toBe(true);
+      expect(element().querySelector('p-message')).toBeNull();
+    });
+
+    it('refuse un nom composé uniquement d\'espaces et l\'explique sous le champ', async () => {
+      fillLabel('   ');
+      selectOffset('UTC+09');
+      element().querySelector<HTMLInputElement>('input#label')!.dispatchEvent(new Event('blur'));
+      await harness.fixture.whenStable();
+
+      const input = element().querySelector<HTMLInputElement>('input#label')!;
+      expect(element().querySelector('#label-error')?.textContent?.trim()).toBe('Le nom est obligatoire.');
+      expect(input.getAttribute('aria-describedby')).toBe('label-error');
+      expect(input.getAttribute('aria-invalid')).toBe('true');
+      expect(element().querySelector<HTMLButtonElement>('button[type="submit"]')!.disabled).toBe(true);
+    });
+
+    it('limite le nom à 100 caractères', async () => {
+      const input = element().querySelector<HTMLInputElement>('input#label')!;
+      expect(input.getAttribute('maxlength')).toBe('100');
+
+      fillLabel('a'.repeat(101));
+      input.dispatchEvent(new Event('blur'));
+      await harness.fixture.whenStable();
+
+      expect(element().querySelector('#label-error')?.textContent?.trim()).toBe('Le nom ne doit pas dépasser 100 caractères.');
+    });
+
+    it('envoie le nom sans les espaces superflus', async () => {
+      timezoneService.createTimezone.mockReturnValue(new Subject());
+
+      fillLabel('  Tokyo ');
+      selectOffset('UTC+09');
+      await harness.fixture.whenStable();
+      await submit();
+
+      expect(timezoneService.createTimezone).toHaveBeenCalledWith({label: 'Tokyo', offsetUTC: 'UTC+09'});
     });
 
     it('crée la timezone puis redirige vers sa consultation', async () => {

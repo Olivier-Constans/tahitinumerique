@@ -6,14 +6,33 @@
   </div>
 </div>
 <form (ngSubmit)="onSubmit()" [formGroup]="form">
+  @let label = form.controls.label;
+  @let labelInError = label.invalid && label.touched;
   <div class="flex flex-col gap-2 m-2">
     <label for="label">Nom</label>
-    <input pInputText id="label" formControlName="label" type="text"/>
+    <input pInputText id="label" formControlName="label" type="text" [maxlength]="LABEL_MAX_LENGTH"
+           [invalid]="labelInError" [attr.aria-invalid]="labelInError"
+           [attr.aria-describedby]="labelInError ? 'label-error' : null"/>
+    @if (labelInError) {
+      <p-message id="label-error" severity="error" size="small" variant="simple">
+        @if (label.hasError('maxlength')) {
+          Le nom ne doit pas dépasser {{LABEL_MAX_LENGTH}} caractères.
+        } @else {
+          Le nom est obligatoire.
+        }
+      </p-message>
+    }
   </div>
 
+  @let offsetUTC = form.controls.offsetUTC;
+  @let offsetUTCInError = offsetUTC.invalid && offsetUTC.touched;
   <div class="flex flex-col gap-2 m-2">
     <label for="offsetUTC">Décalage UTC</label>
-    <p-select inputId="offsetUTC" formControlName="offsetUTC" [options]="optionsOffsetUTC" class="w-full" />
+    <p-select inputId="offsetUTC" formControlName="offsetUTC" [options]="optionsOffsetUTC" class="w-full"
+              [invalid]="offsetUTCInError" />
+    @if (offsetUTCInError) {
+      <p-message severity="error" size="small" variant="simple">Le décalage UTC est obligatoire.</p-message>
+    }
   </div>
 
   <div>

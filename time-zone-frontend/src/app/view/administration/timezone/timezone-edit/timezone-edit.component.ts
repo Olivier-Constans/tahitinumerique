@@ -17,6 +17,11 @@ import {InputTextModule} from "primeng/inputtext";
 import {ADMIN_PATH} from "../../../../app.routes";
 import {catchError, EMPTY, finalize} from "rxjs";
 import {MessageService} from "primeng/api";
+import {Message} from "primeng/message";
+import {notBlank} from "../../../../shared/validator/not-blank.validator";
+
+// Limite imposée par le back (Timezone.LABEL_MAX_LENGTH)
+export const LABEL_MAX_LENGTH = 100;
 
 export interface TimezoneForm {
   label: FormControl<string | undefined>
@@ -29,7 +34,8 @@ export interface TimezoneForm {
         Button,
         Select,
         InputTextModule,
-        RouterLink
+        RouterLink,
+        Message
     ],
     templateUrl: './timezone-edit.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -45,6 +51,8 @@ export class TimezoneEditComponent {
 
   protected readonly ADMIN_PATH = ADMIN_PATH;
 
+  protected readonly LABEL_MAX_LENGTH = LABEL_MAX_LENGTH;
+
   readonly optionsOffsetUTC = OffsetUTC.options;
 
   // Alimenté par le resolver de la route via withComponentInputBinding (absent en création)
@@ -53,7 +61,7 @@ export class TimezoneEditComponent {
   readonly saving = signal(false);
 
   readonly form: FormGroup<TimezoneForm> = this._formBuilder.group({
-    label: this._formBuilder.control<string | undefined>(undefined, Validators.required),
+    label: this._formBuilder.control<string | undefined>(undefined, [notBlank, Validators.maxLength(LABEL_MAX_LENGTH)]),
     offsetUTC: this._formBuilder.control<OffsetUTC | undefined>(undefined, Validators.required)
   });
 
@@ -73,7 +81,7 @@ export class TimezoneEditComponent {
     }
 
     const form = {
-      label : this.form.controls.label.value!,
+      label : this.form.controls.label.value!.trim(),
       offsetUTC: this.form.controls.offsetUTC.value!
     }
 

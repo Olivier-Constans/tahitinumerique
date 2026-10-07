@@ -9,8 +9,8 @@
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
 | 1. Analyse technique | 0 | 0 | 0 | 1 | 1 |
-| 2. Analyse fonctionnelle | 0 | 0 | 5 | 0 | 5 |
-| **Total** | **0** | **0** | **5** | **1** | **6** |
+| 2. Analyse fonctionnelle | 0 | 0 | 4 | 0 | 4 |
+| **Total** | **0** | **0** | **4** | **1** | **5** |
 
 **Outils** : lint OK (0 erreur) · tests 39/39 passés (8 fichiers) · build OK avec 1 avertissement (budget initial dépassé : 955,68 kB pour 500 kB)
 
@@ -75,14 +75,6 @@ Aucun point ouvert.
 - **Constat** : la page de consultation n'a pas de bouton « Modifier ». Le fil d'Ariane est un lien texte `> Administration`, avec un chevron saisi à la main.
 - **Impact** : pour modifier un fuseau qu'on consulte, il faut revenir à la liste.
 - **Recommandation** : ajouter un bouton « Modifier » (`[routerLink]="['edit']"`) et utiliser `p-breadcrumb`.
-
-#### FRONT-20261006-21 · Mineur · Formulaire de fuseau sans contrainte de longueur ni message de validation
-- **Statut** : Ouvert
-- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
-- **Emplacement** : `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.ts:51-54`, `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.html:9-20`
-- **Constat** : le champ « Nom » n'a que `Validators.required`. Le back refuse un libellé de plus de 100 caractères (`Timezone.LABEL_MAX_LENGTH`, `ObjectValidator.maxLength`), mais le front ne le sait pas : l'utilisateur ne l'apprend qu'au toast d'erreur après l'envoi. Un nom composé uniquement d'espaces passe aussi `required`. Enfin, aucun message n'est affiché sous les champs : le bouton « Enregistrer » est simplement désactivé, sans dire pourquoi.
-- **Impact** : un aller-retour serveur pour une erreur détectable à la saisie, et un bouton grisé sans explication.
-- **Recommandation** : ajouter `Validators.maxLength(100)` et un validateur « non vide après `trim()` », `maxlength="100"` sur l'input, et un `<small class="p-error">` (ou `p-message`) sous chaque champ lorsqu'il est `invalid && touched`.
 
 #### FRONT-20261006-22 · Mineur · Résultats du calcul sans rappel de la saisie et périmés après modification
 - **Statut** : Ouvert
