@@ -11,7 +11,7 @@ import { ADMIN_PATH } from '../../../app.routes';
 })
 export class TimezoneComponent {
   protected readonly ADMIN_PATH = ADMIN_PATH;
-
+  protected readonly timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   // Alimenté par le resolver de la route via withComponentInputBinding
   readonly data = input.required<TimezoneResponse>();
 }
