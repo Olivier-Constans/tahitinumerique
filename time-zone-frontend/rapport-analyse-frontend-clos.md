@@ -2,6 +2,15 @@
 
 > Points corrigés ou ignorés, triés par date de clôture (la plus récente en premier). Les points ouverts sont dans `rapport-analyse-frontend.md`.
 
+#### FRONT-20261006-18 · Mineur · Langue du document déclarée en anglais
+- **Statut** : Corrigé le 2026-10-07
+- **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `src/index.html:2`
+- **Constat** : `<html lang="en">` alors que l'interface est principalement en français.
+- **Impact** : les lecteurs d'écran prononcent le texte avec une phonétique anglaise, et la traduction automatique du navigateur se déclenche à tort.
+- **Recommandation** : `<html lang="fr">`, et enregistrer la locale `fr` (`registerLocaleData(localeFr)` et `LOCALE_ID`) pour les pipes de date.
+- **Correction** : `<html lang="fr">` dans `src/index.html` ; `registerLocaleData(localeFr)` et `{provide: LOCALE_ID, useValue: 'fr'}` dans `src/app/app.config.ts`. Test ajouté (`src/app/app.config.spec.ts`). Lint, build et 62 tests OK.
+
 #### FRONT-20261006-22 · Mineur · Résultats du calcul sans rappel de la saisie et périmés après modification
 - **Statut** : Corrigé le 2026-10-07
 - **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07

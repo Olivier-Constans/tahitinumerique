@@ -1,4 +1,6 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationConfig, LOCALE_ID, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -9,6 +11,8 @@ import Lara from "@primeuix/themes/lara";
 import {MessageService} from "primeng/api";
 import {httpErrorInterceptor} from "./shared/interceptor/http-error.interceptor";
 import {responseValidationInterceptor} from "./shared/interceptor/response-validation.interceptor";
+
+registerLocaleData(localeFr);
 
 const LaraBlue = definePreset(Lara, {
   semantic: {
@@ -35,6 +39,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withFetch(), withInterceptors([responseValidationInterceptor, httpErrorInterceptor])),
     MessageService,
+    {provide: LOCALE_ID, useValue: 'fr'},
     providePrimeNG({
       theme: {
         preset: LaraBlue,
