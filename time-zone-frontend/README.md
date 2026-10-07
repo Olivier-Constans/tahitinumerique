@@ -2,10 +2,10 @@
 
 Application Angular du projet Timezone de Tahiti Numérique. Elle propose deux usages :
 
-- **Accueil** (`/`) : on choisit un fuseau horaire et une date, et l'application affiche la date correspondante dans tous les autres fuseaux configurés. Il faut au moins deux fuseaux.
-- **Administration** (`/admin`) : liste paginée des fuseaux horaires, avec création, consultation, modification et suppression.
+- **Accueil** (`/`) : on choisit un lieu et une date, et l'application affiche la date correspondante dans tous les autres lieux configurés. Il faut au moins deux lieux.
+- **Administration** (`/admin`) : liste paginée des lieux, avec création, consultation, modification et suppression. Dans le formulaire, on choisit le type du lieu : un décalage UTC fixe (`UTC-10:00`) ou une zone IANA (`Europe/Paris`), dont le décalage suit l'heure d'été.
 
-Les données viennent de l'API du back-end Spring Boot (dossier `../time-zone`), exposée sous `/api/timezones`.
+Les données viennent de l'API du back-end Spring Boot (dossier `../time-zone`), exposée sous `/api/places`.
 
 **Stack** : Angular 21 (composants standalone, zoneless, signals), PrimeNG 21 (thème Lara), Tailwind CSS 4 (avec `tailwindcss-primeui`), Zod 4 (`zod/mini`), Vitest + jsdom, angular-eslint, Prettier.
 
@@ -74,16 +74,16 @@ src/
 │   │   ├── component/header/  # barre du haut
 │   │   ├── interceptor/       # validation Zod des réponses, toast sur toute erreur HTTP
 │   │   ├── model/             # schémas Zod des réponses, interfaces des requêtes
-│   │   └── service/           # TimezoneService (appels HTTP) et utilitaires de date
+│   │   └── service/           # PlaceService (appels HTTP) et utilitaires de date
 │   └── view/
 │       ├── home/              # calcul de date
-│       ├── administration/    # liste, puis timezone/ (consultation, création, modification)
+│       ├── administration/    # liste, puis place/ (consultation, création, modification)
 │       └── not-found/         # page 404
 ├── styles.css                 # styles globaux : Tailwind et ses calques
 └── testing/                   # fixtures partagées par les tests
 ```
 
-Les pages de consultation et de modification reçoivent le fuseau horaire via un resolver (`timezone.routes.ts`), injecté dans l'input `data` grâce à `withComponentInputBinding`. Si le back répond 404, le resolver redirige vers `/404`. Pour toute autre erreur, déjà signalée par un toast, la navigation est annulée et l'utilisateur reste sur la page courante.
+Les pages de consultation et de modification reçoivent le lieu via un resolver (`place.routes.ts`), injecté dans l'input `data` grâce à `withComponentInputBinding`. Si le back répond 404, le resolver redirige vers `/404`. Pour toute autre erreur, déjà signalée par un toast, la navigation est annulée et l'utilisateur reste sur la page courante.
 
 ## Styles (Tailwind CSS)
 
@@ -104,27 +104,26 @@ Les réponses de l'API sont validées et converties à l'exécution avec [Zod](h
 
 - Chaque réponse est décrite par un **schéma**. Le type TypeScript du même nom en est déduit (`z.infer`) : le schéma est la seule source de vérité.
 - La validation est faite par l'intercepteur `responseValidationInterceptor` (`src/app/shared/interceptor/`), pas par les services. Chaque appel HTTP déclare le schéma attendu via `HttpContext`, avec la fonction `expecting(Schema)`. L'intercepteur valide le corps et le remplace par la sortie du schéma. Un JSON non conforme lève une erreur au lieu de circuler avec un type faux.
-- Les services, comme `TimezoneService`, se limitent à décrire les endpoints. Un nouveau service d'API n'a qu'à déclarer ses schémas, sans recopier de logique de validation.
+- Les services, comme `PlaceService`, se limitent à décrire les endpoints. Un nouveau service d'API n'a qu'à déclarer ses schémas, sans recopier de logique de validation.
 - Les conversions se font dans les schémas, sans modifier l'objet reçu. Par exemple, `isoDate` transforme les dates ISO du back en `Date` à l'aide de `toDate`.
-- `OffsetUTC` est une liste fermée de libellés (`"UTC"`, `"UTC+01"`…), identiques à ceux envoyés par le back. Les options du formulaire viennent de `OffsetUTC.options`.
-- Les requêtes (`TimezoneRequest`, `CalculateDateRequest`) restent de simples interfaces, car elles sont envoyées et non reçues.
+- Les décalages (`zoneOffset`) sont échangés au format ISO-8601 (`"-10:00"`, `"Z"` pour UTC). Le schéma n'en vérifie que le format : la liste des décalages acceptés vient du back (`GET /places/zone-offsets`), comme celle des zones IANA (`GET /places/zone-ids`). `formatZoneOffset` les affiche sous la forme `UTC-10:00`.
+- Les requêtes (`PlaceRequest`, `CalculateDateRequest`) restent de simples interfaces, car elles sont envoyées et non reçues.
 
 Exemple :
 
 ```ts
 import * as z from "zod/mini";
 
-export const TimezoneResponse = z.object({
-  id: z.number(),
-  label: z.string(),
-  offsetUTC: OffsetUTC,
-  audit: AuditResponse
-});
-export type TimezoneResponse = z.infer<typeof TimezoneResponse>;
+// Un lieu est l'un des deux types, distingués par le champ type
+export const PlaceResponse = z.discriminatedUnion("type", [
+  ZoneOffsetFixedPlaceResponse, // { type: "ZONE_OFFSET_FIXED", id, label, zoneOffset, audit }
+  ZoneIdPlaceResponse,          // { type: "ZONE_ID", id, label, zoneId, audit }
+]);
+export type PlaceResponse = z.infer<typeof PlaceResponse>;
 
 // dans le service
-getTimezoneById(id: number): Observable<TimezoneResponse> {
-  return this._http.get<TimezoneResponse>(`${this.baseUrl}/${id}`, { context: expecting(TimezoneResponse) });
+getPlaceById(id: number): Observable<PlaceResponse> {
+  return this._http.get<PlaceResponse>(`${this.baseUrl}/${id}`, { context: expecting(PlaceResponse) });
 }
 ```
 
@@ -132,7 +131,7 @@ getTimezoneById(id: number): Observable<TimezoneResponse> {
 - On importe `zod/mini`, toujours avec `import * as z from "zod/mini"`. Avec `import {z}` ou le Zod classique, le bundle initial dépasse le budget de 1 Mo défini dans `angular.json`.
 - Pour transformer une valeur, on enchaîne validation et transformation : `z.pipe(z.string(), z.transform(fn))`.
 - Le type passé à `get<T>` (ou `post<T>`, `put<T>`) doit être celui déduit du schéma donné à `expecting`. Le compilateur ne vérifie pas la correspondance entre les deux.
-- Une requête sans `expecting` (par exemple `deleteTimezone`) n'est pas validée.
+- Une requête sans `expecting` (par exemple `deletePlace`) n'est pas validée.
 - Si une réponse ne respecte pas son schéma, l'intercepteur journalise la `$ZodError` en console (avec la méthode et l'URL), affiche le toast « Réponse inattendue du serveur. », puis propage l'erreur à l'appelant.
 - Dans `app.config.ts`, `responseValidationInterceptor` doit rester **avant** `httpErrorInterceptor`. Dans l'ordre inverse, `httpErrorInterceptor` intercepterait aussi l'erreur de validation et afficherait un second toast.
 

@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-export const TIMEZONE_PATH = 'timezone';
+export const PLACE_PATH = 'place';
 
 export const routes: Routes = [
   {
@@ -9,7 +9,7 @@ export const routes: Routes = [
       import('./administration.component').then((mod) => mod.AdministrationComponent),
   },
   {
-    path: TIMEZONE_PATH,
-    loadChildren: () => import('./timezone/timezone.routes').then((mod) => mod.routes),
+    path: PLACE_PATH,
+    loadChildren: () => import('./place/place.routes').then((mod) => mod.routes),
   },
 ];

@@ -17,8 +17,8 @@ import {
 import { Select } from 'primeng/select';
 import { Button } from 'primeng/button';
 import { ScrollerOptions } from 'primeng/api';
-import { TimezoneResponse } from '../../shared/model/timezone.model';
-import { TimezoneService } from '../../shared/service/timezone.service';
+import { PlaceResponse } from '../../shared/model/place.model';
+import { PlaceService } from '../../shared/service/place.service';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { catchError, EMPTY, finalize, map, merge, of, Subject, switchMap } from 'rxjs';
 import { ScrollerLazyLoadEvent } from 'primeng/types/scroller';
@@ -27,17 +27,17 @@ import { transformToUTCDate } from '../../shared/util/date.util';
 import { RouterLink } from '@angular/router';
 import { ProgressSpinner } from 'primeng/progressspinner';
 import { ADMIN_PATH } from '../../app.routes';
-import { TIMEZONE_PATH } from '../administration/administration.routes';
+import { PLACE_PATH } from '../administration/administration.routes';
 
 export interface HomeForm {
   dateSearch: FormControl<Date | undefined>;
-  timezone: FormControl<TimezoneResponse | undefined>;
+  place: FormControl<PlaceResponse | undefined>;
 }
 
 // Saisie ayant servi au calcul, rappelée au-dessus des résultats
 export interface CalculateDateSearch {
   date: Date;
-  timezone: TimezoneResponse;
+  place: PlaceResponse;
 }
 
 export interface CalculateDateResult {
@@ -52,31 +52,31 @@ export interface CalculateDateResult {
 })
 export class HomeComponent {
   private readonly _formBuilder = inject(NonNullableFormBuilder);
-  private readonly _timezoneService = inject(TimezoneService);
+  private readonly _placeService = inject(PlaceService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _changeDetectorRef = inject(ChangeDetectorRef);
 
   protected readonly ADMIN_PATH = ADMIN_PATH;
-  protected readonly TIMEZONE_PATH = TIMEZONE_PATH;
+  protected readonly PLACE_PATH = PLACE_PATH;
 
   readonly form = this._formBuilder.group<HomeForm>({
     dateSearch: this._formBuilder.control(undefined, Validators.required),
-    timezone: this._formBuilder.control(undefined, Validators.required),
+    place: this._formBuilder.control(undefined, Validators.required),
   });
 
-  readonly timezones = signal<TimezoneResponse[]>([]);
-  readonly timezonesLoaded = signal(false);
-  readonly timezonesLoadError = signal(false);
-  readonly timezoneScrollerOptions: ScrollerOptions = {
+  readonly places = signal<PlaceResponse[]>([]);
+  readonly placesLoaded = signal(false);
+  readonly placesLoadError = signal(false);
+  readonly placeScrollerOptions: ScrollerOptions = {
     showLoader: false,
     lazy: true,
-    onLazyLoad: (event: ScrollerLazyLoadEvent) => this.onLazyLoadTimezone(event),
+    onLazyLoad: (event: ScrollerLazyLoadEvent) => this.onLazyLoadPlace(event),
   };
 
-  private readonly _timezonePageSize = 10;
-  private _timezonePage = 0;
-  private _timezoneTotalPage = 0;
-  private _timezoneLoading = false;
+  private readonly _placePageSize = 10;
+  private _placePage = 0;
+  private _placeTotalPage = 0;
+  private _placeLoading = false;
 
   readonly calculating = signal(false);
   private readonly _calculateDate = new Subject<CalculateDateSearch>();
@@ -90,10 +90,10 @@ export class HomeComponent {
           return of(undefined);
         }
         this.calculating.set(true);
-        return this._timezoneService
+        return this._placeService
           .calculateDate({
             date: transformToUTCDate(search.date),
-            timezoneId: search.timezone.id,
+            placeId: search.place.id,
           })
           .pipe(
             map((response): CalculateDateResult => ({ search, response })),
@@ -105,51 +105,45 @@ export class HomeComponent {
   );
 
   constructor() {
-    this.loadTimezones();
+    this.loadPlaces();
   }
 
-  loadTimezones() {
-    this.timezonesLoadError.set(false);
-    this._timezoneService
-      .getAllTimezones(0, this._timezonePageSize)
+  loadPlaces() {
+    this.placesLoadError.set(false);
+    this._placeService
+      .getAllPlaces(0, this._placePageSize)
       .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe({
         next: (data) => {
-          this.timezones.set(data.content);
-          this._timezonePage = data.number;
-          this._timezoneTotalPage = data.totalPages;
-          this.timezonesLoaded.set(true);
+          this.places.set(data.content);
+          this._placePage = data.number;
+          this._placeTotalPage = data.totalPages;
+          this.placesLoaded.set(true);
         },
-        error: () => this.timezonesLoadError.set(true),
+        error: () => this.placesLoadError.set(true),
       });
   }
 
-  onLazyLoadTimezone(event: ScrollerLazyLoadEvent) {
-    const nearEnd = event.last + 5 >= this.timezones().length;
-    const hasMorePage = this._timezonePage < this._timezoneTotalPage - 1;
-    if (this._timezoneLoading || !nearEnd || !hasMorePage) {
+  onLazyLoadPlace(event: ScrollerLazyLoadEvent) {
+    const nearEnd = event.last + 5 >= this.places().length;
+    const hasMorePage = this._placePage < this._placeTotalPage - 1;
+    if (this._placeLoading || !nearEnd || !hasMorePage) {
       return;
     }
 
-    this._timezoneLoading = true;
-    this._timezoneService
-      .getAllTimezones(this._timezonePage + 1, this._timezonePageSize)
+    this._placeLoading = true;
+    this._placeService
+      .getAllPlaces(this._placePage + 1, this._placePageSize)
       .pipe(
         takeUntilDestroyed(this._destroyRef),
         catchError(() => EMPTY),
-        finalize(() => (this._timezoneLoading = false)),
+        finalize(() => (this._placeLoading = false)),
       )
       .subscribe((data) => {
-        this.timezones.update((items) => [...items, ...data.content]);
-        this._timezonePage = data.number;
-        this._timezoneTotalPage = data.totalPages;
+        this.places.update((items) => [...items, ...data.content]);
+        this._placePage = data.number;
+        this._placeTotalPage = data.totalPages;
       });
-  }
-
-  // Le scroller virtuel de PrimeNG ne s'initialise qu'une fois l'overlay visible :
-  // on relance la détection de changements à l'ouverture pour qu'il affiche les options.
-  onShowTimezone() {
-    this._changeDetectorRef.detectChanges();
   }
 
   onSubmit() {
@@ -158,7 +152,7 @@ export class HomeComponent {
     }
     this._calculateDate.next({
       date: this.form.controls.dateSearch.value!,
-      timezone: this.form.controls.timezone.value!,
+      place: this.form.controls.place.value!,
     });
   }
 }

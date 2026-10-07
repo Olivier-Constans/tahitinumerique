@@ -1,6 +1,6 @@
 # Rapport d'analyse front-end
 
-> Projet : time-zone-frontend · Dernière analyse : 2026-10-07 · Commit analysé : 127d108
+> Projet : time-zone-frontend · Dernière analyse : 2026-10-07 · Commit analysé : 0767ab0
 
 ## Synthèse
 
@@ -9,12 +9,12 @@
 | Section | Critique | Majeur | Mineur | Info | Total ouverts |
 |---|---|---|---|---|---|
 | 1. Analyse technique | 0 | 0 | 0 | 3 | 3 |
-| 2. Analyse fonctionnelle | 0 | 0 | 5 | 0 | 5 |
-| **Total** | **0** | **0** | **5** | **3** | **8** |
+| 2. Analyse fonctionnelle | 0 | 0 | 5 | 1 | 6 |
+| **Total** | **0** | **0** | **5** | **4** | **9** |
 
-**Outils** : lint OK · tests 66/66 passés (13 fichiers) · build OK sans avertissement (bundle initial 648,24 kB pour un budget de 750 kB) · Prettier OK
+**Outils** : lint OK · tests 75/75 passés (13 fichiers) · build OK sans avertissement (bundle initial 652,64 kB pour un budget de 750 kB) · Prettier OK
 
-**Depuis la dernière analyse** (analyse complète) : 4 nouveaux (FRONT-20261007-09 à -12), 4 corrigés et clos (FRONT-20261007-03 et -06, clos entre les deux analyses et confirmés absents du code ; FRONT-20261007-05 et FRONT-20261006-06, clos par cette analyse), 0 rouvert.
+**Depuis la dernière analyse** (analyse complète, `package.json` et `Dockerfile` modifiés) : 2 nouveaux (FRONT-20261007-13 et -14), 1 corrigé (FRONT-20261007-12, résolu par l'évolution vers les lieux), 0 rouvert. Évolution analysée : remplacement des fuseaux par des lieux à décalage fixe ou zone IANA, listes de décalages et de zones fournies par le back.
 
 ## 1. Analyse technique
 
@@ -70,44 +70,56 @@ Aucun point ouvert.
 #### FRONT-20261006-15 · Mineur · Navigation incomplète dans l'administration
 - **Statut** : Ouvert
 - **Découvert le** : 2026-10-06 · **Dernière vérification** : 2026-10-07
-- **Emplacement** : `src/app/view/administration/timezone/timezone.component.html:1-7`, `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.html:1`
+- **Emplacement** : `src/app/view/administration/place/place.component.html:1-12`, `src/app/view/administration/place/place-edit/place-edit.component.html:1`
 - **Constat** : la page de consultation n'a pas de bouton « Modifier ». Le fil d'Ariane est un lien texte `> Administration`, avec un chevron saisi à la main.
-- **Impact** : pour modifier un fuseau qu'on consulte, il faut revenir à la liste.
+- **Impact** : pour modifier un lieu qu'on consulte, il faut revenir à la liste.
 - **Recommandation** : ajouter un bouton « Modifier » (`[routerLink]="['edit']"`) et utiliser `p-breadcrumb`.
+- **Révisé le 2026-10-07** : déplacé de `view/administration/timezone/` vers `view/administration/place/` (passage aux lieux), problème identique.
 
-#### FRONT-20261007-12 · Mineur · Liste des décalages UTC non triée et sans recherche
+#### FRONT-20261007-14 · Info · Type de lieu proposé par défaut : le décalage fixe, sans heure d'été
 - **Statut** : Ouvert
 - **Découvert le** : 2026-10-07 · **Dernière vérification** : 2026-10-07
-- **Emplacement** : `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.ts:56`, `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.html:44-56`, `src/app/shared/model/offsetUTC.model.ts:4-46`
-- **Constat** : le `p-select` reprend l'ordre de l'enum (identique à l'enum Java `OffsetUTC`) : `UTC`, puis `UTC+01` à `UTC+14`, puis `UTC-01` à `UTC-12`. Les décalages négatifs arrivent après les positifs, et `UTC-12` est en toute fin de liste. Les 41 options s'affichent sans champ de recherche (`[filter]` absent).
-- **Impact** : pour Tahiti (`UTC-10`), il faut faire défiler presque toute la liste, après `UTC+14`. L'ordre ne correspond pas à l'axe des fuseaux.
-- **Recommandation** : présenter les options de `UTC-12` à `UTC+14`, par exemple avec une liste ordonnée dédiée à l'affichage (sans toucher à l'enum de contrat), et ajouter `[filter]="true"` au `p-select`.
+- **Emplacement** : `src/app/view/administration/place/place-edit/place-edit.component.ts:100`
+- **Constat** : un nouveau lieu est créé par défaut en « Décalage UTC fixe ». Pour un lieu réel qui change d'heure (Paris, New York), ce type donne un résultat faux une partie de l'année ; seule la zone IANA suit l'heure d'été.
+- **Impact** : un utilisateur qui ne change pas le type par défaut enregistre Paris en `UTC+01:00` et obtient des calculs décalés d'une heure tout l'été.
+- **Recommandation** : proposer la zone par défaut (`ZONE_ID`), le décalage fixe restant disponible pour les cas sans heure d'été ; ou n'en présélectionner aucun pour forcer un choix conscient.
 
 ### 2.3 Linter (templates et accessibilité)
 
 #### FRONT-20261007-07 · Mineur · Titre de document identique sur toutes les pages
 - **Statut** : Ouvert
 - **Découvert le** : 2026-10-07 · **Dernière vérification** : 2026-10-07
-- **Emplacement** : `src/app/app.routes.ts:5-24`, `src/app/view/administration/administration.routes.ts`, `src/app/view/administration/timezone/timezone.routes.ts:22-39`
+- **Emplacement** : `src/app/app.routes.ts:5-24`, `src/app/view/administration/administration.routes.ts`, `src/app/view/administration/place/place.routes.ts:22-39`
 - **Constat** : aucune route ne définit `title`. L'onglet affiche « Fuseaux horaires » sur l'accueil, l'administration, la consultation, le formulaire et la page introuvable.
 - **Impact** : critère WCAG 2.4.2 (titre de page) non respecté, et un lecteur d'écran n'annonce pas le changement de page lors d'une navigation dans l'application. L'historique du navigateur est aussi indistinct.
-- **Recommandation** : ajouter `title` aux routes (« Administration · Fuseaux horaires », « Nouveau fuseau horaire · Fuseaux horaires », « Page introuvable · Fuseaux horaires »), et un `ResolveFn<string>` ou une `TitleStrategy` pour reprendre le nom du fuseau consulté ou modifié.
+- **Recommandation** : ajouter `title` aux routes (« Administration · Fuseaux horaires », « Nouveau lieu · Fuseaux horaires », « Page introuvable · Fuseaux horaires »), et un `ResolveFn<string>` ou une `TitleStrategy` pour reprendre le nom du lieu consulté ou modifié.
+- **Révisé le 2026-10-07** : déplacé de `timezone.routes.ts` vers `place.routes.ts` (passage aux lieux) ; titres proposés adaptés au terme « lieu ».
 
 ### 2.4 Wording
 
 #### FRONT-20261007-08 · Mineur · Guillemets droits dans le titre de modification
 - **Statut** : Ouvert
 - **Découvert le** : 2026-10-07 · **Dernière vérification** : 2026-10-07
-- **Emplacement** : `src/app/view/administration/timezone/timezone-edit/timezone-edit.component.html:7`
-- **Constat** : le titre affiche `Modification du fuseau horaire "Tahiti"`, avec des guillemets droits, alors que les toasts et la confirmation de suppression utilisent les guillemets français (« Tahiti »).
+- **Emplacement** : `src/app/view/administration/place/place-edit/place-edit.component.html:7`
+- **Constat** : le titre affiche `Modification du lieu "Tahiti"`, avec des guillemets droits, alors que les toasts et la confirmation de suppression utilisent les guillemets français (« Tahiti »).
 - **Impact** : typographie incohérente au sein de l'interface.
-- **Recommandation** : `Modification du fuseau horaire « {{ timezone.label }} »`, avec des espaces insécables si possible.
+- **Recommandation** : `Modification du lieu « {{ place.label }} »`, avec des espaces insécables si possible.
+- **Révisé le 2026-10-07** : déplacé de `timezone-edit.component.html` vers `place-edit.component.html` (passage aux lieux), problème identique.
+
+#### FRONT-20261007-13 · Mineur · Terme technique « Zone IANA » présenté à l'utilisateur
+- **Statut** : Ouvert
+- **Découvert le** : 2026-10-07 · **Dernière vérification** : 2026-10-07
+- **Emplacement** : `src/app/shared/model/place.model.ts:50-53`, `src/app/view/administration/place/place-edit/place-edit.component.html:41,56,76`, `src/app/view/administration/place/place.component.html:8`
+- **Constat** : le formulaire propose de choisir entre « Décalage UTC fixe » et « Zone IANA », puis affiche le champ « Zone IANA » et le message « La zone IANA est obligatoire. ». La page de consultation affiche « Type : Zone IANA » et « Zone IANA : Europe/Paris ». IANA est le nom de l'organisme qui maintient la base des fuseaux, pas un terme connu des utilisateurs. Le libellé du choix, « Type de fuseau », emploie aussi « fuseau » alors que le reste de l'administration parle de « lieu ».
+- **Impact** : l'utilisateur ne comprend pas ce qui distingue les deux types, en particulier que seule la zone suit l'heure d'été.
+- **Recommandation** : un libellé qui décrit l'effet plutôt que la source, par exemple « Fuseau géographique (heure d'été comprise) » face à « Décalage UTC fixe », avec un texte d'aide sous le choix ; « Zone » ou « Fuseau » pour le champ, avec un exemple (« Europe/Paris »). Adapter `PLACE_TYPE_LABELS`, les libellés et le message d'erreur ensemble.
   
 
 ## Historique des analyses
 
 | Date | Nouveaux | Corrigés | Rouverts | Ouverts au total | Lint | Tests |
 |---|---|---|---|---|---|---|
+| 2026-10-07 (3e analyse, complète) | 2 | 1 | 0 | 9 | OK | 75/75 |
 | 2026-10-07 (2e analyse, complète) | 4 | 4 | 0 | 10 | OK | 66/66 |
 | 2026-10-07 | 2 | 2 | 0 | 17 | OK | 39/39 |
 | 2026-10-06 (2e analyse) | 3 | 4 | 1 | 19 | OK | 39/39 |

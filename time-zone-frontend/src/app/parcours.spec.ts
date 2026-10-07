@@ -12,19 +12,24 @@ import { MessageService } from 'primeng/api';
 import { routes } from './app.routes';
 import { httpErrorInterceptor } from './shared/interceptor/http-error.interceptor';
 import { responseValidationInterceptor } from './shared/interceptor/response-validation.interceptor';
-import { TimezoneEditComponent } from './view/administration/timezone/timezone-edit/timezone-edit.component';
+import { PlaceEditComponent } from './view/administration/place/place-edit/place-edit.component';
 import { HomeComponent } from './view/home/home.component';
-import { OffsetUTC } from './shared/model/offsetUTC.model';
 
 // Parcours complet à travers les vraies routes, le vrai service et l'intercepteur : seul le back est simulé
-describe('Parcours : création de deux fuseaux puis calcul', () => {
+describe('Parcours : création de deux lieux puis calcul', () => {
   let harness: RouterTestingHarness;
   let router: Router;
   let httpTesting: HttpTestingController;
 
   const audit = { createDate: '2026-10-06T08:00:00Z', updateDate: '2026-10-06T08:00:00Z' };
-  const tahiti = { id: 1, label: 'Tahiti', offsetUTC: 'UTC-10', audit };
-  const paris = { id: 2, label: 'Paris', offsetUTC: 'UTC+02', audit };
+  const tahiti = {
+    id: 1,
+    type: 'ZONE_OFFSET_FIXED',
+    label: 'Tahiti',
+    zoneOffset: '-10:00',
+    audit,
+  } as const;
+  const paris = { id: 2, type: 'ZONE_ID', label: 'Paris', zoneId: 'Europe/Paris', audit } as const;
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
@@ -59,33 +64,44 @@ describe('Parcours : création de deux fuseaux puis calcul', () => {
     return httpTesting.expectOne(match);
   }
 
-  async function createTimezone(timezone: { id: number; label: string; offsetUTC: string }) {
-    await harness.navigateByUrl('/admin/timezone/new');
+  async function createPlace(place: typeof tahiti | typeof paris) {
+    await harness.navigateByUrl('/admin/place/new');
+    (await expectRequest('api/places/zone-ids')).flush(['Europe/Paris', 'Pacific/Tahiti']);
+    (await expectRequest('api/places/zone-offsets')).flush(['-10:00', 'Z', '+01:00']);
     const input = element().querySelector<HTMLInputElement>('input#label')!;
-    input.value = timezone.label;
+    input.value = place.label;
     input.dispatchEvent(new Event('input'));
-    const component = harness.routeDebugElement!.componentInstance as TimezoneEditComponent;
-    component.form.controls.offsetUTC.setValue(timezone.offsetUTC as OffsetUTC);
+    const component = harness.routeDebugElement!.componentInstance as PlaceEditComponent;
+    if (place.type === 'ZONE_ID') {
+      component.form.controls.type.setValue('ZONE_ID');
+      component.form.controls.zoneId.setValue(place.zoneId);
+    } else {
+      component.form.controls.zoneOffset.setValue(place.zoneOffset);
+    }
     await harness.fixture.whenStable();
     element().querySelector<HTMLButtonElement>('button[type="submit"]')!.click();
 
-    const post = await expectRequest({ method: 'POST', url: 'api/timezones' });
-    expect(post.request.body).toEqual({ label: timezone.label, offsetUTC: timezone.offsetUTC });
-    post.flush({ ...timezone, audit });
+    const post = await expectRequest({ method: 'POST', url: 'api/places' });
+    expect(post.request.body).toEqual(
+      place.type === 'ZONE_ID'
+        ? { type: place.type, label: place.label, zoneId: place.zoneId }
+        : { type: place.type, label: place.label, zoneOffset: place.zoneOffset },
+    );
+    post.flush(place);
 
     // Redirection vers la consultation, chargée par le resolver
-    (await expectRequest(`api/timezones/${timezone.id}`)).flush({ ...timezone, audit });
+    (await expectRequest(`api/places/${place.id}`)).flush(place);
     await harness.fixture.whenStable();
-    expect(router.url).toBe(`/admin/timezone/${timezone.id}`);
-    expect(element().querySelector('h2')?.textContent).toBe(timezone.label);
+    expect(router.url).toBe(`/admin/place/${place.id}`);
+    expect(element().querySelector('h2')?.textContent).toBe(place.label);
   }
 
-  it('crée deux fuseaux puis calcule une date dans chacun', async () => {
-    await createTimezone(tahiti);
-    await createTimezone(paris);
+  it('crée un lieu de chaque type puis calcule une date dans chacun', async () => {
+    await createPlace(tahiti);
+    await createPlace(paris);
 
     void router.navigateByUrl('/');
-    (await expectRequest({ method: 'GET', url: 'api/timezones?page=0&size=10' })).flush({
+    (await expectRequest({ method: 'GET', url: 'api/places?page=0&size=10' })).flush({
       content: [tahiti, paris],
       totalPages: 1,
       totalElements: 2,
@@ -95,19 +111,19 @@ describe('Parcours : création de deux fuseaux puis calcul', () => {
     await harness.fixture.whenStable();
 
     const home = harness.routeDebugElement!.componentInstance as HomeComponent;
-    home.form.setValue({ timezone: home.timezones()[0], dateSearch: new Date(2026, 9, 6, 10, 0) });
+    home.form.setValue({ place: home.places()[0], dateSearch: new Date(2026, 9, 6, 10, 0) });
     await harness.fixture.whenStable();
     element().querySelector<HTMLButtonElement>('button[type="submit"]')!.click();
 
-    const calculate = await expectRequest({ method: 'POST', url: 'api/timezones/calculate-date' });
+    const calculate = await expectRequest({ method: 'POST', url: 'api/places/calculate-date' });
     expect(calculate.request.body).toEqual({
       date: new Date('2026-10-06T10:00:00Z'),
-      timezoneId: 1,
+      placeId: 1,
     });
     calculate.flush({
       calculateDateItemList: [
-        { date: '2026-10-06T20:00:00Z', timezone: tahiti },
-        { date: '2026-10-07T08:00:00Z', timezone: paris },
+        { date: '2026-10-06T20:00:00Z', place: tahiti },
+        { date: '2026-10-07T08:00:00Z', place: paris },
       ],
     });
     await harness.fixture.whenStable();

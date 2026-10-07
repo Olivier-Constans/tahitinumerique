@@ -22,6 +22,6 @@ Voici plusieurs possibilités d'amélioration:
 - Ajout des tests sur l'application Back
 - Améliorer le design de l'application
 - Ajouter des fonctionnalités:
-  - Création d'un objet "timezone" à partir d'un point sur un carte géolocalisé
-  - Création d'un objet "timezone" à partir d'un recherche de lieux (api OpenStreetMap / Google Map ) 
+  - Création d'un objet "zoneOffsetFixed" à partir d'un point sur un carte géolocalisé
+  - Création d'un objet "zoneOffsetFixed" à partir d'un recherche de lieux (api OpenStreetMap / Google Map ) 
 

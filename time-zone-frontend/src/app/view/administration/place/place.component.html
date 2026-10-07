@@ -1,0 +1,12 @@
+<a [routerLink]="['/', ADMIN_PATH]">> Administration</a>
+@let place = data();
+<div>
+  <h2>{{ place.label }}</h2>
+  <div>Modifié le {{ place.audit.updateDate | date: "dd/MM/yyyy 'à' HH:mm" }} ({{ timeZone }})</div>
+  <div>Type : {{ PLACE_TYPE_LABELS[place.type] }}</div>
+  @if (place.type === ZONE_ID) {
+    <div>Zone IANA : {{ place.zoneId }}</div>
+  } @else {
+    <div>Décalage UTC : {{ formatZoneOffset(place.zoneOffset) }}</div>
+  }
+</div>
