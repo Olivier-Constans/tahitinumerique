@@ -7,13 +7,13 @@ import {
   signal,
 } from '@angular/core';
 import { Button } from 'primeng/button';
-import { TimezoneService } from '../../shared/service/timezone.service';
+import { PlaceService } from '../../shared/service/place.service';
 import { catchError, EMPTY, of, switchMap } from 'rxjs';
-import { TimezoneResponse } from '../../shared/model/timezone.model';
+import { PlaceResponse } from '../../shared/model/place.model';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { TIMEZONE_PATH } from './administration.routes';
+import { PLACE_PATH } from './administration.routes';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { Tooltip } from 'primeng/tooltip';
@@ -26,12 +26,12 @@ import { ProgressSpinner } from 'primeng/progressspinner';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdministrationComponent {
-  private readonly _timezoneService = inject(TimezoneService);
+  private readonly _placeService = inject(PlaceService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _confirmationService = inject(ConfirmationService);
   private readonly _messageService = inject(MessageService);
 
-  protected readonly TIMEZONE_PATH = TIMEZONE_PATH;
+  protected readonly PLACE_PATH = PLACE_PATH;
 
   readonly page = signal(0);
   readonly rows = signal(10);
@@ -50,7 +50,7 @@ export class AdministrationComponent {
   readonly result = toSignal(
     toObservable(this._search).pipe(
       switchMap(({ page, rows }) =>
-        this._timezoneService.getAllTimezones(page, rows).pipe(catchError(() => of(null))),
+        this._placeService.getAllPlaces(page, rows).pipe(catchError(() => of(null))),
       ),
     ),
   );
@@ -64,23 +64,23 @@ export class AdministrationComponent {
     this.rows.set($event.rows ?? this.rows());
   }
 
-  delete(data: TimezoneResponse) {
+  delete(data: PlaceResponse) {
     this._confirmationService.confirm({
-      header: 'Supprimer le fuseau horaire',
-      message: `Supprimer le fuseau « ${data.label} » ? Cette action est définitive.`,
+      header: 'Supprimer le lieu',
+      message: `Supprimer le lieu « ${data.label} » ? Cette action est définitive.`,
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Supprimer',
       rejectLabel: 'Annuler',
       acceptButtonProps: { severity: 'danger' },
       rejectButtonProps: { severity: 'secondary', outlined: true },
       defaultFocus: 'reject',
-      accept: () => this._deleteTimezone(data),
+      accept: () => this._deletePlace(data),
     });
   }
 
-  private _deleteTimezone(data: TimezoneResponse) {
-    this._timezoneService
-      .deleteTimezone(data.id)
+  private _deletePlace(data: PlaceResponse) {
+    this._placeService
+      .deletePlace(data.id)
       .pipe(
         takeUntilDestroyed(this._destroyRef),
         catchError(() => EMPTY),
@@ -89,7 +89,7 @@ export class AdministrationComponent {
         this._messageService.add({
           severity: 'success',
           summary: 'Succès',
-          detail: `Fuseau horaire « ${data.label} » supprimé.`,
+          detail: `Lieu « ${data.label} » supprimé.`,
         });
         this._refresh.update((value) => value + 1);
       });

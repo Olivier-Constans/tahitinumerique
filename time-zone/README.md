@@ -1,6 +1,8 @@
 # Time Zone – Back-end
 
-API REST Spring Boot du projet Timezone de Tahiti Numérique. Elle gère une liste de fuseaux horaires (un libellé et un décalage UTC) et calcule, pour une date saisie dans l'un d'eux, la date correspondante dans tous les autres.
+API REST Spring Boot du projet Timezone de Tahiti Numérique. Elle gère une liste de lieux et calcule, pour une date saisie dans l'un d'eux, la date correspondante dans tous les autres. Un lieu a un libellé et l'un de ces deux types :
+- **décalage UTC fixe** (`ZONE_OFFSET_FIXED`) : `-10:00`, sans changement d'heure ;
+- **zone IANA** (`ZONE_ID`) : `Europe/Paris`, dont le décalage suit l'heure d'été et d'hiver.
 
 Elle est consommée par le front Angular (dossier `../time-zone-frontend`).
 
@@ -17,7 +19,7 @@ Elle est consommée par le front Angular (dossier `../time-zone-frontend`).
 ./mvnw spring-boot:run
 ```
 
-L'API écoute sur le port **7373**, sous le contexte `/api` : http://localhost:7373/api/timezones
+L'API écoute sur le port **7373**, sous le contexte `/api` : http://localhost:7373/api/places
 
 La base H2 est **en mémoire** : le schéma est créé au démarrage par Hibernate, et les données sont perdues à chaque arrêt. Aucun jeu de données n'est chargé : la liste est vide au premier lancement.
 
@@ -36,40 +38,48 @@ Toutes les routes sont préfixées par `/api`.
 
 | Verbe | Route | Rôle | Succès |
 |---|---|---|---|
-| `GET` | `/timezones` | Liste paginée des fuseaux | 200 |
-| `GET` | `/timezones/{id}` | Un fuseau | 200 |
-| `POST` | `/timezones` | Création | 201, avec l'en-tête `Location` |
-| `PUT` | `/timezones/{id}` | Modification | 200 |
-| `DELETE` | `/timezones/{id}` | Suppression | 204 |
-| `POST` | `/timezones/calculate-date` | Calcul de la date dans les autres fuseaux | 200 |
+| `GET` | `/places` | Liste paginée des lieux, tous types confondus | 200 |
+| `GET` | `/places/{id}` | Un lieu | 200 |
+| `POST` | `/places` | Création | 201, avec l'en-tête `Location` |
+| `PUT` | `/places/{id}` | Modification, y compris du type | 200 |
+| `DELETE` | `/places/{id}` | Suppression | 204 |
+| `GET` | `/places/zone-ids` | Zones IANA acceptées, triées | 200 |
+| `GET` | `/places/zone-offsets` | Décalages acceptés, triés de `-12:00` à `+14:00` | 200 |
+| `POST` | `/places/calculate-date` | Calcul de la date dans les autres lieux | 200 |
 
-### Fuseau horaire
+### Lieu
 
-Requête (`POST` et `PUT`) :
+Requête (`POST` et `PUT`), selon le type :
 
 ```json
-{ "label": "Tahiti", "offsetUTC": "UTC-10" }
+{ "type": "ZONE_OFFSET_FIXED", "label": "Tahiti", "zoneOffset": "-10:00" }
+{ "type": "ZONE_ID", "label": "Paris", "zoneId": "Europe/Paris" }
 ```
 
+- `type` : obligatoire, `ZONE_OFFSET_FIXED` ou `ZONE_ID`. Jackson s'en sert pour instancier la requête correspondante (`ZoneOffsetFixedPlaceRequest` ou `ZoneIdPlaceRequest`, sous-classes de `PlaceRequest`). Un type absent ou inconnu est refusé avant le service, avec le même format de message que les autres champs.
 - `label` : obligatoire, non vide, 100 caractères au plus.
-- `offsetUTC` : obligatoire, parmi les libellés de l'enum `OffsetUTC` (`"UTC"`, `"UTC+01"`, `"UTC+05:30"`, `"UTC-10"`…). La casse n'est pas prise en compte.
+- `zoneOffset` (type `ZONE_OFFSET_FIXED`) : obligatoire, au format ISO-8601 de `java.time.ZoneOffset` (`"-10:00"`, `"+05:45"`, `"Z"` ou `"+00:00"` pour UTC), et parmi les décalages renvoyés par `GET /places/zone-offsets`. Cette liste n'est pas écrite en dur : ce sont les décalages en vigueur dans au moins une zone IANA de la JVM, au démarrage ou dans l'année qui suit, heure d'été comprise.
+- `zoneId` (type `ZONE_ID`) : obligatoire, parmi les zones renvoyées par `GET /places/zone-ids` (zones connues de la JVM).
+
+Un `PUT` peut changer le type d'un lieu : l'id et la date de création sont conservés, le champ propre à l'ancien type est effacé.
 
 Réponse :
 
 ```json
 {
   "id": 1,
+  "type": "ZONE_OFFSET_FIXED",
   "label": "Tahiti",
-  "offsetUTC": "UTC-10",
+  "zoneOffset": "-10:00",
   "audit": { "createDate": "2026-10-07T08:00:00Z", "updateDate": "2026-10-07T08:00:00Z" }
 }
 ```
 
-`offsetUTC` est renvoyé sous forme de libellé, comme en entrée. Les dates d'audit sont des `Instant` en UTC, renseignées par `AuditListener` à la création et à chaque modification.
+Un lieu `ZONE_ID` porte `zoneId` à la place de `zoneOffset`. `zoneOffset` est renvoyé au format ISO-8601, `Z` pour UTC. Les dates d'audit sont des `Instant` en UTC, renseignées par `AuditListener` à la création et à chaque modification.
 
 ### Liste paginée
 
-`GET /timezones?page=0&size=10&sort=label,asc`
+`GET /places?page=0&size=10&sort=label,asc`
 
 Les paramètres sont ceux de Spring Data (`page` commence à 0, 10 éléments par défaut). Un tri sur une propriété inconnue renvoie 400. La réponse est un `PageResponse`, au format stable, indépendant de la sérialisation de `PageImpl` :
 
@@ -82,15 +92,15 @@ Les paramètres sont ceux de Spring Data (`page` commence à 0, 10 éléments pa
 Requête :
 
 ```json
-{ "timezoneId": 1, "date": "2026-10-07T12:00:00" }
+{ "placeId": 1, "date": "2026-10-07T12:00:00" }
 ```
 
-La date, sans fuseau, est interprétée dans le décalage du fuseau `timezoneId`. La réponse donne la date équivalente dans chacun des **autres** fuseaux enregistrés :
+La date, sans fuseau, est l'heure locale du lieu `placeId`. Pour une zone IANA, le décalage appliqué est celui en vigueur à cette date. La réponse donne la date équivalente dans chacun des **autres** lieux enregistrés :
 
 ```json
 {
   "calculateDateItemList": [
-    { "timezone": { "id": 2, "label": "Paris", "offsetUTC": "UTC+02", "audit": { … } }, "date": "2026-10-08T00:00:00" }
+    { "place": { "id": 2, "type": "ZONE_ID", "label": "Paris", "zoneId": "Europe/Paris", "audit": { … } }, "date": "2026-10-08T00:00:00" }
   ]
 }
 ```
@@ -106,7 +116,7 @@ Toutes les erreurs ont le même format, avec un message en français tiré de `s
 | Cas | Code |
 |---|---|
 | Validation métier (`BusinessException`) : champ manquant, invalide, trop long, référence inexistante | 400 |
-| Fuseau introuvable (`NotFoundException`) | 404 |
+| Lieu introuvable (`NotFoundException`) | 404 |
 | Erreur Spring MVC : JSON illisible, paramètre mal typé, tri inconnu | 400 |
 | Route inexistante | 404 |
 | Erreur inattendue (détail dans les journaux uniquement) | 500 |
@@ -141,14 +151,16 @@ src/main/java/tahiti/numerique/time_zone/
 │   ├── exception/                 # BusinessException, NotFoundException, RestExceptionHandler
 │   └── validator/                 # ObjectValidator, MessageCode (clés de messages.properties)
 ├── metier/
-│   ├── timezone/
-│   │   ├── controller/            # TimezoneController, DTO Request/Response
-│   │   ├── service/               # TimezoneService (validation, CRUD, calcul de date)
+│   ├── place/
+│   │   ├── controller/            # PlaceController, DTO Request/Response (une réponse par type de lieu)
+│   │   ├── service/               # PlaceService (validation, CRUD, changement de type, calcul de date)
+│   │   │   └── handler/           # PlaceHandler (une stratégie par type de lieu) et PlaceHandlerRegistry
 │   │   └── mapper/                # mappers MapStruct entité <-> DTO
 │   └── audit/                     # AuditResponse et son mapper
 └── persistence/
-    ├── OffsetUTC.java             # enum des décalages UTC (libellé + ZoneOffset)
-    ├── timezone/                  # entité Timezone et son repository
+    ├── place/                     # Place (abstraite, table unique), PlaceRepository
+    │   ├── time_zone_fixed/       # ZoneOffsetFixedPlace : décalage fixe, et son convertisseur JPA
+    │   └── zone_id/               # ZoneIdPlace : zone IANA, et son convertisseur JPA
     └── audit/                     # Audit (embarqué), Auditable, AuditListener
 ```
 
@@ -156,15 +168,16 @@ src/main/java/tahiti/numerique/time_zone/
 - Les controllers ne font que mapper : la validation et la logique sont dans les services.
 - La validation passe par `ObjectValidator` (`required`, `notBlank`, `maxLength`, `valid`, `exist`), qui lève une `BusinessException` portant une clé de message et ses arguments. Le message n'est résolu qu'au moment de la réponse, par `RestExceptionHandler`.
 - Toute nouvelle clé de message est déclarée dans `MessageCode` et dans `messages.properties`. `spring.messages.always-use-message-format=true` : les apostrophes s'y écrivent doublées (`''`).
+- Un type de lieu se traite par une stratégie `PlaceHandler` (bean Spring), que `PlaceService` obtient de `PlaceHandlerRegistry` d'après la classe de la requête. Au démarrage, avant le lancement du serveur web, le registre construit son index et vérifie qu'il existe exactement une stratégie par sous-classe de `PlaceRequest` : sinon, l'application ne démarre pas.
 - Les entités ne sortent pas de l'API : elles sont converties en DTO `…Response` par les mappers MapStruct.
 - Une entité qui implémente `Auditable` et déclare `@EntityListeners(AuditListener.class)` reçoit ses dates de création et de modification. L'heure vient du bean `Clock`, que les tests peuvent remplacer.
 
 ## Tests
 
 Dans `src/test/java/` :
-- `TimezoneServiceTest`, `TimezoneMapperTest`, `ObjectValidatorTest` : tests unitaires (Mockito) ;
-- `TimezoneControllerTest` : couche web seule, avec MockMvc et le service simulé ;
-- `TimezoneApiTest` : pile complète (service, repository, H2) avec MockMvc ;
+- `PlaceServiceTest`, `PlaceMapperTest`, `ObjectValidatorTest` : tests unitaires (Mockito) ;
+- `PlaceControllerTest` : couche web seule, avec MockMvc et le service simulé ;
+- `PlaceApiTest` : pile complète (service, repository, H2) avec MockMvc, dont le changement de type d'un lieu ;
 - `TimeZoneApplicationTests` : chargement du contexte Spring.
 
 ## Claude Code

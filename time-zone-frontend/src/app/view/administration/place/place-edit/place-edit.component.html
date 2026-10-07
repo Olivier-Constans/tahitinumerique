@@ -1,0 +1,118 @@
+<a [routerLink]="['/', ADMIN_PATH]">> Administration</a>
+
+<div class="flex items-center flex-wrap">
+  <div class="grow">
+    <h2>
+      @if (data(); as place) {
+        Modification du lieu "{{ place.label }}"
+      } @else {
+        Nouveau lieu
+      }
+    </h2>
+  </div>
+</div>
+<form (ngSubmit)="onSubmit()" [formGroup]="form">
+  @let label = form.controls.label;
+  @let labelInError = label.invalid && label.touched;
+  <div class="flex flex-col gap-2 m-2">
+    <label for="label">Nom</label>
+    <input
+      pInputText
+      id="label"
+      formControlName="label"
+      type="text"
+      [maxlength]="LABEL_MAX_LENGTH"
+      [invalid]="labelInError"
+      [attr.aria-invalid]="labelInError"
+      [attr.aria-describedby]="labelInError ? 'label-error' : null"
+    />
+    @if (labelInError) {
+      <p-message id="label-error" severity="error" size="small" variant="simple">
+        @if (label.hasError('maxlength')) {
+          Le nom ne doit pas dépasser {{ LABEL_MAX_LENGTH }} caractères.
+        } @else {
+          Le nom est obligatoire.
+        }
+      </p-message>
+    }
+  </div>
+
+  <div class="flex flex-col gap-2 m-2">
+    <span id="type-label">Type de fuseau</span>
+    <p-selectbutton
+      formControlName="type"
+      [options]="optionsType"
+      optionLabel="label"
+      optionValue="value"
+      [allowEmpty]="false"
+      ariaLabelledBy="type-label"
+    />
+  </div>
+
+  @if (type() === ZONE_ID) {
+    @let zoneId = form.controls.zoneId;
+    @let zoneIdInError = zoneId.invalid && zoneId.touched;
+    <div class="flex flex-col gap-2 m-2">
+      <label for="zoneId">Zone IANA</label>
+      <p-select
+        inputId="zoneId"
+        formControlName="zoneId"
+        [options]="optionsZoneId()"
+        [filter]="true"
+        [virtualScroll]="true"
+        [virtualScrollItemSize]="38"
+        placeholder="Pacific/Tahiti"
+        class="w-full"
+        [invalid]="zoneIdInError"
+        [pt]="{
+          label: {
+            'aria-invalid': zoneIdInError,
+            'aria-describedby': zoneIdInError ? 'zoneId-error' : null,
+          },
+        }"
+      />
+      @if (zoneIdInError) {
+        <p-message id="zoneId-error" severity="error" size="small" variant="simple"
+          >La zone IANA est obligatoire.</p-message
+        >
+      }
+    </div>
+  } @else {
+    @let zoneOffset = form.controls.zoneOffset;
+    @let zoneOffsetInError = zoneOffset.invalid && zoneOffset.touched;
+    <div class="flex flex-col gap-2 m-2">
+      <label for="zoneOffset">Décalage UTC</label>
+      <p-select
+        inputId="zoneOffset"
+        formControlName="zoneOffset"
+        [options]="optionsZoneOffset()"
+        optionLabel="label"
+        optionValue="value"
+        [filter]="true"
+        class="w-full"
+        [invalid]="zoneOffsetInError"
+        [pt]="{
+          label: {
+            'aria-invalid': zoneOffsetInError,
+            'aria-describedby': zoneOffsetInError ? 'zoneOffset-error' : null,
+          },
+        }"
+      />
+      @if (zoneOffsetInError) {
+        <p-message id="zoneOffset-error" severity="error" size="small" variant="simple"
+          >Le décalage UTC est obligatoire.</p-message
+        >
+      }
+    </div>
+  }
+
+  <div>
+    <p-button
+      [disabled]="form.invalid"
+      [loading]="saving()"
+      label="Enregistrer"
+      ariaLabel="Enregistrer"
+      type="submit"
+    />
+  </div>
+</form>

@@ -73,7 +73,7 @@ Ordre dans une sous-section : gravité (Critique à Info), puis date de découve
 #### BACK-20261007-03 · Majeur · Requête de calcul sans validation de la date
 - **Statut** : Ouvert
 - **Découvert le** : 2026-10-07 · **Dernière vérification** : 2026-10-07
-- **Emplacement** : `src/main/java/tahiti/numerique/time_zone/metier/timezone/controller/CalculateDateRequest.java:12`
+- **Emplacement** : `src/main/java/tahiti/numerique/time_zone/metier/zoneOffsetFixed/controller/CalculateDateRequest.java:12`
 - **Constat** : le champ `date` n'est pas contrôlé, une requête sans date atteint le service.
 - **Impact** : `NullPointerException` traduite en erreur 500 au lieu d'une erreur 400 explicite.
 - **Recommandation** : valider le champ avant l'appel au service et renvoyer un message de `messages.properties`.

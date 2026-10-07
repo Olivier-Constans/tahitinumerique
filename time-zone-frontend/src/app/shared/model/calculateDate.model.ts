@@ -1,10 +1,10 @@
 import * as z from 'zod/mini';
-import { TimezoneResponse } from './timezone.model';
+import { PlaceResponse } from './place.model';
 import { isoDate } from './date.model';
 
 export const CalculateDateItemResponse = z.object({
   date: isoDate,
-  timezone: TimezoneResponse,
+  place: PlaceResponse,
 });
 
 export type CalculateDateItemResponse = z.infer<typeof CalculateDateItemResponse>;
@@ -17,5 +17,5 @@ export type CalculateDateResponse = z.infer<typeof CalculateDateResponse>;
 
 export interface CalculateDateRequest {
   date: Date;
-  timezoneId: number;
+  placeId: number;
 }

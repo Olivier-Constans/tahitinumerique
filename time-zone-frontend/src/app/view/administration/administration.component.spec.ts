@@ -2,15 +2,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
 import { AdministrationComponent } from './administration.component';
-import { TimezoneService } from '../../shared/service/timezone.service';
-import { aPage, aTimezone } from '../../../testing/timezone.fixture';
+import { PlaceService } from '../../shared/service/place.service';
+import { aPage, aPlace, aZoneIdPlace } from '../../../testing/place.fixture';
 import { MessageService } from 'primeng/api';
 
 describe('AdministrationComponent', () => {
   let fixture: ComponentFixture<AdministrationComponent>;
-  const timezoneService = {
-    getAllTimezones: vi.fn<TimezoneService['getAllTimezones']>(),
-    deleteTimezone: vi.fn<TimezoneService['deleteTimezone']>(),
+  const placeService = {
+    getAllPlaces: vi.fn<PlaceService['getAllPlaces']>(),
+    deletePlace: vi.fn<PlaceService['deletePlace']>(),
   };
 
   beforeEach(() => {
@@ -19,7 +19,7 @@ describe('AdministrationComponent', () => {
       imports: [AdministrationComponent],
       providers: [
         provideRouter([]),
-        { provide: TimezoneService, useValue: timezoneService },
+        { provide: PlaceService, useValue: placeService },
         MessageService,
       ],
     });
@@ -49,22 +49,20 @@ describe('AdministrationComponent', () => {
     await fixture.whenStable();
   }
 
-  it('affiche la liste des timezones de la première page', async () => {
-    timezoneService.getAllTimezones.mockReturnValue(
-      of(aPage([aTimezone({ id: 1, label: 'Tahiti' }), aTimezone({ id: 2, label: 'Paris' })])),
+  it('affiche la liste des lieux de la première page', async () => {
+    placeService.getAllPlaces.mockReturnValue(
+      of(aPage([aPlace({ id: 1, label: 'Tahiti' }), aZoneIdPlace({ id: 2, label: 'Paris' })])),
     );
 
     await render();
 
-    expect(timezoneService.getAllTimezones).toHaveBeenCalledWith(0, 10);
+    expect(placeService.getAllPlaces).toHaveBeenCalledWith(0, 10);
     const labels = [...element().querySelectorAll('.resultat .grow')].map((it) => it.textContent);
     expect(labels).toEqual(['Tahiti', 'Paris']);
   });
 
   it('donne un libellé accessible aux boutons réduits à une icône', async () => {
-    timezoneService.getAllTimezones.mockReturnValue(
-      of(aPage([aTimezone({ id: 1, label: 'Tahiti' })])),
-    );
+    placeService.getAllPlaces.mockReturnValue(of(aPage([aPlace({ id: 1, label: 'Tahiti' })])));
 
     await render();
 
@@ -72,7 +70,7 @@ describe('AdministrationComponent', () => {
       it.getAttribute('aria-label'),
     );
     expect(labels).toEqual([
-      'Ajouter un fuseau horaire',
+      'Ajouter un lieu',
       'Modifier Tahiti',
       'Voir Tahiti',
       'Supprimer Tahiti',
@@ -80,130 +78,122 @@ describe('AdministrationComponent', () => {
   });
 
   it('affiche un indicateur pendant le chargement', async () => {
-    timezoneService.getAllTimezones.mockReturnValue(new Subject());
+    placeService.getAllPlaces.mockReturnValue(new Subject());
 
     await render();
 
     expect(element().querySelector('p-progressSpinner')?.getAttribute('aria-label')).toBe(
-      'Chargement des fuseaux horaires',
+      'Chargement des lieux',
     );
   });
 
-  it("indique qu'aucune timezone n'est configurée", async () => {
-    timezoneService.getAllTimezones.mockReturnValue(of(aPage([])));
+  it("indique qu'aucun lieu n'est configuré", async () => {
+    placeService.getAllPlaces.mockReturnValue(of(aPage([])));
 
     await render();
 
-    expect(element().textContent).toContain('Aucun fuseau horaire configuré.');
+    expect(element().textContent).toContain('Aucun lieu configuré.');
   });
 
   it('propose de réessayer quand le chargement échoue', async () => {
-    timezoneService.getAllTimezones.mockReturnValueOnce(throwError(() => new Error('500')));
-    timezoneService.getAllTimezones.mockReturnValueOnce(
-      of(aPage([aTimezone({ label: 'Tahiti' })])),
-    );
+    placeService.getAllPlaces.mockReturnValueOnce(throwError(() => new Error('500')));
+    placeService.getAllPlaces.mockReturnValueOnce(of(aPage([aPlace({ label: 'Tahiti' })])));
 
     await render();
-    expect(element().textContent).toContain('Impossible de charger les fuseaux horaires.');
+    expect(element().textContent).toContain('Impossible de charger les lieux.');
 
     clickButton('p-button[label="Réessayer"]');
     await fixture.whenStable();
 
-    expect(timezoneService.getAllTimezones).toHaveBeenCalledTimes(2);
+    expect(placeService.getAllPlaces).toHaveBeenCalledTimes(2);
     expect(element().textContent).toContain('Tahiti');
   });
 
   it('charge la page demandée via le paginator', async () => {
-    timezoneService.getAllTimezones.mockReturnValue(
-      of(aPage([aTimezone()], { totalElements: 25, totalPages: 3 })),
+    placeService.getAllPlaces.mockReturnValue(
+      of(aPage([aPlace()], { totalElements: 25, totalPages: 3 })),
     );
 
     await render();
     element().querySelectorAll<HTMLButtonElement>('.p-paginator-page')[1].click();
     await fixture.whenStable();
 
-    expect(timezoneService.getAllTimezones).toHaveBeenLastCalledWith(1, 10);
+    expect(placeService.getAllPlaces).toHaveBeenLastCalledWith(1, 10);
   });
 
-  it('supprime une timezone puis recharge la page courante', async () => {
-    timezoneService.getAllTimezones.mockReturnValueOnce(
-      of(aPage([aTimezone({ id: 1, label: 'Tahiti' })])),
-    );
-    timezoneService.getAllTimezones.mockReturnValueOnce(of(aPage([])));
-    timezoneService.deleteTimezone.mockReturnValue(of(undefined));
+  it('supprime un lieu puis recharge la page courante', async () => {
+    placeService.getAllPlaces.mockReturnValueOnce(of(aPage([aPlace({ id: 1, label: 'Tahiti' })])));
+    placeService.getAllPlaces.mockReturnValueOnce(of(aPage([])));
+    placeService.deletePlace.mockReturnValue(of(undefined));
 
     await render();
     clickButton('p-button[icon="pi pi-trash"]');
     await clickInConfirmDialog('Supprimer');
 
-    expect(timezoneService.deleteTimezone).toHaveBeenCalledWith(1);
+    expect(placeService.deletePlace).toHaveBeenCalledWith(1);
     expect(TestBed.inject(MessageService).add).toHaveBeenCalledWith(
       expect.objectContaining({
         severity: 'success',
-        detail: 'Fuseau horaire « Tahiti » supprimé.',
+        detail: 'Lieu « Tahiti » supprimé.',
       }),
     );
-    expect(timezoneService.getAllTimezones).toHaveBeenCalledTimes(2);
-    expect(element().textContent).toContain('Aucun fuseau horaire configuré.');
+    expect(placeService.getAllPlaces).toHaveBeenCalledTimes(2);
+    expect(element().textContent).toContain('Aucun lieu configuré.');
   });
 
-  it("revient à la page précédente quand la dernière timezone d'une page est supprimée", async () => {
-    timezoneService.getAllTimezones.mockReturnValue(
-      of(aPage([aTimezone()], { totalElements: 11, totalPages: 2 })),
+  it("revient à la page précédente quand le dernier lieu d'une page est supprimée", async () => {
+    placeService.getAllPlaces.mockReturnValue(
+      of(aPage([aPlace()], { totalElements: 11, totalPages: 2 })),
     );
-    timezoneService.deleteTimezone.mockReturnValue(of(undefined));
+    placeService.deletePlace.mockReturnValue(of(undefined));
 
     await render();
     element().querySelectorAll<HTMLButtonElement>('.p-paginator-page')[1].click();
     await fixture.whenStable();
-    expect(timezoneService.getAllTimezones).toHaveBeenLastCalledWith(1, 10);
+    expect(placeService.getAllPlaces).toHaveBeenLastCalledWith(1, 10);
 
-    timezoneService.getAllTimezones.mockReturnValue(
+    placeService.getAllPlaces.mockReturnValue(
       of(aPage([], { totalElements: 10, totalPages: 1, number: 1 })),
     );
     clickButton('p-button[icon="pi pi-trash"]');
     await clickInConfirmDialog('Supprimer');
 
-    expect(timezoneService.getAllTimezones).toHaveBeenLastCalledWith(0, 10);
+    expect(placeService.getAllPlaces).toHaveBeenLastCalledWith(0, 10);
   });
 
-  it('demande confirmation en rappelant le fuseau à supprimer', async () => {
-    timezoneService.getAllTimezones.mockReturnValue(
-      of(aPage([aTimezone({ id: 1, label: 'Tahiti' })])),
-    );
+  it('demande confirmation en rappelant le lieu à supprimer', async () => {
+    placeService.getAllPlaces.mockReturnValue(of(aPage([aPlace({ id: 1, label: 'Tahiti' })])));
 
     await render();
     clickButton('p-button[icon="pi pi-trash"]');
     await fixture.whenStable();
 
     expect(document.querySelector('.p-confirmdialog')?.textContent).toContain(
-      'Supprimer le fuseau « Tahiti » ?',
+      'Supprimer le lieu « Tahiti » ?',
     );
-    expect(timezoneService.deleteTimezone).not.toHaveBeenCalled();
+    expect(placeService.deletePlace).not.toHaveBeenCalled();
   });
 
   it('ne supprime rien quand la suppression est annulée', async () => {
-    timezoneService.getAllTimezones.mockReturnValue(
-      of(aPage([aTimezone({ id: 1, label: 'Tahiti' })])),
-    );
+    placeService.getAllPlaces.mockReturnValue(of(aPage([aPlace({ id: 1, label: 'Tahiti' })])));
 
     await render();
     clickButton('p-button[icon="pi pi-trash"]');
     await clickInConfirmDialog('Annuler');
 
-    expect(timezoneService.deleteTimezone).not.toHaveBeenCalled();
-    expect(timezoneService.getAllTimezones).toHaveBeenCalledTimes(1);
+    expect(placeService.deletePlace).not.toHaveBeenCalled();
+    expect(placeService.getAllPlaces).toHaveBeenCalledTimes(1);
   });
 
   it('ne recharge pas la liste quand la suppression échoue', async () => {
-    timezoneService.getAllTimezones.mockReturnValue(of(aPage([aTimezone()])));
-    timezoneService.deleteTimezone.mockReturnValue(throwError(() => new Error('500')));
+    placeService.getAllPlaces.mockReturnValue(of(aPage([aPlace()])));
+    placeService.deletePlace.mockReturnValue(throwError(() => new Error('500')));
 
     await render();
     clickButton('p-button[icon="pi pi-trash"]');
     await clickInConfirmDialog('Supprimer');
 
-    expect(timezoneService.getAllTimezones).toHaveBeenCalledTimes(1);
+    expect(placeService.getAllPlaces).toHaveBeenCalledTimes(1);
     expect(TestBed.inject(MessageService).add).not.toHaveBeenCalled();
   });
 });
